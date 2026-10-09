@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Lock, Mail, AlertCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 
 export const LoginView: React.FC = () => {
   const { session, isLoading: authLoading } = useAuth();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,9 +24,13 @@ export const LoginView: React.FC = () => {
     );
   }
 
-  // Cuando authLoading sea false y ya exista sesión, dejar que HomeRedirect ("/") decida la ruta según roles
+  // Cuando authLoading sea false y ya exista sesión, redirigir a la ruta previa o a "/"
   if (session) {
-    return <Navigate to="/" replace />;
+    const fromLocation = (location.state as { from?: { pathname?: string; search?: string } })?.from;
+    const redirectTarget = fromLocation
+      ? `${fromLocation.pathname || '/'}${fromLocation.search || ''}`
+      : '/';
+    return <Navigate to={redirectTarget} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

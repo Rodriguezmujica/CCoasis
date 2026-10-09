@@ -1,0 +1,10 @@
+{
+  "name": "centro-cristiano-oasis-root",
+  "private": true,
+  "description": "Centro Cristiano Oasis - Church Management PWA",
+  "scripts": {
+    "dev": "npm --prefix ccoasis-app run dev",
+    "build": "npm --prefix ccoasis-app run build",
+    "preview": "npm --prefix ccoasis-app run preview"
+  }
+}

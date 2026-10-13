@@ -1,6 +1,26 @@
 import React, { useState, useRef } from 'react';
-import { X, Receipt, Loader2, AlertCircle, PlusCircle, UploadCloud, FileText } from 'lucide-react';
-import { ExpenseFormData, TransactionCategory } from '../../types/finances';
+import {
+  X,
+  Receipt,
+  Loader2,
+  AlertCircle,
+  PlusCircle,
+  UploadCloud,
+  FileText,
+  Banknote,
+  ArrowLeftRight,
+  Smartphone,
+  CreditCard,
+  MoreHorizontal,
+  Wallet,
+  Landmark,
+} from 'lucide-react';
+import {
+  ExpenseFormData,
+  TransactionCategory,
+  PaymentMethod,
+  FundAccount,
+} from '../../types/finances';
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -9,6 +29,14 @@ interface ExpenseModalProps {
   categories: TransactionCategory[];
   onOpenCategories: () => void;
 }
+
+const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: React.ElementType }[] = [
+  { id: 'efectivo', label: 'Efectivo', icon: Banknote },
+  { id: 'transferencia', label: 'Transferencia', icon: ArrowLeftRight },
+  { id: 'bizum', label: 'Bizum', icon: Smartphone },
+  { id: 'tarjeta', label: 'Tarjeta', icon: CreditCard },
+  { id: 'otro', label: 'Otro', icon: MoreHorizontal },
+];
 
 export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   isOpen,
@@ -22,6 +50,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
 
   const [amount, setAmount] = useState<string>('');
   const [expenseDate, setExpenseDate] = useState<string>(todayStr);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
+  const [fundAccount, setFundAccount] = useState<FundAccount>('caja_efectivo');
   const [description, setDescription] = useState<string>('');
   const [categoryId, setCategoryId] = useState<string>(
     expenseCategories.length > 0 ? expenseCategories[0].id : ''
@@ -34,6 +64,16 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  const handlePaymentMethodSelect = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    // Sugerencia automática e inteligente de cuenta de fondos
+    if (method === 'efectivo') {
+      setFundAccount('caja_efectivo');
+    } else if (method === 'transferencia' || method === 'bizum' || method === 'tarjeta') {
+      setFundAccount('cuenta_bancaria');
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -90,6 +130,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
       const res = await onSubmit({
         amount: numAmount,
         expense_date: expenseDate,
+        payment_method: paymentMethod,
+        fund_account: fundAccount,
         description: description.trim(),
         category_id: categoryId,
         receipt_file: receiptFile,
@@ -101,6 +143,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
         // Reset y cerrar
         setAmount('');
         setDescription('');
+        setPaymentMethod('efectivo');
+        setFundAccount('caja_efectivo');
         setReceiptFile(null);
         setHighAmountConfirmed(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -177,6 +221,70 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({
                 onChange={(e) => setExpenseDate(e.target.value)}
                 className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none"
               />
+            </div>
+          </div>
+
+          {/* Método de Pago */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Método de pago <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+              {PAYMENT_METHODS.map((m) => {
+                const Icon = m.icon;
+                const isSelected = paymentMethod === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => handlePaymentMethodSelect(m.id)}
+                    className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                      m.id === 'otro' ? 'col-span-2 sm:col-span-1' : ''
+                    } ${
+                      isSelected
+                        ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300 active:bg-slate-200'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{m.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Ubicación del dinero / Cuenta */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Ubicación del dinero / Cuenta <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setFundAccount('caja_efectivo')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
+                  fundAccount === 'caja_efectivo'
+                    ? 'bg-rose-700 text-white border-rose-700 shadow-sm ring-2 ring-rose-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                <Wallet className={`w-4 h-4 shrink-0 ${fundAccount === 'caja_efectivo' ? 'text-amber-300' : 'text-slate-500'}`} />
+                <span>Caja en Efectivo</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFundAccount('cuenta_bancaria')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
+                  fundAccount === 'cuenta_bancaria'
+                    ? 'bg-rose-700 text-white border-rose-700 shadow-sm ring-2 ring-rose-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                <Landmark className={`w-4 h-4 shrink-0 ${fundAccount === 'cuenta_bancaria' ? 'text-sky-300' : 'text-slate-500'}`} />
+                <span>Cuenta Bancaria</span>
+              </button>
             </div>
           </div>
 

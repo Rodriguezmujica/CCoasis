@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'oasis-icon.svg'],
+      includeAssets: ['logo.png', 'favicon.svg'],
       manifest: {
         name: 'Centro Cristiano Oasis',
         short_name: 'CC Oasis',
@@ -21,9 +21,15 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/oasis-icon.svg',
-            sizes: '192x192 512x512',
-            type: 'image/svg+xml',
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ]

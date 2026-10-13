@@ -9,6 +9,8 @@ import {
   FinancialSummary,
   CategoryType,
   MONTH_NAMES,
+  PAYMENT_METHOD_LABELS,
+  FUND_ACCOUNT_LABELS,
 } from '../types/finances';
 import { logAuditEvent } from './useAuditLogs';
 
@@ -182,14 +184,48 @@ export function useFinances() {
 
   // Resumen calculado del periodo
   const summary: FinancialSummary = useMemo(() => {
-    const totalIncome = offerings.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
-    const totalExpenses = expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    let totalIncome = 0;
+    let cashIncome = 0;
+    let bankIncome = 0;
+
+    offerings.forEach((curr) => {
+      const amt = Number(curr.amount) || 0;
+      totalIncome += amt;
+      const account = curr.fund_account || 'caja_efectivo';
+      if (account === 'caja_efectivo') {
+        cashIncome += amt;
+      } else if (account === 'cuenta_bancaria') {
+        bankIncome += amt;
+      }
+    });
+
+    let totalExpenses = 0;
+    let cashExpenses = 0;
+    let bankExpenses = 0;
+
+    expenses.forEach((curr) => {
+      const amt = Number(curr.amount) || 0;
+      totalExpenses += amt;
+      const account = curr.fund_account || 'caja_efectivo';
+      if (account === 'caja_efectivo') {
+        cashExpenses += amt;
+      } else if (account === 'cuenta_bancaria') {
+        bankExpenses += amt;
+      }
+    });
+
     return {
       totalIncome,
       totalExpenses,
       netBalance: totalIncome - totalExpenses,
       offeringsCount: offerings.length,
       expensesCount: expenses.length,
+      cashIncome,
+      cashExpenses,
+      cashBalance: cashIncome - cashExpenses,
+      bankIncome,
+      bankExpenses,
+      bankBalance: bankIncome - bankExpenses,
     };
   }, [offerings, expenses]);
 
@@ -213,6 +249,8 @@ export function useFinances() {
         offering_date: data.offering_date,
         category_id: data.category_id,
         person_id: data.person_id || null,
+        payment_method: data.payment_method || 'efectivo',
+        fund_account: data.fund_account || 'caja_efectivo',
         notes: data.notes?.trim() || null,
       }).select('id').single();
 
@@ -225,6 +263,8 @@ export function useFinances() {
         offering_date: data.offering_date,
         category_id: data.category_id,
         person_id: data.person_id || null,
+        payment_method: data.payment_method || 'efectivo',
+        fund_account: data.fund_account || 'caja_efectivo',
       });
 
       await fetchTransactions();
@@ -298,6 +338,8 @@ export function useFinances() {
         currency: 'EUR',
         expense_date: data.expense_date,
         category_id: data.category_id,
+        payment_method: data.payment_method || 'efectivo',
+        fund_account: data.fund_account || 'caja_efectivo',
         description: data.description.trim(),
         receipt_url: uploadedFilePath,
       }).select('id').single();
@@ -316,6 +358,8 @@ export function useFinances() {
         currency: 'EUR',
         expense_date: data.expense_date,
         description: data.description.trim(),
+        payment_method: data.payment_method || 'efectivo',
+        fund_account: data.fund_account || 'caja_efectivo',
         has_receipt: Boolean(uploadedFilePath),
         is_high_amount: numAmount > 300,
       });
@@ -425,6 +469,8 @@ export function useFinances() {
       categoria: string;
       concepto: string;
       donante: string;
+      metodoPago: string;
+      cuentaCaja: string;
       monto: number;
       comprobante: string;
     }[] = [];
@@ -437,6 +483,8 @@ export function useFinances() {
         categoria: o.category?.name || 'Sin categoría',
         concepto: o.notes || 'Ofrenda congregacional',
         donante: o.person ? `${o.person.first_name} ${o.person.last_name}` : 'Anónimo',
+        metodoPago: PAYMENT_METHOD_LABELS[o.payment_method] || o.payment_method || 'Efectivo',
+        cuentaCaja: FUND_ACCOUNT_LABELS[o.fund_account] || o.fund_account || 'Caja en Efectivo',
         monto: Number(o.amount),
         comprobante: '—',
       });
@@ -450,6 +498,8 @@ export function useFinances() {
         categoria: e.category?.name || 'Sin categoría',
         concepto: e.description,
         donante: '—',
+        metodoPago: PAYMENT_METHOD_LABELS[e.payment_method] || e.payment_method || 'Efectivo',
+        cuentaCaja: FUND_ACCOUNT_LABELS[e.fund_account] || e.fund_account || 'Caja en Efectivo',
         monto: -Number(e.amount),
         comprobante: e.receipt_url ? 'Adjunto' : 'Sin comprobante',
       });
@@ -465,6 +515,8 @@ export function useFinances() {
       'Categoría',
       'Concepto / Notas',
       'Donante / Beneficiario',
+      'Método de Pago',
+      'Cuenta/Caja',
       'Monto (EUR)',
       'Comprobante',
     ];
@@ -483,6 +535,8 @@ export function useFinances() {
           r.categoria,
           r.concepto,
           r.donante,
+          r.metodoPago,
+          r.cuentaCaja,
           r.monto.toFixed(2).replace('.', ','), // Formato numérico estándar español para Excel
           r.comprobante,
         ]
@@ -497,7 +551,9 @@ export function useFinances() {
         '',
         `Total Ingresos: ${summary.totalIncome.toFixed(2).replace('.', ',')} €`,
         `Total Gastos: ${summary.totalExpenses.toFixed(2).replace('.', ',')} €`,
-        `Balance Neto: ${summary.netBalance.toFixed(2).replace('.', ',')} €`,
+        `Balance Total: ${summary.netBalance.toFixed(2).replace('.', ',')} €`,
+        `En Caja: ${summary.cashBalance.toFixed(2).replace('.', ',')} €`,
+        `En Banco: ${summary.bankBalance.toFixed(2).replace('.', ',')} €`,
         '',
       ]
         .map(escapeCSV)

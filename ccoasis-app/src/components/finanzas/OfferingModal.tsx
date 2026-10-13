@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
-import { X, HeartHandshake, Loader2, AlertCircle, PlusCircle } from 'lucide-react';
-import { OfferingFormData, TransactionCategory } from '../../types/finances';
+import {
+  X,
+  HeartHandshake,
+  Loader2,
+  AlertCircle,
+  PlusCircle,
+  Banknote,
+  ArrowLeftRight,
+  Smartphone,
+  CreditCard,
+  MoreHorizontal,
+  Wallet,
+  Landmark,
+} from 'lucide-react';
+import {
+  OfferingFormData,
+  TransactionCategory,
+  PaymentMethod,
+  FundAccount,
+} from '../../types/finances';
 import { PersonOption } from '../../lib/useFinances';
 
 interface OfferingModalProps {
@@ -11,6 +29,14 @@ interface OfferingModalProps {
   persons: PersonOption[];
   onOpenCategories: () => void;
 }
+
+const PAYMENT_METHODS: { id: PaymentMethod; label: string; icon: React.ElementType }[] = [
+  { id: 'efectivo', label: 'Efectivo', icon: Banknote },
+  { id: 'transferencia', label: 'Transferencia', icon: ArrowLeftRight },
+  { id: 'bizum', label: 'Bizum', icon: Smartphone },
+  { id: 'tarjeta', label: 'Tarjeta', icon: CreditCard },
+  { id: 'otro', label: 'Otro', icon: MoreHorizontal },
+];
 
 export const OfferingModal: React.FC<OfferingModalProps> = ({
   isOpen,
@@ -28,6 +54,8 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
   const [categoryId, setCategoryId] = useState<string>(
     incomeCategories.length > 0 ? incomeCategories[0].id : ''
   );
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('efectivo');
+  const [fundAccount, setFundAccount] = useState<FundAccount>('caja_efectivo');
   const [personId, setPersonId] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
 
@@ -35,6 +63,16 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handlePaymentMethodSelect = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    // Sugerencia automática e inteligente de cuenta de fondos
+    if (method === 'efectivo') {
+      setFundAccount('caja_efectivo');
+    } else if (method === 'transferencia' || method === 'bizum' || method === 'tarjeta') {
+      setFundAccount('cuenta_bancaria');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +101,8 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
         offering_date: offeringDate,
         category_id: categoryId,
         person_id: personId || null,
+        payment_method: paymentMethod,
+        fund_account: fundAccount,
         notes,
       });
 
@@ -73,6 +113,8 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
         setAmount('');
         setNotes('');
         setPersonId('');
+        setPaymentMethod('efectivo');
+        setFundAccount('caja_efectivo');
         onClose();
       }
     } catch (err: any) {
@@ -146,6 +188,70 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
                 onChange={(e) => setOfferingDate(e.target.value)}
                 className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none"
               />
+            </div>
+          </div>
+
+          {/* Método de Pago */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Método de pago <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+              {PAYMENT_METHODS.map((m) => {
+                const Icon = m.icon;
+                const isSelected = paymentMethod === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => handlePaymentMethodSelect(m.id)}
+                    className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                      m.id === 'otro' ? 'col-span-2 sm:col-span-1' : ''
+                    } ${
+                      isSelected
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300 active:bg-slate-200'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{m.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Ubicación del dinero / Cuenta */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Ubicación del dinero / Cuenta <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setFundAccount('caja_efectivo')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
+                  fundAccount === 'caja_efectivo'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm ring-2 ring-emerald-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                <Wallet className={`w-4 h-4 shrink-0 ${fundAccount === 'caja_efectivo' ? 'text-amber-300' : 'text-slate-500'}`} />
+                <span>Caja en Efectivo</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFundAccount('cuenta_bancaria')}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
+                  fundAccount === 'cuenta_bancaria'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm ring-2 ring-emerald-500/30'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                <Landmark className={`w-4 h-4 shrink-0 ${fundAccount === 'cuenta_bancaria' ? 'text-sky-300' : 'text-slate-500'}`} />
+                <span>Cuenta Bancaria</span>
+              </button>
             </div>
           </div>
 
@@ -225,7 +331,7 @@ export const OfferingModal: React.FC<OfferingModalProps> = ({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej: Culto dominical mañana, transferencia con referencia X, etc."
+              placeholder="Ej: Culto dominical mañana, ofrenda misionera, etc."
               className="w-full py-2 px-3 rounded-xl border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none resize-none"
             />
           </div>

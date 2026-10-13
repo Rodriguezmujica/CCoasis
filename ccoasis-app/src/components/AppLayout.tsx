@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAvailableNavItems } from '../config/navigation';
 import { ROLE_LABELS } from '../types/persons';
@@ -20,6 +20,24 @@ export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
   const [isSelfPasswordModalOpen, setIsSelfPasswordModalOpen] = useState(false);
   const navItems = getAvailableNavItems(roles);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!mobileNavRef.current) return;
+    const activeLink = mobileNavRef.current.querySelector<HTMLElement>('a[aria-current="page"]');
+    if (activeLink) {
+      const container = mobileNavRef.current;
+      const linkLeft = activeLink.offsetLeft;
+      const linkRight = linkLeft + activeLink.offsetWidth;
+      const containerScrollLeft = container.scrollLeft;
+      const containerWidth = container.clientWidth;
+
+      if (linkLeft < containerScrollLeft || linkRight > containerScrollLeft + containerWidth) {
+        activeLink.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [location.pathname]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -171,26 +189,37 @@ export const AppLayout: React.FC = () => {
       />
 
       {/* Barra de navegación inferior móvil (Bottom Nav) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 px-2 py-1.5 flex justify-around items-center shadow-lg">
-        {navItems.map((item) => {
-          const IconComponent = item.icon;
-          return (
-            <NavLink
-              key={item.id}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-1 px-2 rounded-lg text-xs transition-colors flex-1 ${
-                  isActive
-                    ? 'text-blue-600 font-bold'
-                    : 'text-slate-500 hover:text-slate-900 font-medium'
-                }`
-              }
-            >
-              <IconComponent className="w-5 h-5 mb-0.5" />
-              <span className="text-[11px] leading-none truncate max-w-[70px]">{item.label}</span>
-            </NavLink>
-          );
-        })}
+      <nav
+        aria-label="Navegación móvil inferior"
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 shadow-lg"
+      >
+        <div
+          ref={mobileNavRef}
+          className="relative flex items-center overflow-x-auto scrollbar-none touch-scroll pl-2 pr-4 py-1.5 gap-1 overscroll-x-contain"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center py-1 px-1.5 rounded-lg text-xs transition-colors flex-1 min-w-[4.25rem] flex-shrink-0 ${
+                    isActive
+                      ? 'text-blue-600 font-bold'
+                      : 'text-slate-500 hover:text-slate-900 font-medium'
+                  }`
+                }
+              >
+                <IconComponent className="w-5 h-5 mb-0.5 flex-shrink-0" />
+                <span className="text-[11px] leading-tight truncate max-w-full text-center">
+                  {item.label}
+                </span>
+              </NavLink>
+            );
+          })}
+        </div>
       </nav>
     </div>
   </NotificationsProvider>

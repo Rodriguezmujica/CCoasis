@@ -32,6 +32,11 @@ import {
   TrendingUp,
   UserCheck,
   Megaphone,
+  CalendarCheck,
+  CheckCircle2,
+  HelpCircle,
+  XCircle,
+  Check,
 } from 'lucide-react';
 import { useBatchEventAssignments } from '../lib/useEventAssignments';
 import { EventAssignmentsModal, getRoleIcon } from '../components/calendario/EventAssignmentsModal';
@@ -44,6 +49,9 @@ import { Announcement, AnnouncementFormData } from '../types/announcements';
 import { AnnouncementsBanner } from '../components/announcements/AnnouncementsBanner';
 import { AnnouncementModal } from '../components/announcements/AnnouncementModal';
 import { AnnouncementsManagerModal } from '../components/announcements/AnnouncementsManagerModal';
+import { useEventRSVPs, isEventFuture } from '../lib/useEventRSVPs';
+import { EventRSVPModal } from '../components/calendario/EventRSVPModal';
+import { EventRSVPListModal } from '../components/calendario/EventRSVPListModal';
 
 export const CalendarioView: React.FC = () => {
   const { roles } = useAuth();
@@ -96,6 +104,19 @@ export const CalendarioView: React.FC = () => {
     deleteAnnouncement,
   } = useAnnouncements();
 
+  // Hook de confirmación de asistencia individual (RSVP)
+  const {
+    personName,
+    isPersonLinked,
+    myRsvpsByEvent,
+    summariesByEvent,
+    actionLoading: rsvpActionLoading,
+    error: rsvpError,
+    upsertRSVP,
+    deleteRSVP,
+    clearError: clearRsvpError,
+  } = useEventRSVPs(events);
+
   // Estados de Modales de Avisos
   const [isAnnouncementFormOpen, setIsAnnouncementFormOpen] = useState<boolean>(false);
   const [isAnnouncementsManagerOpen, setIsAnnouncementsManagerOpen] = useState<boolean>(false);
@@ -126,6 +147,8 @@ export const CalendarioView: React.FC = () => {
   const [assignmentsEvent, setAssignmentsEvent] = useState<ChurchEvent | null>(null);
   const [headcountEvent, setHeadcountEvent] = useState<ChurchEvent | null>(null);
   const [isMetricsOpen, setIsMetricsOpen] = useState<boolean>(false);
+  const [rsvpModalEvent, setRsvpModalEvent] = useState<ChurchEvent | null>(null);
+  const [rsvpListEvent, setRsvpListEvent] = useState<ChurchEvent | null>(null);
 
   // Estado del Formulario
   const [formData, setFormData] = useState<ChurchEventFormData>({
@@ -366,9 +389,79 @@ export const CalendarioView: React.FC = () => {
                   {upcomingEvent.description}
                 </p>
               )}
+
+              {/* Resumen público de RSVP y confirmación en banner */}
+              {(() => {
+                const sum = summariesByEvent[upcomingEvent.id];
+                const myRsvp = myRsvpsByEvent[upcomingEvent.id];
+                const isFuture = isEventFuture(upcomingEvent.start_time);
+                return (
+                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                    {sum && (sum.confirmed > 0 || sum.maybe > 0) ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-white/20 text-white backdrop-blur-sm">
+                        <CalendarCheck className="w-3.5 h-3.5 text-blue-200" />
+                        <span>
+                          {sum.confirmed} {sum.confirmed === 1 ? 'confirmado' : 'confirmados'}
+                          {sum.guests > 0 ? ` (${sum.guests} ${sum.guests === 1 ? 'invitado' : 'invitados'})` : ''}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-blue-200/80 italic">Sin confirmaciones aún</span>
+                    )}
+
+                    {isFuture && (
+                      myRsvp ? (
+                        <button
+                          type="button"
+                          onClick={() => setRsvpModalEvent(upcomingEvent)}
+                          className="px-3 py-1 rounded-full font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center gap-1.5 shadow-sm"
+                          title="Modificar tu confirmación"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>
+                            {myRsvp.status === 'asistire'
+                              ? `Asistirás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
+                              : myRsvp.status === 'quizas'
+                              ? `Quizás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
+                              : 'No asistirás'}
+                          </span>
+                          <span className="text-[10px] underline ml-0.5">Modificar</span>
+                        </button>
+                      ) : isPersonLinked ? (
+                        <button
+                          type="button"
+                          onClick={() => setRsvpModalEvent(upcomingEvent)}
+                          className="px-3 py-1 rounded-full font-bold bg-white text-blue-900 hover:bg-blue-50 transition-colors flex items-center gap-1.5 shadow-sm"
+                        >
+                          <CalendarCheck className="w-3.5 h-3.5 text-blue-600" />
+                          <span>Confirmar asistencia</span>
+                        </button>
+                      ) : (
+                        <span
+                          className="px-3 py-1 rounded-full text-xs font-medium bg-white/15 text-blue-100"
+                          title="Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule"
+                        >
+                          Cuenta sin vincular para confirmar
+                        </span>
+                      )
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 self-start md:self-auto pt-2 md:pt-0">
+              {isAdmin && (
+                <button
+                  onClick={() => setRsvpListEvent(upcomingEvent)}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold backdrop-blur-sm shadow-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
+                  title="Ver lista de personas que han confirmado asistencia"
+                >
+                  <Users className="w-4 h-4 text-blue-200" />
+                  <span>Ver confirmados</span>
+                </button>
+              )}
+
               {canManageHeadcount && (
                 <button
                   onClick={() => setHeadcountEvent(upcomingEvent)}
@@ -378,8 +471,8 @@ export const CalendarioView: React.FC = () => {
                   <UserCheck className="w-4 h-4 text-emerald-300" />
                   <span>
                     {headcountsByEvent[upcomingEvent.id]
-                      ? `Asistencia: ${headcountsByEvent[upcomingEvent.id].total_count}`
-                      : 'Registrar Asistencia'}
+                      ? `Conteo: ${headcountsByEvent[upcomingEvent.id].total_count}`
+                      : 'Registrar conteo'}
                   </span>
                 </button>
               )}
@@ -447,16 +540,17 @@ export const CalendarioView: React.FC = () => {
       </div>
 
       {/* Alerta de Error */}
-      {(error || headcountError) && (
+      {(error || headcountError || rsvpError) && (
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start justify-between gap-3 text-rose-800">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
-            <span className="text-sm">{error || headcountError}</span>
+            <span className="text-sm">{error || headcountError || rsvpError}</span>
           </div>
           <button
             onClick={() => {
               if (error) clearError();
               if (headcountError) clearHeadcountError();
+              if (rsvpError) clearRsvpError();
             }}
             className="text-rose-500 hover:text-rose-700 p-1"
             title="Cerrar aviso"
@@ -619,9 +713,121 @@ export const CalendarioView: React.FC = () => {
                           );
                         })()}
 
+                        {/* Bloque de Confirmación Previa de Asistencia (RSVP) */}
+                        {(() => {
+                          const rsvpSummary = summariesByEvent[event.id];
+                          const userRsvp = myRsvpsByEvent[event.id];
+                          const isFuture = isEventFuture(event.start_time);
+
+                          return (
+                            <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                {/* Resumen público para todos los miembros */}
+                                <div className="flex items-center gap-1.5">
+                                  <CalendarCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                  <span className="text-xs font-bold text-slate-700">Confirmación previa:</span>
+                                  {rsvpSummary && (rsvpSummary.confirmed > 0 || rsvpSummary.maybe > 0) ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                      <span>
+                                        {rsvpSummary.confirmed} {rsvpSummary.confirmed === 1 ? 'confirmado' : 'confirmados'}
+                                      </span>
+                                      {rsvpSummary.guests > 0 && (
+                                        <span className="text-blue-600 font-semibold">
+                                          ({rsvpSummary.guests} {rsvpSummary.guests === 1 ? 'invitado' : 'invitados'})
+                                        </span>
+                                      )}
+                                      {rsvpSummary.maybe > 0 && (
+                                        <span className="text-amber-700 font-normal text-[11px] ml-0.5">
+                                          · {rsvpSummary.maybe} quizás
+                                        </span>
+                                      )}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-slate-400 italic">Sin confirmaciones aún</span>
+                                  )}
+                                </div>
+
+                                {/* Acción de confirmar asistencia para miembros en eventos futuros */}
+                                {isFuture ? (
+                                  <div>
+                                    {userRsvp ? (
+                                      <div className="flex items-center gap-1.5">
+                                        <span
+                                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                                            userRsvp.status === 'asistire'
+                                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                              : userRsvp.status === 'quizas'
+                                              ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                              : 'bg-slate-100 text-slate-700 border-slate-300'
+                                          }`}
+                                        >
+                                          {userRsvp.status === 'asistire' && (
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                          )}
+                                          {userRsvp.status === 'quizas' && (
+                                            <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+                                          )}
+                                          {userRsvp.status === 'no_asistire' && (
+                                            <XCircle className="w-3.5 h-3.5 text-slate-500" />
+                                          )}
+                                          <span>
+                                            {userRsvp.status === 'asistire'
+                                              ? `Asistirás${userRsvp.guests > 0 ? ` (+${userRsvp.guests})` : ''}`
+                                              : userRsvp.status === 'quizas'
+                                              ? `Quizás${userRsvp.guests > 0 ? ` (+${userRsvp.guests})` : ''}`
+                                              : 'No asistirás'}
+                                          </span>
+                                        </span>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => setRsvpModalEvent(event)}
+                                          className="text-xs font-semibold px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors min-h-[32px]"
+                                          title="Modificar o cancelar tu respuesta"
+                                        >
+                                          Modificar
+                                        </button>
+                                      </div>
+                                    ) : isPersonLinked ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => setRsvpModalEvent(event)}
+                                        className="text-xs font-bold px-3 py-1.5 rounded-xl border border-blue-600 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white transition-colors inline-flex items-center gap-1.5 min-h-[36px] shadow-sm"
+                                      >
+                                        <CalendarCheck className="w-3.5 h-3.5 text-white" />
+                                        <span>Confirmar asistencia</span>
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        disabled
+                                        className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed inline-flex items-center gap-1.5 min-h-[36px]"
+                                        title="Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule"
+                                      >
+                                        <CalendarCheck className="w-3.5 h-3.5 text-slate-400" />
+                                        <span>Confirmar asistencia</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </div>
+
+                              {/* Aviso amigable si el usuario no tiene ficha vinculada */}
+                              {isFuture && !isPersonLinked && (
+                                <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] sm:text-xs flex items-center gap-2">
+                                  <Info className="w-4 h-4 flex-shrink-0 text-amber-600" />
+                                  <span>
+                                    Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule.
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                         {/* Bloque de Conteo de Asistencia Congregacional (Admin y Tesorero) */}
                         {canManageHeadcount && (
-                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5">
                               <UserCheck className="w-4 h-4 text-emerald-600" />
                               <span className="text-xs font-bold text-slate-700">Asistencia del Culto:</span>
@@ -637,18 +843,33 @@ export const CalendarioView: React.FC = () => {
                               )}
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => setHeadcountEvent(event)}
-                              className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-colors inline-flex items-center gap-1.5 min-h-[36px] ${
-                                headcountsByEvent[event.id]
-                                  ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
-                                  : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400'
-                              }`}
-                            >
-                              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{headcountsByEvent[event.id] ? 'Editar Conteo' : 'Registrar Asistencia'}</span>
-                            </button>
+                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                              {/* Botón Ver Confirmados (Solo Admin) */}
+                              {isAdmin && (
+                                <button
+                                  type="button"
+                                  onClick={() => setRsvpListEvent(event)}
+                                  className="text-xs font-bold px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-colors inline-flex items-center gap-1.5 min-h-[36px]"
+                                  title="Ver lista de personas que han confirmado asistencia"
+                                >
+                                  <Users className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>Ver confirmados</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => setHeadcountEvent(event)}
+                                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-colors inline-flex items-center gap-1.5 min-h-[36px] ${
+                                  headcountsByEvent[event.id]
+                                    ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                                    : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-400'
+                                }`}
+                              >
+                                <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{headcountsByEvent[event.id] ? 'Editar conteo' : 'Registrar conteo'}</span>
+                              </button>
+                            </div>
                           </div>
                         )}
 
@@ -946,6 +1167,29 @@ export const CalendarioView: React.FC = () => {
           onToggleActive={toggleAnnouncementActive}
           onDelete={deleteAnnouncement}
           isLoading={announcementsActionLoading}
+        />
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN DE ASISTENCIA INDIVIDUAL (RSVP - Miembros / Alumnos) */}
+      {rsvpModalEvent && (
+        <EventRSVPModal
+          event={rsvpModalEvent}
+          currentRSVP={myRsvpsByEvent[rsvpModalEvent.id]}
+          personName={personName}
+          isOpen={!!rsvpModalEvent}
+          onClose={() => setRsvpModalEvent(null)}
+          onSave={upsertRSVP}
+          onDelete={deleteRSVP}
+          actionLoading={rsvpActionLoading}
+        />
+      )}
+
+      {/* MODAL DE LISTA DE ASISTENTES CONFIRMADOS (RSVP - Solo Admin) */}
+      {rsvpListEvent && (
+        <EventRSVPListModal
+          event={rsvpListEvent}
+          isOpen={!!rsvpListEvent}
+          onClose={() => setRsvpListEvent(null)}
         />
       )}
     </div>

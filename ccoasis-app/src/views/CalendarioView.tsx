@@ -304,10 +304,10 @@ export const CalendarioView: React.FC = () => {
             <button
               onClick={() => setIsAnnouncementsManagerOpen(true)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-800 rounded-xl font-semibold shadow-sm hover:shadow transition-all text-sm min-h-[48px]"
-              title="Administrar tablón parroquial de avisos"
+              title="Administrar anuncios especiales"
             >
               <Megaphone className="w-4 h-4 text-blue-600" />
-              <span>Avisos</span>
+              <span>Anuncios</span>
               {activeAnnouncements.length > 0 && (
                 <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
                   {activeAnnouncements.length}
@@ -328,7 +328,7 @@ export const CalendarioView: React.FC = () => {
         </div>
       </div>
 
-      {/* Banner / Tablón de Avisos y Anuncios Generales (Bloque 4) */}
+      {/* Banner de Anuncios Especiales (Bloque 4) */}
       <AnnouncementsBanner
         announcements={activeAnnouncements}
         isAdmin={isAdmin}
@@ -1147,7 +1147,7 @@ export const CalendarioView: React.FC = () => {
         />
       )}
 
-      {/* MODAL DE CREACIÓN / EDICIÓN DE AVISOS PARROQUIALES (Admin) */}
+      {/* MODAL DE CREACIÓN / EDICIÓN DE ANUNCIOS ESPECIALES (Admin) */}
       <AnnouncementModal
         isOpen={isAnnouncementFormOpen}
         onClose={() => setIsAnnouncementFormOpen(false)}

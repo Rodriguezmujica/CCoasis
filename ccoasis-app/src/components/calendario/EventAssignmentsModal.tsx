@@ -358,7 +358,7 @@ export const EventAssignmentsModal: React.FC<EventAssignmentsModalProps> = ({
               </h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
                 {isAdmin
-                  ? 'Como administrador, puedes organizar el programa asignando predicador, director, alabanza, ujieres y más.'
+                  ? 'Como administrador, puedes organizar el programa asignando predicador, director, alabanza, servidores y más.'
                   : 'El liderazgo de la congregación publicará el programa con los turnos próximamente.'}
               </p>
               {isAdmin && (

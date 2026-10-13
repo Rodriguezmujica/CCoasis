@@ -61,6 +61,11 @@ function getActionBadgeStyle(action: string) {
         label: 'Restaurado',
         className: 'bg-teal-100 text-teal-800 border-teal-200',
       };
+    case 'UPDATE_PASSWORD':
+      return {
+        label: 'Cambio de Clave',
+        className: 'bg-amber-100 text-amber-800 border-amber-200',
+      };
     default:
       return {
         label: AUDIT_ACTION_LABELS[action] || action,
@@ -142,6 +147,7 @@ export const AuditoriaView: React.FC = () => {
             <option value="UPDATE">Modificaciones</option>
             <option value="DELETE">Eliminaciones / Archivos</option>
             <option value="ROLE_CHANGE">Cambios de Rol</option>
+            <option value="UPDATE_PASSWORD">Cambios de Contraseña</option>
           </select>
         </div>
 
@@ -153,10 +159,11 @@ export const AuditoriaView: React.FC = () => {
             className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-700 bg-white hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="todos">Todos los módulos</option>
-            <option value="expenses">Finanzas (Gastos)</option>
-            <option value="offerings">Finanzas (Ofrendas)</option>
+            <option value="users">Usuarios (Cuentas)</option>
             <option value="user_roles">Usuarios (Roles)</option>
             <option value="persons">Personas (Fichas)</option>
+            <option value="expenses">Finanzas (Gastos)</option>
+            <option value="offerings">Finanzas (Ofrendas)</option>
             <option value="church_events">Calendario / Eventos</option>
           </select>
         </div>

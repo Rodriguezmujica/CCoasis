@@ -4,7 +4,8 @@ export type AuditAction =
   | 'DELETE'
   | 'ROLE_CHANGE'
   | 'ARCHIVE'
-  | 'RESTORE';
+  | 'RESTORE'
+  | 'UPDATE_PASSWORD';
 
 export type AuditTargetTable =
   | 'expenses'
@@ -14,7 +15,8 @@ export type AuditTargetTable =
   | 'church_events'
   | 'transaction_categories'
   | 'courses'
-  | 'cycles';
+  | 'cycles'
+  | 'users';
 
 export interface AuditLog {
   id: string;
@@ -40,6 +42,7 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   ROLE_CHANGE: 'Cambio de Rol',
   ARCHIVE: 'Archivado',
   RESTORE: 'Restauración',
+  UPDATE_PASSWORD: 'Cambio de Contraseña',
 };
 
 export const AUDIT_TABLE_LABELS: Record<string, string> = {
@@ -51,4 +54,5 @@ export const AUDIT_TABLE_LABELS: Record<string, string> = {
   transaction_categories: 'Categorías finanzas',
   courses: 'Cursos',
   cycles: 'Ciclos',
+  users: 'Cuentas de usuario',
 };

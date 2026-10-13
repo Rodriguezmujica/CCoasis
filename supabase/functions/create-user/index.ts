@@ -99,6 +99,70 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // 6.1 Soportar actualización de contraseña si se indica action: 'update_password' o se pasa user_id sin email
+    if (body?.action === 'update_password' || (body?.user_id && body?.password && !body?.email)) {
+      const targetUserId = body.user_id;
+      const newPassword = body.password;
+
+      if (!targetUserId || typeof targetUserId !== 'string') {
+        return new Response(
+          JSON.stringify({ error: 'Debes proporcionar un ID de usuario válido (user_id).' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+        return new Response(
+          JSON.stringify({ error: 'La nueva contraseña debe tener al menos 6 caracteres.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: updateData, error: updateError } = await adminClient.auth.admin.updateUserById(
+        targetUserId,
+        { password: newPassword }
+      );
+
+      if (updateError || !updateData?.user) {
+        let friendlyMsg = updateError?.message || 'Error al actualizar la contraseña del usuario.';
+        const lower = friendlyMsg.toLowerCase();
+        if (lower.includes('user not found')) {
+          friendlyMsg = 'El usuario especificado no fue encontrado en el sistema.';
+        } else if (lower.includes('password should be different')) {
+          friendlyMsg = 'La nueva contraseña debe ser diferente a la contraseña anterior.';
+        }
+        return new Response(
+          JSON.stringify({ error: friendlyMsg }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      try {
+        await adminClient.from('audit_logs').insert({
+          user_id: callerUser.id,
+          user_email: callerUser.email,
+          action: 'UPDATE_PASSWORD',
+          target_table: 'users',
+          target_id: targetUserId,
+          details: {
+            action_type: 'ADMIN_RESET_PASSWORD',
+            target_user_id: targetUserId,
+            target_email: updateData.user.email,
+            updated_by: callerUser.email,
+          },
+        });
+      } catch (_err) {}
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          user_id: targetUserId,
+          message: 'Contraseña actualizada correctamente.',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { email, password, first_name, last_name, roles, person_id } = body;
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {

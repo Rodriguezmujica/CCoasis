@@ -32,6 +32,11 @@ export interface CreateUserResponse {
   error?: string;
 }
 
+export interface UpdateUserPasswordPayload {
+  user_id: string;
+  password: string;
+}
+
 export const ROLE_BADGE_STYLES: Record<AppRole, string> = {
   admin: 'bg-purple-100 text-purple-700 border-purple-200',
   tesorero: 'bg-emerald-100 text-emerald-700 border-emerald-200',

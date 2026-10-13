@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAvailableNavItems } from '../config/navigation';
 import { ROLE_LABELS } from '../types/persons';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, KeyRound } from 'lucide-react';
 import { NotificationsBell } from './notifications/NotificationsBell';
 import { NotificationsProvider } from '../context/NotificationsContext';
+import { SelfChangePasswordModal } from './SelfChangePasswordModal';
 
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-purple-100 text-purple-700 border-purple-200',
@@ -17,6 +18,7 @@ const ROLE_COLORS: Record<string, string> = {
 export const AppLayout: React.FC = () => {
   const { user, roles, signOut } = useAuth();
   const navigate = useNavigate();
+  const [isSelfPasswordModalOpen, setIsSelfPasswordModalOpen] = useState(false);
   const navItems = getAvailableNavItems(roles);
 
   const handleSignOut = async () => {
@@ -51,7 +53,7 @@ export const AppLayout: React.FC = () => {
             </div>
             <NotificationsBell />
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 mb-2.5">
             {roles.map((r) => (
               <span
                 key={r}
@@ -63,6 +65,14 @@ export const AppLayout: React.FC = () => {
               </span>
             ))}
           </div>
+          <button
+            onClick={() => setIsSelfPasswordModalOpen(true)}
+            className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 hover:text-blue-600 border border-slate-200 transition-colors shadow-2xs"
+            title="Cambiar mi contraseña"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-slate-500" />
+            <span>Cambiar mi contraseña</span>
+          </button>
         </div>
 
         {/* Menú de navegación según roles */}
@@ -127,6 +137,15 @@ export const AppLayout: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setIsSelfPasswordModalOpen(true)}
+            title="Cambiar mi contraseña"
+            aria-label="Cambiar mi contraseña"
+            className="flex items-center gap-1 p-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-blue-600 hover:bg-slate-50 border border-slate-200 transition-colors"
+          >
+            <KeyRound className="w-4 h-4 text-slate-500" />
+            <span className="hidden sm:inline">Clave</span>
+          </button>
           <NotificationsBell />
           <button
             onClick={handleSignOut}
@@ -144,6 +163,12 @@ export const AppLayout: React.FC = () => {
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>
+
+      {/* Modal de cambio de contraseña propio */}
+      <SelfChangePasswordModal
+        isOpen={isSelfPasswordModalOpen}
+        onClose={() => setIsSelfPasswordModalOpen(false)}
+      />
 
       {/* Barra de navegación inferior móvil (Bottom Nav) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-30 px-2 py-1.5 flex justify-around items-center shadow-lg">

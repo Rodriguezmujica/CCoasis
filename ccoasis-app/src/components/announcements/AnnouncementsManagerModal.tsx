@@ -111,10 +111,10 @@ export const AnnouncementsManagerModal: React.FC<AnnouncementsManagerModalProps>
               </div>
               <div>
                 <h2 className="text-lg font-bold text-slate-900 leading-tight">
-                  Gestión de Avisos Parroquiales
+                  Gestión de Anuncios Especiales
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Tablón de anuncios oficiales, comunicados y alertas congregacionales
+                  Panel de anuncios especiales, comunicados y alertas congregacionales
                 </p>
               </div>
             </div>
@@ -370,7 +370,7 @@ export const AnnouncementsManagerModal: React.FC<AnnouncementsManagerModalProps>
 
             <div className="text-center space-y-2">
               <h3 className="text-base font-bold text-slate-900">
-                ¿Archivar este aviso parroquial?
+                ¿Archivar este anuncio especial?
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 El aviso{' '}

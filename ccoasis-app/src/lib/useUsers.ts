@@ -35,15 +35,15 @@ async function parseFunctionsError(error: any): Promise<string> {
     msg.includes('Relay Error') ||
     msg.includes('NetworkError')
   ) {
-    return 'No se pudo comunicar con la Edge Function "create-user". Asegúrate de que esté desplegada en tu proyecto de Supabase.';
+    return 'No se pudo comunicar con el servidor de Supabase. Asegúrate de que las Edge Functions estén desplegadas en tu proyecto.';
   }
 
   if (msg.includes('404') || msg.includes('Function not found')) {
-    return 'La Edge Function "create-user" no fue encontrada. Debe ser desplegada en Supabase con la CLI o el Dashboard.';
+    return 'La Edge Function administrativa no fue encontrada. Debe ser desplegada en Supabase con la CLI o el Dashboard.';
   }
 
   if (msg.includes('403') || msg.includes('Forbidden')) {
-    return 'Acceso denegado: solo los administradores pueden crear usuarios.';
+    return 'Acceso denegado: solo los administradores pueden realizar esta acción.';
   }
 
   return msg;
@@ -56,6 +56,7 @@ interface UseUsersReturn {
   error: string | null;
   refresh: () => Promise<void>;
   createUser: (payload: CreateUserPayload) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  updateUserPassword: (userId: string, newPassword: string, userEmail?: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
   addUserRole: (userId: string, role: AppRole) => Promise<{ ok: boolean; error?: string }>;
   removeUserRole: (userId: string, role: AppRole) => Promise<{ ok: boolean; error?: string }>;
 }
@@ -208,6 +209,70 @@ export function useUsers(): UseUsersReturn {
     [fetchUsers]
   );
 
+  const updateUserPassword = useCallback(
+    async (
+      userId: string,
+      newPassword: string,
+      userEmail?: string
+    ): Promise<{ ok: boolean; error?: string; message?: string }> => {
+      try {
+        if (!newPassword || newPassword.length < 6) {
+          return { ok: false, error: 'La nueva contraseña debe tener al menos 6 caracteres.' };
+        }
+
+        // 1. Intentar llamar a la función específica 'update-user-password'
+        let invokeRes = await supabase.functions.invoke('update-user-password', {
+          body: {
+            user_id: userId,
+            password: newPassword,
+          },
+        });
+
+        // 2. Si la función específica da 404 / no encontrada, probar fallback con 'create-user'
+        if (invokeRes.error) {
+          const errStr = invokeRes.error.message || String(invokeRes.error);
+          if (errStr.includes('404') || errStr.includes('Function not found') || errStr.includes('not found')) {
+            const fallbackRes = await supabase.functions.invoke('create-user', {
+              body: {
+                action: 'update_password',
+                user_id: userId,
+                password: newPassword,
+              },
+            });
+            if (!fallbackRes.error || !fallbackRes.error.message?.includes('404')) {
+              invokeRes = fallbackRes;
+            }
+          }
+        }
+
+        if (invokeRes.error) {
+          const parsed = await parseFunctionsError(invokeRes.error);
+          return { ok: false, error: parsed };
+        }
+
+        if (invokeRes.data?.error) {
+          return { ok: false, error: invokeRes.data.error };
+        }
+
+        // 3. Registrar acción en audit_logs de forma resiliente
+        logAuditEvent('UPDATE_PASSWORD', 'users', userId, {
+          action_type: 'ADMIN_RESET_PASSWORD',
+          target_user_id: userId,
+          target_email: userEmail || null,
+        });
+
+        return {
+          ok: true,
+          message: invokeRes.data?.message || 'Contraseña actualizada correctamente.',
+        };
+      } catch (err: any) {
+        const parsed = await parseFunctionsError(err);
+        return { ok: false, error: parsed };
+      }
+    },
+    []
+  );
+
   const addUserRole = useCallback(
     async (userId: string, role: AppRole): Promise<{ ok: boolean; error?: string }> => {
       try {
@@ -287,6 +352,7 @@ export function useUsers(): UseUsersReturn {
     error,
     refresh: fetchUsers,
     createUser,
+    updateUserPassword,
     addUserRole,
     removeUserRole,
   };

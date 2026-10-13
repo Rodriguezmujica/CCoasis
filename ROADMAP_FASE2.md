@@ -20,7 +20,7 @@
   - Predicación / Mensaje (pastor o predicador invitado).
   - Dirección del culto / Apertura.
   - Alabanza / Música (líder de alabanza o grupo).
-  - Ujieres / Bienvenida / Recogida de ofrenda.
+  - Servidores / Bienvenida / Recogida de ofrenda.
   - Escuela Dominical / Cuidado de niños.
   - Sonido / Audiovisuales.
 - **Integración**: Vinculado directamente a cada evento del Calendario (`church_event_assignments`, migración `007_event_assignments.sql`), seleccionando personas activas de la tabla `persons`.
@@ -39,7 +39,7 @@
 
 ---
 
-## Bloque 4: Avisos y Anuncios Generales (Tablón Parroquial) (COMPLETADO)
+## Bloque 4: Anuncios Especiales (COMPLETADO)
 - **Objetivo**: Comunicados oficiales del pastor o directiva en la pantalla principal tras iniciar sesión.
 - **Acceso**:
   - `admin`: Redactar, editar, activar/desactivar y archivar (soft-delete) avisos.

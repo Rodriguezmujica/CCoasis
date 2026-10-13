@@ -12,6 +12,7 @@ import {
   ExternalLink,
   CheckCircle2,
   ShieldAlert,
+  KeyRound,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUsers } from '../lib/useUsers';
@@ -21,6 +22,7 @@ import { AppRole } from '../types/auth';
 import { PERSON_STATUS_COLORS, PERSON_STATUS_OPTIONS, ROLE_LABELS } from '../types/persons';
 import { CreateUserModal } from '../components/usuarios/CreateUserModal';
 import { ManageRolesModal } from '../components/usuarios/ManageRolesModal';
+import { AdminResetPasswordModal } from '../components/usuarios/AdminResetPasswordModal';
 
 const ROLE_FILTER_OPTIONS: { value: AppRole | 'todos'; label: string }[] = [
   { value: 'todos', label: 'Todos los roles' },
@@ -39,6 +41,7 @@ export const UsuariosView: React.FC = () => {
     error,
     refresh,
     createUser,
+    updateUserPassword,
     addUserRole,
     removeUserRole,
   } = useUsers();
@@ -47,6 +50,7 @@ export const UsuariosView: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<AppRole | 'todos'>('todos');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedUserForRoles, setSelectedUserForRoles] = useState<AppUser | null>(null);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState<AppUser | null>(null);
   const [globalBanner, setGlobalBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Filtrado de usuarios
@@ -327,7 +331,7 @@ export const UsuariosView: React.FC = () => {
                 </div>
 
                 {/* Acciones */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
                   {user.personId ? (
                     <Link
                       to="/personas"
@@ -335,21 +339,34 @@ export const UsuariosView: React.FC = () => {
                       title="Ver en directorio de personas"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Ficha vinculada</span>
+                      <span className="hidden sm:inline">Ficha vinculada</span>
+                      <span className="sm:hidden">Ficha</span>
                     </Link>
                   ) : (
                     <span className="text-[11px] text-slate-400 italic">
-                      Sin ficha personal
+                      Sin ficha
                     </span>
                   )}
 
-                  <button
-                    onClick={() => setSelectedUserForRoles(user)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors ml-auto"
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    <span>Gestionar roles</span>
-                  </button>
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <button
+                      onClick={() => setSelectedUserForPassword(user)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors shadow-2xs"
+                      title="Cambiar contraseña de usuario"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Cambiar contraseña</span>
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedUserForRoles(user)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                      title="Gestionar roles"
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Roles</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -373,6 +390,21 @@ export const UsuariosView: React.FC = () => {
         onAddRole={addUserRole}
         onRemoveRole={removeUserRole}
         onRolesUpdated={refresh}
+      />
+
+      {/* Modal de Cambiar Contraseña (Admin) */}
+      <AdminResetPasswordModal
+        isOpen={Boolean(selectedUserForPassword)}
+        onClose={() => setSelectedUserForPassword(null)}
+        user={selectedUserForPassword}
+        onUpdatePassword={updateUserPassword}
+        onSuccess={(msg) => {
+          setGlobalBanner({
+            type: 'success',
+            message: `${msg} (${selectedUserForPassword?.email})`,
+          });
+          setTimeout(() => setGlobalBanner(null), 5000);
+        }}
       />
     </div>
   );

@@ -56,7 +56,7 @@ export const AnnouncementsBanner: React.FC<AnnouncementsBannerProps> = ({
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800">
-              Tablón Parroquial de Avisos
+              Anuncios Especiales
             </p>
             <p className="text-xs text-slate-500">
               No hay comunicados vigentes para la congregación.
@@ -152,7 +152,7 @@ export const AnnouncementsBanner: React.FC<AnnouncementsBannerProps> = ({
                 </button>
                 <button
                   onClick={onOpenManager}
-                  title="Administrar tablón de avisos"
+                  title="Administrar anuncios especiales"
                   className="p-1.5 rounded-lg bg-white/80 hover:bg-white text-slate-700 border border-slate-200/80 text-xs font-semibold flex items-center gap-1 transition-colors min-h-[34px]"
                 >
                   <Settings className="w-3.5 h-3.5 text-slate-600" />

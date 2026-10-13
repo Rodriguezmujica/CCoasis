@@ -136,7 +136,7 @@ export const AnnouncementModal: React.FC<AnnouncementModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                {announcementToEdit ? 'Editar Aviso' : 'Nuevo Aviso Parroquial'}
+                {announcementToEdit ? 'Editar Anuncio' : 'Nuevo Anuncio Especial'}
               </h2>
               <p className="text-xs text-slate-500">
                 {announcementToEdit

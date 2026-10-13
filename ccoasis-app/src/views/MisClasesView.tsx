@@ -68,7 +68,7 @@ export const MisClasesView: React.FC = () => {
         </button>
       </div>
 
-      {/* Banner de Avisos y Anuncios Vigentes (Tablón Parroquial) */}
+      {/* Banner de Anuncios Especiales Vigentes */}
       {activeAnnouncements.length > 0 && (
         <AnnouncementsBanner
           announcements={activeAnnouncements}

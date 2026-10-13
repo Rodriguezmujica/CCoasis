@@ -68,8 +68,8 @@ export const CHURCH_ROLES_CONFIG: Record<ChurchEventRoleType, ChurchRoleMetadata
     description: 'Líder o equipo de ministración musical y alabanza',
   },
   ujier: {
-    label: 'Ujieres / Recepción',
-    shortLabel: 'Ujier',
+    label: 'Servidores / Recepción',
+    shortLabel: 'Servidor',
     badgeBg: 'bg-emerald-50',
     badgeText: 'text-emerald-700',
     badgeBorder: 'border-emerald-200',

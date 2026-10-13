@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/AppLayout';
 import { LoginView } from './views/LoginView';
@@ -21,7 +23,9 @@ import {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ToastProvider>
+        <ConfirmProvider>
+          <BrowserRouter>
         <Routes>
           {/* Ruta pública de login */}
           <Route path="/login" element={<LoginView />} />
@@ -126,6 +130,8 @@ export const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+        </ConfirmProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 };

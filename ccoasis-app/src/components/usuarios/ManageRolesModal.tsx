@@ -3,6 +3,7 @@ import { X, ShieldCheck, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react
 import { AppUser, ROLE_DESCRIPTIONS, ROLE_BADGE_STYLES } from '../../types/users';
 import { AppRole } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirm } from '../../context/ConfirmContext';
 
 const AVAILABLE_ROLES: { role: AppRole; label: string }[] = [
   { role: 'admin', label: 'Administrador' },
@@ -29,6 +30,7 @@ export const ManageRolesModal: React.FC<ManageRolesModalProps> = ({
   onRolesUpdated,
 }) => {
   const { user: currentAuthUser } = useAuth();
+  const { confirm } = useConfirm();
   const [togglingRole, setTogglingRole] = useState<AppRole | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -49,11 +51,22 @@ export const ManageRolesModal: React.FC<ManageRolesModalProps> = ({
 
     // Advertencia de seguridad si se quita a sí mismo el rol de admin
     if (hasRole && role === 'admin' && user.userId === currentAuthUser?.id) {
-      const confirmed = window.confirm(
-        '¡Atención! Estás a punto de quitarte el rol de Administrador a ti mismo.\n' +
-        'Si confirmas, perderás acceso de inmediato a este panel de administración.\n\n' +
-        '¿Estás seguro de que deseas continuar?'
-      );
+      const confirmed = await confirm({
+        title: '¡Atención! Quitar rol de Administrador',
+        message: (
+          <div>
+            <p>
+              Estás a punto de quitarte el rol de <strong>Administrador</strong> a ti mismo.
+            </p>
+            <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 mt-2 font-medium">
+              Si confirmas, perderás el acceso de inmediato a este panel de administración. ¿Estás seguro de que deseas continuar?
+            </p>
+          </div>
+        ),
+        confirmText: 'Sí, quitar rol',
+        cancelText: 'Cancelar',
+        variant: 'warning',
+      });
       if (!confirmed) return;
     }
 

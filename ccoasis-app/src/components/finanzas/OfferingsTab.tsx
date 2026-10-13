@@ -19,6 +19,8 @@ import {
   FundAccount,
 } from '../../types/finances';
 import { formatCurrency, formatShortDate } from '../../lib/useFinances';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 
 interface OfferingsTabProps {
   offerings: Offering[];
@@ -35,6 +37,8 @@ export const OfferingsTab: React.FC<OfferingsTabProps> = ({
   onDeleteOffering,
   isLoading,
 }) => {
+  const { confirm } = useConfirm();
+  const { toast } = useToast();
   const [fundFilter, setFundFilter] = useState<FundFilter>('todos');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -47,18 +51,32 @@ export const OfferingsTab: React.FC<OfferingsTabProps> = ({
     const donorText = offering.person
       ? `${offering.person.first_name} ${offering.person.last_name}`
       : 'anónima';
-    const confirm = window.confirm(
-      `¿Deseas eliminar la ofrenda de ${formatCurrency(offering.amount)} (${donorText}) del ${formatShortDate(
-        offering.offering_date
-      )}?`
-    );
-    if (!confirm) return;
+    const confirmed = await confirm({
+      title: '¿Eliminar ofrenda?',
+      message: (
+        <div>
+          <p>
+            ¿Deseas eliminar la ofrenda de <strong>{formatCurrency(offering.amount)}</strong> ({donorText}) del{' '}
+            {formatShortDate(offering.offering_date)}?
+          </p>
+          <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mt-2">
+            Esta acción es irreversible y eliminará el registro contable de la ofrenda.
+          </p>
+        </div>
+      ),
+      confirmText: 'Eliminar ofrenda',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     setDeletingId(offering.id);
     try {
       const res = await onDeleteOffering(offering.id);
       if (!res.ok) {
-        alert(res.error || 'No se pudo eliminar la ofrenda.');
+        toast.error(res.error || 'No se pudo eliminar la ofrenda.');
+      } else {
+        toast.success('Ofrenda eliminada correctamente.');
       }
     } finally {
       setDeletingId(null);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link2, CheckCircle2, AlertCircle, ShieldCheck, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirm } from '../../context/ConfirmContext';
 import { Person, PersonUserLink, ALL_ROLES, ROLE_LABELS } from '../../types/persons';
 import { AppRole } from '../../types/auth';
 
@@ -22,6 +23,7 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
   onLinked,
 }) => {
   const { user: currentUser } = useAuth();
+  const { confirm } = useConfirm();
   const [linkEmail, setLinkEmail] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
@@ -69,10 +71,22 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
 
     // Warn before removing own admin role
     if (hasRole && role === 'admin' && userLink.user_id === currentUser?.id) {
-      const confirmed = window.confirm(
-        '¡Atención! Estás a punto de quitarte el rol de administrador a ti mismo. ' +
-        'Si continúas, podrías perder acceso a esta sección. ¿Deseas continuar?'
-      );
+      const confirmed = await confirm({
+        title: '¡Atención! Quitar rol de Administrador',
+        message: (
+          <div>
+            <p>
+              Estás a punto de quitarte el rol de <strong>Administrador</strong> a ti mismo.
+            </p>
+            <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 mt-2 font-medium">
+              Si continúas, perderás el acceso a las funciones de administración y a esta sección de inmediato. ¿Deseas continuar?
+            </p>
+          </div>
+        ),
+        confirmText: 'Sí, quitar rol',
+        cancelText: 'Cancelar',
+        variant: 'warning',
+      });
       if (!confirmed) return;
     }
 

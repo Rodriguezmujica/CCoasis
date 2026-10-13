@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent } from '../../types/events';
 import { ChurchEventRSVP, RSVPFormData, RSVPStatus } from '../../types/rsvps';
 import { formatEventFriendlyDate, formatEventTime } from '../../lib/useEvents';
+import { useConfirm } from '../../context/ConfirmContext';
 import {
   CalendarCheck,
   CheckCircle2,
@@ -40,6 +41,7 @@ export const EventRSVPModal: React.FC<EventRSVPModalProps> = ({
   onDelete,
   actionLoading = false,
 }) => {
+  const { confirm } = useConfirm();
   const [status, setStatus] = useState<RSVPStatus>('asistire');
   const [guests, setGuests] = useState<number>(0);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -90,9 +92,13 @@ export const EventRSVPModal: React.FC<EventRSVPModalProps> = ({
 
   const handleDelete = async () => {
     if (!onDelete) return;
-    const confirmed = window.confirm(
-      '¿Deseas cancelar y retirar tu confirmación de asistencia para este evento?'
-    );
+    const confirmed = await confirm({
+      title: '¿Cancelar confirmación de asistencia?',
+      message: '¿Deseas cancelar y retirar tu confirmación de asistencia para este evento? Dejarás de figurar en la lista de confirmados.',
+      confirmText: 'Retirar confirmación',
+      cancelText: 'Volver',
+      variant: 'danger',
+    });
     if (!confirmed) return;
 
     setIsDeleting(true);

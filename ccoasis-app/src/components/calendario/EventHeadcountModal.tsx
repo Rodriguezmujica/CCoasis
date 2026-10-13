@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChurchEvent } from '../../types/events';
 import { EventHeadcount, HeadcountFormData } from '../../types/headcount';
 import { formatEventFriendlyDate, formatEventTime } from '../../lib/useEvents';
+import { useConfirm } from '../../context/ConfirmContext';
 import {
   Users,
   X,
@@ -37,6 +38,7 @@ export const EventHeadcountModal: React.FC<EventHeadcountModalProps> = ({
   onDelete,
   actionLoading = false,
 }) => {
+  const { confirm } = useConfirm();
   const [adults, setAdults] = useState<number>(0);
   const [children, setChildren] = useState<number>(0);
   const [visitors, setVisitors] = useState<number>(0);
@@ -107,9 +109,13 @@ export const EventHeadcountModal: React.FC<EventHeadcountModalProps> = ({
 
   const handleDelete = async () => {
     if (!onDelete) return;
-    const confirmed = window.confirm(
-      '¿Deseas eliminar el registro de asistencia de este culto?'
-    );
+    const confirmed = await confirm({
+      title: '¿Eliminar registro de asistencia?',
+      message: '¿Deseas eliminar el registro de conteo de asistencia de este culto? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar registro',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    });
     if (!confirmed) return;
 
     setIsDeleting(true);

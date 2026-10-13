@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Tags, Plus, Trash2, Loader2, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { TransactionCategory, CategoryType } from '../../types/finances';
+import { useConfirm } from '../../context/ConfirmContext';
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
   onCreateCategory,
   onDeleteCategory,
 }) => {
+  const { confirm } = useConfirm();
   const [activeFilter, setActiveFilter] = useState<'todas' | 'ingreso' | 'gasto'>('todas');
   const [name, setName] = useState('');
   const [type, setType] = useState<CategoryType>('ingreso');
@@ -54,18 +56,30 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
         setSuccessMsg(`Categoría "${trimmed}" creada correctamente.`);
         setTimeout(() => setSuccessMsg(null), 3000);
       }
-    } catch (err: any) {
-      setError(err?.message || 'Error inesperado al crear categoría.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error inesperado al crear categoría.';
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (cat: TransactionCategory) => {
-    const confirm = window.confirm(
-      `¿Seguro que deseas eliminar la categoría "${cat.name}"?\n(Solo se puede eliminar si no tiene ofrendas o gastos asociados).`
-    );
-    if (!confirm) return;
+    const confirmed = await confirm({
+      title: '¿Eliminar categoría?',
+      message: (
+        <div>
+          <p>¿Seguro que deseas eliminar la categoría <strong>"{cat.name}"</strong>?</p>
+          <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 mt-2">
+            Solo se puede eliminar si no tiene ofrendas ni gastos asociados en el sistema. Esta acción es irreversible.
+          </p>
+        </div>
+      ),
+      confirmText: 'Eliminar categoría',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     setError(null);
     setDeletingId(cat.id);
@@ -74,8 +88,9 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
       if (!res.ok) {
         setError(res.error || 'No se pudo eliminar la categoría.');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Error al eliminar categoría.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al eliminar categoría.';
+      setError(msg);
     } finally {
       setDeletingId(null);
     }

@@ -20,6 +20,8 @@ import {
   FundAccount,
 } from '../../types/finances';
 import { formatCurrency, formatShortDate } from '../../lib/useFinances';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 
 interface ExpensesTabProps {
   expenses: Expense[];
@@ -38,6 +40,8 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
   onGetReceiptUrl,
   isLoading,
 }) => {
+  const { confirm } = useConfirm();
+  const { toast } = useToast();
   const [fundFilter, setFundFilter] = useState<FundFilter>('todos');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loadingReceiptId, setLoadingReceiptId] = useState<string | null>(null);
@@ -48,18 +52,32 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
   });
 
   const handleDelete = async (expense: Expense) => {
-    const confirm = window.confirm(
-      `¿Deseas eliminar el gasto "${expense.description}" por valor de ${formatCurrency(
-        expense.amount
-      )} del ${formatShortDate(expense.expense_date)}?`
-    );
-    if (!confirm) return;
+    const confirmed = await confirm({
+      title: '¿Eliminar gasto?',
+      message: (
+        <div>
+          <p>
+            ¿Deseas eliminar el gasto <strong>"{expense.description}"</strong> por valor de{' '}
+            <strong>{formatCurrency(expense.amount)}</strong> del {formatShortDate(expense.expense_date)}?
+          </p>
+          <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mt-2">
+            Esta acción es irreversible y eliminará el registro contable y su comprobante asociado si existe.
+          </p>
+        </div>
+      ),
+      confirmText: 'Eliminar gasto',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     setDeletingId(expense.id);
     try {
       const res = await onDeleteExpense(expense);
       if (!res.ok) {
-        alert(res.error || 'No se pudo eliminar el gasto.');
+        toast.error(res.error || 'No se pudo eliminar el gasto.');
+      } else {
+        toast.success('Gasto eliminado correctamente.');
       }
     } finally {
       setDeletingId(null);
@@ -73,13 +91,14 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
     try {
       const { url, error } = await onGetReceiptUrl(expense.receipt_url);
       if (error || !url) {
-        alert(error || 'No se pudo obtener el comprobante.');
+        toast.error(error || 'No se pudo obtener el comprobante.');
       } else {
         // Abrir URL firmada en nueva pestaña
         window.open(url, '_blank', 'noopener,noreferrer');
       }
-    } catch (err: any) {
-      alert(err?.message || 'Error al descargar comprobante.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al descargar comprobante.';
+      toast.error(msg);
     } finally {
       setLoadingReceiptId(null);
     }

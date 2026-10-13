@@ -16,8 +16,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import {
   Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Clock,
   MapPin,
@@ -52,6 +50,7 @@ import { AnnouncementsManagerModal } from '../components/announcements/Announcem
 import { useEventRSVPs, isEventFuture } from '../lib/useEventRSVPs';
 import { EventRSVPModal } from '../components/calendario/EventRSVPModal';
 import { EventRSVPListModal } from '../components/calendario/EventRSVPListModal';
+import { CalendarGridView, formatDateKeyFriendly } from '../components/calendario/CalendarGridView';
 
 export const CalendarioView: React.FC = () => {
   const { roles } = useAuth();
@@ -63,6 +62,8 @@ export const CalendarioView: React.FC = () => {
   const today = new Date();
   const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth());
+  // Día específico seleccionado para filtrar la lista ('YYYY-MM-DD' o null para todo el mes)
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
 
   // Hook de eventos
   const {
@@ -164,6 +165,7 @@ export const CalendarioView: React.FC = () => {
 
   // Navegación de mes anterior / siguiente
   const handlePrevMonth = () => {
+    setSelectedDateKey(null);
     if (selectedMonth === 0) {
       setSelectedMonth(11);
       setSelectedYear((y) => y - 1);
@@ -173,6 +175,7 @@ export const CalendarioView: React.FC = () => {
   };
 
   const handleNextMonth = () => {
+    setSelectedDateKey(null);
     if (selectedMonth === 11) {
       setSelectedMonth(0);
       setSelectedYear((y) => y + 1);
@@ -182,15 +185,18 @@ export const CalendarioView: React.FC = () => {
   };
 
   const handleGoToday = () => {
+    setSelectedDateKey(null);
     setSelectedYear(today.getFullYear());
     setSelectedMonth(today.getMonth());
   };
 
   // Abrir modal de creación
   const handleOpenCreate = () => {
-    // Si estamos en un mes futuro, sugerir el primer día de ese mes o hoy si es el mes actual
+    // Si hay un día seleccionado, usarlo como fecha sugerida; si no, si estamos en el mes actual usar hoy, sino primer día del mes
     const isCurrentMonth = selectedYear === today.getFullYear() && selectedMonth === today.getMonth();
-    const defaultDate = isCurrentMonth 
+    const defaultDate = selectedDateKey
+      ? selectedDateKey
+      : isCurrentMonth 
       ? toLocalDateString(today.toISOString())
       : `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-01`;
 
@@ -263,6 +269,11 @@ export const CalendarioView: React.FC = () => {
 
   // Array ordenado de fechas de eventos en este mes
   const sortedDates = Object.keys(eventsByDate).sort();
+
+  // Array de fechas a mostrar en la lista detallada (filtrado por día seleccionado si existe)
+  const displayedDates = selectedDateKey
+    ? (eventsByDate[selectedDateKey] ? [selectedDateKey] : [])
+    : sortedDates;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
@@ -500,44 +511,18 @@ export const CalendarioView: React.FC = () => {
         </div>
       )}
 
-      {/* Selector de Mes y Año con navegación móvil amigable */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrevMonth}
-            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors"
-            title="Mes anterior"
-            aria-label="Mes anterior"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <div className="px-2 sm:px-3">
-            <span className="text-lg sm:text-xl font-bold text-slate-900 block leading-tight">
-              {MONTH_NAMES_ES[selectedMonth]} {selectedYear}
-            </span>
-            <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-              {events.length} {events.length === 1 ? 'actividad programada' : 'actividades programadas'}
-            </span>
-          </div>
-
-          <button
-            onClick={handleNextMonth}
-            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors"
-            title="Mes siguiente"
-            aria-label="Mes siguiente"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        <button
-          onClick={handleGoToday}
-          className="px-3 py-2 text-xs sm:text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-xl transition-colors min-h-[40px]"
-        >
-          Ir a hoy
-        </button>
-      </div>
+      {/* Cuadrícula Mensual Interactiva (Calendar Grid View) */}
+      <CalendarGridView
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        events={events}
+        eventsByDate={eventsByDate}
+        selectedDate={selectedDateKey}
+        onSelectDate={setSelectedDateKey}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+        onGoToday={handleGoToday}
+      />
 
       {/* Alerta de Error */}
       {(error || headcountError || rsvpError) && (
@@ -585,9 +570,75 @@ export const CalendarioView: React.FC = () => {
             </button>
           )}
         </div>
+      ) : selectedDateKey && (!eventsByDate[selectedDateKey] || eventsByDate[selectedDateKey].length === 0) ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center space-y-3 shadow-xs">
+          <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
+            <CalendarDays className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-base sm:text-lg font-bold text-slate-800">
+              No hay actividades programadas para este día
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+              No se han registrado actividades para el {formatDateKeyFriendly(selectedDateKey)}.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            <button
+              onClick={() => setSelectedDateKey(null)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs sm:text-sm font-bold transition-colors min-h-[40px] touch-manipulation"
+            >
+              <CalendarDays className="w-4 h-4 text-blue-600" />
+              <span>Ver todas las actividades de {MONTH_NAMES_ES[selectedMonth]}</span>
+            </button>
+            {isAdmin && (
+              <button
+                onClick={handleOpenCreate}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[40px] touch-manipulation"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Programar actividad este día</span>
+              </button>
+            )}
+          </div>
+        </div>
       ) : (
         <div className="space-y-6">
-          {sortedDates.map((dateKey) => {
+          {/* Cabecera enfocado cuando hay un día seleccionado con actividades */}
+          {selectedDateKey && (
+            <div className="bg-blue-50/90 border border-blue-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs">
+                  <CalendarDays className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Día seleccionado</span>
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                      {eventsByDate[selectedDateKey]?.length || 0}{' '}
+                      {eventsByDate[selectedDateKey]?.length === 1 ? 'actividad' : 'actividades'}
+                    </span>
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+                    {formatDateKeyFriendly(selectedDateKey)}
+                  </h2>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedDateKey(null)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-blue-50 active:bg-blue-100 text-blue-800 border border-blue-300 rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors min-h-[40px] touch-manipulation self-start sm:self-auto"
+                title="Restablecer filtro y ver todas las actividades del mes"
+              >
+                <CalendarDays className="w-4 h-4 text-blue-600" />
+                <span>Ver todas las del mes</span>
+                <X className="w-3.5 h-3.5 text-blue-500" />
+              </button>
+            </div>
+          )}
+
+          {displayedDates.map((dateKey) => {
             const dayEvents = eventsByDate[dateKey];
             const isToday = toLocalDateString(today.toISOString()) === dateKey;
 

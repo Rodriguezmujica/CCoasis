@@ -39,4 +39,8 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    host: true, // Permite entrar desde el móvil conectado al mismo Wi-Fi
+    port: 5173,
+  },
 })

@@ -79,6 +79,58 @@ export const NAV_ITEMS: NavItemConfig[] = [
 ];
 
 /**
+ * Prioridad de módulos para la barra inferior móvil cuando hay más de 4 opciones.
+ * Los 4 módulos principales con mayor frecuencia de uso congregacional se mantienen
+ * fijos en la barra inferior y los demás se agrupan dentro del menú "Más".
+ */
+export const MOBILE_NAV_PRIORITY: string[] = [
+  'calendario',
+  'mis-clases',
+  'clases',
+  'finanzas',
+  'personas',
+  'usuarios',
+  'auditoria',
+];
+
+export interface MobileNavGroups {
+  barItems: NavItemConfig[];
+  moreItems: NavItemConfig[];
+  hasMore: boolean;
+}
+
+/**
+ * Obtiene los elementos de navegación para móvil:
+ * - Si hay 4 o menos módulos visibles: se devuelven todos en barItems (sin botón "Más").
+ * - Si hay más de 4 módulos visibles: se devuelven los primeros 4 ordenados por prioridad
+ *   en barItems y el resto en moreItems (para el Bottom Sheet "Más").
+ */
+export function getMobileNavItems(userRoles: AppRole[]): MobileNavGroups {
+  const available = getAvailableNavItems(userRoles);
+  if (available.length <= 4) {
+    return {
+      barItems: available,
+      moreItems: [],
+      hasMore: false,
+    };
+  }
+
+  const sorted = [...available].sort((a, b) => {
+    const indexA = MOBILE_NAV_PRIORITY.indexOf(a.id);
+    const indexB = MOBILE_NAV_PRIORITY.indexOf(b.id);
+    const posA = indexA === -1 ? 999 : indexA;
+    const posB = indexB === -1 ? 999 : indexB;
+    return posA - posB;
+  });
+
+  return {
+    barItems: sorted.slice(0, 4),
+    moreItems: sorted.slice(4),
+    hasMore: true,
+  };
+}
+
+/**
  * Filtra los elementos de navegación accesibles según los roles del usuario.
  * Un usuario puede poseer múltiples roles y recibirá la unión de módulos permitidos.
  */
@@ -109,3 +161,4 @@ export function getDefaultPathForRoles(userRoles: AppRole[]): string {
   }
   return '/sin-permisos';
 }
+

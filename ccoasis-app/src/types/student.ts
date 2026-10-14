@@ -22,12 +22,14 @@ export interface StudentCycleSummary {
     start_date: string;
     end_date: string | null;
     status: CycleStatus;
+    deleted_at?: string | null;
     course: {
       id: string;
       title: string;
       description: string | null;
       passing_grade: number;
       min_attendance_pct: number;
+      deleted_at?: string | null;
     } | null;
     teacher: {
       id: string;
@@ -46,12 +48,14 @@ export interface StudentCycleDetail {
     start_date: string;
     end_date: string | null;
     status: CycleStatus;
+    deleted_at?: string | null;
     course: {
       id: string;
       title: string;
       description: string | null;
       passing_grade: number;
       min_attendance_pct: number;
+      deleted_at?: string | null;
     } | null;
     teacher: {
       id: string;

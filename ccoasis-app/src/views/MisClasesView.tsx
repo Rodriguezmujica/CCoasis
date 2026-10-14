@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BookOpen,
@@ -17,9 +17,12 @@ import { ENROLLMENT_STATUS_OPTIONS, ENROLLMENT_STATUS_COLORS, EnrollmentStatus }
 import { useAnnouncements } from '../lib/useAnnouncements';
 import { AnnouncementsBanner } from '../components/announcements/AnnouncementsBanner';
 
+type MisClasesTab = 'activos' | 'historial';
+
 export const MisClasesView: React.FC = () => {
   const navigate = useNavigate();
   const { activeAnnouncements } = useAnnouncements();
+  const [activeTab, setActiveTab] = useState<MisClasesTab>('activos');
   const {
     cycles,
     personName,
@@ -28,6 +31,21 @@ export const MisClasesView: React.FC = () => {
     error,
     refresh,
   } = useStudentClasses();
+
+  const isCycleFinished = (item: (typeof cycles)[0]) =>
+    item.cycle.status === 'cerrado' || item.status === 'completado';
+
+  const activeCycles = useMemo(
+    () => cycles.filter((c) => !isCycleFinished(c)),
+    [cycles]
+  );
+
+  const finishedCycles = useMemo(
+    () => cycles.filter((c) => isCycleFinished(c)),
+    [cycles]
+  );
+
+  const displayedCycles = activeTab === 'activos' ? activeCycles : finishedCycles;
 
   if (isLoading) {
     return (
@@ -121,11 +139,112 @@ export const MisClasesView: React.FC = () => {
         </div>
       )}
 
+      {/* Selector de pestañas: En Curso / Activos vs Finalizados / Historial */}
+      {isLinkedPerson === true && cycles.length > 0 && (
+        <div className="border-b border-slate-200">
+          <nav className="flex space-x-4 sm:space-x-8" aria-label="Pestañas de Mis Clases">
+            <button
+              onClick={() => setActiveTab('activos')}
+              className={`py-3 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors ${
+                activeTab === 'activos'
+                  ? 'border-blue-600 text-blue-600 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>En Curso / Activos</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  activeTab === 'activos'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {activeCycles.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('historial')}
+              className={`py-3 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors ${
+                activeTab === 'historial'
+                  ? 'border-blue-600 text-blue-600 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Finalizados / Historial</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  activeTab === 'historial'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {finishedCycles.length}
+              </span>
+            </button>
+          </nav>
+        </div>
+      )}
+
+      {/* Estado vacío por pestaña cuando hay ciclos pero ninguno en la pestaña activa */}
+      {isLinkedPerson === true && cycles.length > 0 && displayedCycles.length === 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-xs">
+          {activeTab === 'activos' ? (
+            <>
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-base sm:text-lg">
+                No tienes ciclos en curso actualmente
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                {finishedCycles.length > 0
+                  ? 'Todos tus ciclos formativos han concluido o han sido completados. Puedes consultar tus notas y entregas en la pestaña de Historial.'
+                  : 'Cuando el maestro o administrador te inscriba en un nuevo ciclo, aparecerá disponible aquí.'}
+              </p>
+              {finishedCycles.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('historial')}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors"
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  <span>Ver ciclos finalizados ({finishedCycles.length})</span>
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-base sm:text-lg">
+                Sin ciclos en el historial todavía
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                Los ciclos que concluyan normalmente con estado cerrado o con tu formación completada se archivarán aquí para que puedas consultar tus notas y certificados pasados.
+              </p>
+              {activeCycles.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('activos')}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Ver mis clases activas ({activeCycles.length})</span>
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       {/* Listado de Tarjetas de Ciclos Inscritos (Mobile-First) */}
-      {cycles.length > 0 && (
+      {displayedCycles.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {cycles.map((item) => {
+          {displayedCycles.map((item) => {
             const { cycle, academicSummary, status: enrollStatus } = item;
+            const isFinished = isCycleFinished(item);
 
             const cycleStatusLabel =
               CYCLE_STATUS_OPTIONS.find((s) => s.value === cycle.status)?.label ||
@@ -149,7 +268,11 @@ export const MisClasesView: React.FC = () => {
               <div
                 key={item.enrollment_id}
                 onClick={() => navigate(`/mis-clases/ciclo/${cycle.id}`)}
-                className="group cursor-pointer bg-white rounded-2xl border border-slate-200/80 hover:border-blue-400 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 active:scale-[0.99]"
+                className={`group cursor-pointer bg-white rounded-2xl border p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 active:scale-[0.99] ${
+                  isFinished
+                    ? 'border-slate-200/90 hover:border-slate-400 bg-gradient-to-b from-white to-slate-50/50'
+                    : 'border-slate-200/80 hover:border-blue-400'
+                }`}
               >
                 {/* Cabecera de la tarjeta: Título del curso y estados */}
                 <div className="space-y-2">
@@ -239,6 +362,10 @@ export const MisClasesView: React.FC = () => {
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded-lg">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Aprobado</span>
+                      </span>
+                    ) : isFinished ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-lg">
+                        <span>Finalizado</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-lg">

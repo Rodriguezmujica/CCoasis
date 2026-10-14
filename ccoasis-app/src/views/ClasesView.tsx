@@ -16,7 +16,12 @@ import {
   Lock,
   AlertCircle,
   Loader2,
+  Archive,
+  RotateCcw,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import { useCourses } from '../lib/useCourses';
 import { useCycles } from '../lib/useCycles';
 import {
@@ -45,6 +50,11 @@ type ModalState =
 
 export const ClasesView: React.FC = () => {
   const navigate = useNavigate();
+  const { roles } = useAuth();
+  const isAdmin = roles.includes('admin');
+  const { confirm } = useConfirm();
+  const { toast } = useToast();
+
   const [activeTab, setActiveTab] = useState<Tab>('ciclos');
   const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
 
@@ -55,10 +65,13 @@ export const ClasesView: React.FC = () => {
     error: coursesError,
     searchQuery: coursesSearch,
     setSearchQuery: setCoursesSearch,
+    showArchived: showArchivedCourses,
+    setShowArchived: setShowArchivedCourses,
     refresh: refreshCourses,
     createCourse,
     updateCourse,
     softDeleteCourse,
+    restoreCourse,
   } = useCourses();
 
   const {
@@ -72,11 +85,14 @@ export const ClasesView: React.FC = () => {
     setCourseFilter,
     searchQuery: cyclesSearch,
     setSearchQuery: setCyclesSearch,
+    showArchived: showArchivedCycles,
+    setShowArchived: setShowArchivedCycles,
     refresh: refreshCycles,
     createCycle,
     updateCycle,
     updateCycleStatus,
     softDeleteCycle,
+    restoreCycle,
   } = useCycles();
 
   // Handlers for Course actions
@@ -92,6 +108,24 @@ export const ClasesView: React.FC = () => {
     return softDeleteCourse(modal.course.id);
   };
 
+  const handleRestoreCourse = async (course: Course) => {
+    const ok = await confirm({
+      title: '¿Restaurar curso del catálogo?',
+      message: `El curso "${course.title}" volverá a estar disponible en el catálogo activo para abrir nuevos ciclos formativos.`,
+      confirmText: 'Sí, restaurar',
+      cancelText: 'Cancelar',
+      variant: 'primary',
+    });
+    if (!ok) return;
+
+    const res = await restoreCourse(course.id);
+    if (res.ok) {
+      toast.success(`Curso "${course.title}" restaurado correctamente.`);
+    } else {
+      toast.error(res.error || 'No se pudo restaurar el curso.');
+    }
+  };
+
   // Handlers for Cycle actions
   const handleSaveCycle = async (data: CycleFormData) => {
     if (modal.kind === 'editCycle') {
@@ -103,6 +137,24 @@ export const ClasesView: React.FC = () => {
   const handleConfirmDeleteCycle = async () => {
     if (modal.kind !== 'deleteCycle') return { ok: false, error: 'No seleccionado' };
     return softDeleteCycle(modal.cycle.id);
+  };
+
+  const handleRestoreCycle = async (cycle: CycleWithDetails) => {
+    const ok = await confirm({
+      title: '¿Restaurar ciclo de clases?',
+      message: `El ciclo "${cycle.name}" volverá a estar activo y disponible para alumnos y maestros.`,
+      confirmText: 'Sí, restaurar',
+      cancelText: 'Cancelar',
+      variant: 'primary',
+    });
+    if (!ok) return;
+
+    const res = await restoreCycle(cycle.id);
+    if (res.ok) {
+      toast.success(`Ciclo "${cycle.name}" restaurado correctamente.`);
+    } else {
+      toast.error(res.error || 'No se pudo restaurar el ciclo.');
+    }
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -139,21 +191,41 @@ export const ClasesView: React.FC = () => {
         {/* Botón de acción principal adaptativo */}
         <div className="flex items-center gap-2">
           {activeTab === 'ciclos' ? (
-            <button
-              onClick={() => setModal({ kind: 'createCycle' })}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Abrir Nuevo Ciclo</span>
-            </button>
+            showArchivedCycles ? (
+              <button
+                onClick={() => setShowArchivedCycles(false)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-2xs transition-colors"
+              >
+                <RotateCcw className="w-4 h-4 text-slate-500" />
+                <span>Ver Ciclos Activos</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setModal({ kind: 'createCycle' })}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Abrir Nuevo Ciclo</span>
+              </button>
+            )
           ) : (
-            <button
-              onClick={() => setModal({ kind: 'createCourse' })}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Crear Nuevo Curso</span>
-            </button>
+            showArchivedCourses ? (
+              <button
+                onClick={() => setShowArchivedCourses(false)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-2xs transition-colors"
+              >
+                <RotateCcw className="w-4 h-4 text-slate-500" />
+                <span>Ver Cursos Activos</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setModal({ kind: 'createCourse' })}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Crear Nuevo Curso</span>
+              </button>
+            )
           )}
         </div>
       </div>
@@ -173,7 +245,11 @@ export const ClasesView: React.FC = () => {
             <span>Ciclos y Cohortes</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs ${
-                activeTab === 'ciclos' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+                activeTab === 'ciclos'
+                  ? showArchivedCycles
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-100 text-slate-600'
               }`}
             >
               {cycles.length}
@@ -192,7 +268,11 @@ export const ClasesView: React.FC = () => {
             <span>Catálogo de Cursos</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs ${
-                activeTab === 'cursos' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+                activeTab === 'cursos'
+                  ? showArchivedCourses
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-100 text-slate-600'
               }`}
             >
               {courses.length}
@@ -252,6 +332,31 @@ export const ClasesView: React.FC = () => {
                 </select>
               </div>
 
+              {/* Filtro / Botón Ver archivados (solo admin) */}
+              {isAdmin && (
+                <button
+                  onClick={() => setShowArchivedCycles(!showArchivedCycles)}
+                  className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    showArchivedCycles
+                      ? 'bg-amber-100/90 border-amber-300 text-amber-900 hover:bg-amber-100 shadow-2xs font-bold'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }`}
+                  title={showArchivedCycles ? 'Volver a ciclos activos' : 'Ver ciclos archivados / eliminados'}
+                >
+                  {showArchivedCycles ? (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-800" />
+                      <span>Ver activos</span>
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Ver archivados</span>
+                    </>
+                  )}
+                </button>
+              )}
+
               {/* Recargar */}
               <button
                 onClick={() => refreshCycles()}
@@ -263,6 +368,24 @@ export const ClasesView: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Banner de modo archivado */}
+          {showArchivedCycles && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-amber-900">
+              <div className="flex items-center gap-2">
+                <Archive className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                <span>
+                  Visualizando <strong>ciclos archivados / eliminados</strong>. Pulsa &quot;Restaurar&quot; en cualquier ciclo para reactivarlo en el aula virtual.
+                </span>
+              </div>
+              <button
+                onClick={() => setShowArchivedCycles(false)}
+                className="self-start sm:self-auto px-3 py-1 bg-amber-200/80 hover:bg-amber-200 font-bold rounded-lg text-amber-950 transition-colors"
+              >
+                Volver a ciclos activos
+              </button>
+            </div>
+          )}
 
           {/* Error Banner */}
           {cyclesError && (
@@ -283,34 +406,55 @@ export const ClasesView: React.FC = () => {
             </div>
           ) : cycles.length === 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-900 mb-1">
-                No hay ciclos registrados
-              </h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
-                {cyclesSearch || statusFilter !== 'todos' || courseFilter !== 'todos'
-                  ? 'No se encontraron ciclos con los filtros seleccionados.'
-                  : 'Crea tu primer ciclo para comenzar a impartir clases y registrar asistencia.'}
-              </p>
-              {courses.length === 0 ? (
-                <button
-                  onClick={() => {
-                    setActiveTab('cursos');
-                    setModal({ kind: 'createCourse' });
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Primero debes crear un Curso</span>
-                </button>
+              {showArchivedCycles ? (
+                <>
+                  <Archive className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-slate-900 mb-1">
+                    No hay ciclos archivados
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                    La papelera de ciclos está vacía. Todos los ciclos registrados se encuentran activos.
+                  </p>
+                  <button
+                    onClick={() => setShowArchivedCycles(false)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Volver a ciclos activos</span>
+                  </button>
+                </>
               ) : (
-                <button
-                  onClick={() => setModal({ kind: 'createCycle' })}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Crear Nuevo Ciclo</span>
-                </button>
+                <>
+                  <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-slate-900 mb-1">
+                    No hay ciclos registrados
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                    {cyclesSearch || statusFilter !== 'todos' || courseFilter !== 'todos'
+                      ? 'No se encontraron ciclos con los filtros seleccionados.'
+                      : 'Crea tu primer ciclo para comenzar a impartir clases y registrar asistencia.'}
+                  </p>
+                  {courses.length === 0 ? (
+                    <button
+                      onClick={() => {
+                        setActiveTab('cursos');
+                        setModal({ kind: 'createCourse' });
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Primero debes crear un Curso</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setModal({ kind: 'createCycle' })}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Crear Nuevo Ciclo</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           ) : (
@@ -381,49 +525,69 @@ export const ClasesView: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Botón Gestión del Aula - Mobile First */}
-                      <button
-                        onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
-                        className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl transition-colors"
-                      >
-                        <GraduationCap className="w-4 h-4" />
-                        <span>Gestionar Aula ({cycle.enrollments_count ?? 0} alumnos)</span>
-                      </button>
-
                       {/* Botones de acción móvil - Grandes y táctiles */}
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                        {/* Selector rápido de estado */}
-                        <div className="relative flex-1">
-                          <select
-                            value={cycle.status}
-                            onChange={(e) =>
-                              updateCycleStatus(cycle.id, e.target.value as CycleStatus)
-                            }
-                            className="w-full text-xs py-2 px-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-700"
+                      {showArchivedCycles ? (
+                        <div className="pt-2 border-t border-slate-100 space-y-2">
+                          {cycle.deleted_at && (
+                            <div className="text-xs text-rose-700 font-semibold flex items-center gap-1.5">
+                              <Archive className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>Archivado el {formatDate(cycle.deleted_at)}</span>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => handleRestoreCycle(cycle)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-colors shadow-xs"
                           >
-                            {CYCLE_STATUS_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                Estado: {opt.label}
-                              </option>
-                            ))}
-                          </select>
+                            <RotateCcw className="w-4 h-4" />
+                            <span>Restaurar Ciclo</span>
+                          </button>
                         </div>
+                      ) : (
+                        <>
+                          {/* Botón Gestión del Aula - Mobile First */}
+                          <button
+                            onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
+                            className="w-full mb-3 flex items-center justify-center gap-2 py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl transition-colors"
+                          >
+                            <GraduationCap className="w-4 h-4" />
+                            <span>Gestionar Aula ({cycle.enrollments_count ?? 0} alumnos)</span>
+                          </button>
 
-                        <button
-                          onClick={() => setModal({ kind: 'editCycle', cycle })}
-                          className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
-                          title="Editar ciclo"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setModal({ kind: 'deleteCycle', cycle })}
-                          className="p-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
-                          title="Archivar ciclo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                            {/* Selector rápido de estado */}
+                            <div className="relative flex-1">
+                              <select
+                                value={cycle.status}
+                                onChange={(e) =>
+                                  updateCycleStatus(cycle.id, e.target.value as CycleStatus)
+                                }
+                                className="w-full text-xs py-2 px-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-700"
+                              >
+                                {CYCLE_STATUS_OPTIONS.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    Estado: {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <button
+                              onClick={() => setModal({ kind: 'editCycle', cycle })}
+                              className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+                              title="Editar ciclo"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setModal({ kind: 'deleteCycle', cycle })}
+                              className="p-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
+                              title="Archivar ciclo"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
@@ -454,18 +618,31 @@ export const ClasesView: React.FC = () => {
                           }`}
                         >
                           <td className="px-5 py-4">
-                            <button
-                              onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
-                              className="font-bold text-slate-900 hover:text-blue-600 text-left transition-colors flex items-center gap-1.5 group"
-                              title="Abrir aula del ciclo"
-                            >
-                              <span>{cycle.name}</span>
-                              <GraduationCap className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </button>
-                            {isClosed && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 mt-0.5">
-                                <Lock className="w-3 h-3" /> Bloqueado por cierre
-                              </span>
+                            {showArchivedCycles ? (
+                              <div>
+                                <span className="font-bold text-slate-900">{cycle.name}</span>
+                                {cycle.deleted_at && (
+                                  <span className="block text-[11px] font-semibold text-rose-600 mt-0.5">
+                                    Archivado el {formatDate(cycle.deleted_at)}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
+                                  className="font-bold text-slate-900 hover:text-blue-600 text-left transition-colors flex items-center gap-1.5 group"
+                                  title="Abrir aula del ciclo"
+                                >
+                                  <span>{cycle.name}</span>
+                                  <GraduationCap className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                                {isClosed && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 mt-0.5">
+                                    <Lock className="w-3 h-3" /> Bloqueado por cierre
+                                  </span>
+                                )}
+                              </>
                             )}
                           </td>
                           <td className="px-4 py-4 text-slate-700 font-medium">
@@ -518,29 +695,40 @@ export const ClasesView: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-5 py-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
+                            {showArchivedCycles ? (
                               <button
-                                onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
-                                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                                title="Gestionar Aula (asistencia, calificaciones y alumnos)"
+                                onClick={() => handleRestoreCycle(cycle)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold rounded-lg transition-colors"
+                                title="Restaurar ciclo"
                               >
-                                <GraduationCap className="w-4 h-4" />
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>Restaurar</span>
                               </button>
-                              <button
-                                onClick={() => setModal({ kind: 'editCycle', cycle })}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                title="Editar ciclo"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => setModal({ kind: 'deleteCycle', cycle })}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                title="Archivar ciclo"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+                            ) : (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => navigate(`/clases/ciclo/${cycle.id}`)}
+                                  className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Gestionar Aula (asistencia, calificaciones y alumnos)"
+                                >
+                                  <GraduationCap className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setModal({ kind: 'editCycle', cycle })}
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Editar ciclo"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => setModal({ kind: 'deleteCycle', cycle })}
+                                  className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                  title="Archivar ciclo"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       );
@@ -570,6 +758,32 @@ export const ClasesView: React.FC = () => {
                 className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
+
+            {/* Filtro / Botón Ver archivados (solo admin) */}
+            {isAdmin && (
+              <button
+                onClick={() => setShowArchivedCourses(!showArchivedCourses)}
+                className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 self-end sm:self-auto ${
+                  showArchivedCourses
+                    ? 'bg-amber-100/90 border-amber-300 text-amber-900 hover:bg-amber-100 shadow-2xs font-bold'
+                    : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                }`}
+                title={showArchivedCourses ? 'Volver a cursos activos' : 'Ver cursos archivados / eliminados'}
+              >
+                {showArchivedCourses ? (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5 text-amber-800" />
+                    <span>Ver activos</span>
+                  </>
+                ) : (
+                  <>
+                    <Archive className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Ver archivados</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => refreshCourses()}
               disabled={isLoadingCourses}
@@ -579,6 +793,24 @@ export const ClasesView: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${isLoadingCourses ? 'animate-spin' : ''}`} />
             </button>
           </div>
+
+          {/* Banner de modo archivado */}
+          {showArchivedCourses && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-amber-900">
+              <div className="flex items-center gap-2">
+                <Archive className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                <span>
+                  Visualizando <strong>cursos del catálogo archivados / eliminados</strong>. Pulsa &quot;Restaurar&quot; para reactivar cualquier materia en el catálogo.
+                </span>
+              </div>
+              <button
+                onClick={() => setShowArchivedCourses(false)}
+                className="self-start sm:self-auto px-3 py-1 bg-amber-200/80 hover:bg-amber-200 font-bold rounded-lg text-amber-950 transition-colors"
+              >
+                Volver a activos
+              </button>
+            </div>
+          )}
 
           {/* Error Banner */}
           {coursesError && (
@@ -599,20 +831,41 @@ export const ClasesView: React.FC = () => {
             </div>
           ) : courses.length === 0 ? (
             <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-slate-900 mb-1">
-                No hay cursos en el catálogo
-              </h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
-                Define las materias y asignaturas de la iglesia con sus requisitos de aprobación y asistencia.
-              </p>
-              <button
-                onClick={() => setModal({ kind: 'createCourse' })}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Crear Primer Curso</span>
-              </button>
+              {showArchivedCourses ? (
+                <>
+                  <Archive className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-slate-900 mb-1">
+                    No hay cursos archivados
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                    La papelera de cursos está vacía. Todos los cursos del catálogo se encuentran activos.
+                  </p>
+                  <button
+                    onClick={() => setShowArchivedCourses(false)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Volver a cursos activos</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-slate-900 mb-1">
+                    No hay cursos en el catálogo
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
+                    Define las materias y asignaturas de la iglesia con sus requisitos de aprobación y asistencia.
+                  </p>
+                  <button
+                    onClick={() => setModal({ kind: 'createCourse' })}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Crear Primer Curso</span>
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -650,19 +903,39 @@ export const ClasesView: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                      <button
-                        onClick={() => setModal({ kind: 'editCourse', course })}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <Pencil className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Editar</span>
-                      </button>
-                      <button
-                        onClick={() => setModal({ kind: 'deleteCourse', course })}
-                        className="py-2 px-3 rounded-xl border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {showArchivedCourses ? (
+                        <div className="w-full space-y-2">
+                          {course.deleted_at && (
+                            <div className="text-xs text-rose-700 font-semibold flex items-center gap-1.5">
+                              <Archive className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>Archivado el {formatDate(course.deleted_at)}</span>
+                            </div>
+                          )}
+                          <button
+                            onClick={() => handleRestoreCourse(course)}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-colors shadow-xs"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                            <span>Restaurar Curso</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setModal({ kind: 'editCourse', course })}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          >
+                            <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Editar</span>
+                          </button>
+                          <button
+                            onClick={() => setModal({ kind: 'deleteCourse', course })}
+                            className="py-2 px-3 rounded-xl border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -683,7 +956,14 @@ export const ClasesView: React.FC = () => {
                   <tbody className="divide-y divide-slate-100">
                     {courses.map((course) => (
                       <tr key={course.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-5 py-4 font-bold text-slate-900">{course.title}</td>
+                        <td className="px-5 py-4 font-bold text-slate-900">
+                          {course.title}
+                          {showArchivedCourses && course.deleted_at && (
+                            <span className="block text-[11px] font-semibold text-rose-600 mt-0.5">
+                              Archivado el {formatDate(course.deleted_at)}
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-4 text-slate-600 text-xs max-w-md">
                           {course.description || <span className="text-slate-400 italic">Sin descripción</span>}
                         </td>
@@ -698,22 +978,33 @@ export const ClasesView: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                          {showArchivedCourses ? (
                             <button
-                              onClick={() => setModal({ kind: 'editCourse', course })}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                              title="Editar curso"
+                              onClick={() => handleRestoreCourse(course)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold rounded-lg transition-colors"
+                              title="Restaurar curso"
                             >
-                              <Pencil className="w-4 h-4" />
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Restaurar</span>
                             </button>
-                            <button
-                              onClick={() => setModal({ kind: 'deleteCourse', course })}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                              title="Archivar curso"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => setModal({ kind: 'editCourse', course })}
+                                className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                title="Editar curso"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setModal({ kind: 'deleteCourse', course })}
+                                className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                title="Archivar curso"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}

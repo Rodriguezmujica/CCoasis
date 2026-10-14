@@ -71,12 +71,14 @@ export function useStudentClasses() {
             start_date,
             end_date,
             status,
+            deleted_at,
             course:courses (
               id,
               title,
               description,
               passing_grade,
-              min_attendance_pct
+              min_attendance_pct,
+              deleted_at
             ),
             teacher:persons!cycles_teacher_id_fkey (
               id,
@@ -112,8 +114,14 @@ export function useStudentClasses() {
       }
 
       const formatted: StudentCycleSummary[] = (enrollmentsData || [])
-        // Filtrar aquellos donde cycle exista y no esté eliminado
-        .filter((item: any) => item.cycle != null)
+        // Filtrar para que NUNCA se muestren inscripciones con ciclo o curso eliminado (deleted_at !== null)
+        .filter((item: any) => {
+          if (!item.cycle) return false;
+          if (item.cycle.deleted_at !== null && item.cycle.deleted_at !== undefined) return false;
+          if (!item.cycle.course) return false;
+          if (item.cycle.course.deleted_at !== null && item.cycle.course.deleted_at !== undefined) return false;
+          return true;
+        })
         .map((item: any) => ({
           enrollment_id: item.id,
           cycle_id: item.cycle_id,

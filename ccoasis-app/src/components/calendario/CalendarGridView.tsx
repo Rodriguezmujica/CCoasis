@@ -6,9 +6,7 @@ import {
   ChevronRight,
   ChevronUp,
   ChevronDown,
-  CalendarDays,
   Calendar as CalendarIcon,
-  X,
 } from 'lucide-react';
 
 export interface CalendarGridViewProps {
@@ -16,8 +14,8 @@ export interface CalendarGridViewProps {
   selectedMonth: number; // 0 a 11
   events: ChurchEvent[];
   eventsByDate: Record<string, ChurchEvent[]>;
-  selectedDate: string | null; // Formato 'YYYY-MM-DD' o null para todo el mes
-  onSelectDate: (dateKey: string | null) => void;
+  selectedDate: string | null; // Formato 'YYYY-MM-DD'
+  onSelectDate: (dateKey: string) => void;
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onGoToday: () => void;
@@ -233,12 +231,7 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
       return;
     }
 
-    // Si ya estaba seleccionado ese día, alternar para volver a ver todo el mes
-    if (selectedDate === cell.dateKey) {
-      onSelectDate(null);
-    } else {
-      onSelectDate(cell.dateKey);
-    }
+    onSelectDate(cell.dateKey);
   };
 
   const selectedDayEvents = selectedDate ? eventsByDate[selectedDate] || [] : [];
@@ -278,19 +271,8 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
           </button>
         </div>
 
-        {/* Acciones: Ir a hoy / Restablecer filtro / Plegar o Desplegar cuadrícula */}
+        {/* Acciones: Ir a hoy + Plegar o Desplegar cuadrícula */}
         <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-          {selectedDate && (
-            <button
-              onClick={() => onSelectDate(null)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition-colors min-h-[40px] touch-manipulation"
-              title="Restablecer para ver todo el mes"
-            >
-              <CalendarDays className="w-4 h-4 text-slate-600" />
-              <span>Ver todo el mes</span>
-            </button>
-          )}
-
           <button
             onClick={onGoToday}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-xl transition-colors min-h-[40px] touch-manipulation"
@@ -324,22 +306,20 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
         </div>
       </div>
 
-      {/* Resumen compacto cuando la cuadrícula está colapsada pero hay un día filtrado */}
+      {/* Resumen compacto cuando la cuadrícula está colapsada */}
       {!isExpanded && selectedDate && (
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-600">
           <div className="flex items-center gap-1.5 truncate">
-            <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
             <span>
-              Filtrado por: <strong className="text-slate-900 font-bold">{formatDateKeyFriendly(selectedDate)}</strong>
+              Fecha seleccionada: <strong className="text-slate-900 font-bold">{formatDateKeyFriendly(selectedDate)}</strong>
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => onSelectDate(null)}
-            className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline flex-shrink-0"
-          >
-            Quitar filtro
-          </button>
+          {selectedDayEvents.length > 0 && (
+            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[11px] font-bold flex-shrink-0">
+              {selectedDayEvents.length} {selectedDayEvents.length === 1 ? 'actividad' : 'actividades'}
+            </span>
+          )}
         </div>
       )}
 
@@ -409,7 +389,7 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
                   key={cell.dateKey}
                   type="button"
                   onClick={() => handleCellClick(cell)}
-                  className={`min-h-[48px] sm:min-h-[60px] p-1 sm:p-1.5 rounded-xl border flex flex-col items-center justify-between transition-all touch-manipulation relative group ${cellStyle}`}
+                  className={`min-h-[50px] sm:min-h-[62px] p-1 sm:p-1.5 rounded-xl border flex flex-col items-center justify-between transition-all touch-manipulation relative group ${cellStyle}`}
                   title={
                     cell.isCurrentMonth
                       ? `${cell.dayNumber} de ${MONTH_NAMES_ES[selectedMonth]}${
@@ -425,18 +405,16 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
                     hasEvents ? `, ${cell.events.length} actividades` : ''
                   }`}
                 >
-                  {/* Número del día y distintivo 'Hoy' */}
-                  <div className="w-full flex items-center justify-center relative">
-                    <span className={`text-xs sm:text-base leading-none ${numberColor}`}>
-                      {cell.dayNumber}
-                    </span>
-
-                    {/* Insignia visual destacada 'HOY' */}
+                  {/* Cabecera del día: etiqueta HOY y número (sin superposición en móvil) */}
+                  <div className="w-full flex flex-col items-center justify-center text-center">
                     {cell.isToday && cell.isCurrentMonth && (
-                      <span className="absolute -top-1 -right-1 text-[9px] font-black tracking-tight text-white uppercase bg-blue-600 px-1 py-0.2 rounded-full shadow-xs">
+                      <span className="text-[8px] sm:text-[9px] font-black tracking-tight text-white uppercase bg-blue-600 px-1 py-0.5 rounded leading-none shadow-2xs mb-0.5">
                         HOY
                       </span>
                     )}
+                    <span className={`text-xs sm:text-base leading-none ${numberColor}`}>
+                      {cell.dayNumber}
+                    </span>
                   </div>
 
                   {/* Indicadores complementarios si hay actividades */}
@@ -469,46 +447,16 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
             })}
           </div>
 
-          {/* Barra de estado cuando hay un día seleccionado */}
-          {selectedDate && (
-            <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-blue-50/80 -mx-3.5 sm:-mx-5 -mb-3.5 sm:-mb-5 p-3 sm:p-4 rounded-b-2xl">
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-700">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse flex-shrink-0" />
-                <span>
-                  Filtrando actividades del:{' '}
-                  <strong className="text-slate-900 font-bold">
-                    {formatDateKeyFriendly(selectedDate)}
-                  </strong>
-                </span>
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
-                  {selectedDayEvents.length}{' '}
-                  {selectedDayEvents.length === 1 ? 'actividad' : 'actividades'}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onSelectDate(null)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 bg-white hover:bg-blue-100 active:bg-blue-200 border border-blue-200 rounded-xl transition-colors shadow-xs touch-manipulation"
-              >
-                <X className="w-3.5 h-3.5" />
-                <span>Ver todo el mes</span>
-              </button>
-            </div>
-          )}
-
           {/* Leyenda amigable de tipos de actividades con muestras de color completas */}
-          {!selectedDate && (
-            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-slate-600">
-              <span className="font-bold text-slate-800">Leyenda:</span>
-              {Object.entries(EVENT_TYPE_CELL_STYLES).map(([key, config]) => (
-                <div key={key} className="flex items-center gap-1.5">
-                  <span className={`w-3.5 h-3.5 rounded-md ${config.bg} border ${config.border} flex-shrink-0 shadow-2xs`} />
-                  <span className="font-medium text-slate-800">{config.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-slate-600">
+            <span className="font-bold text-slate-800">Leyenda:</span>
+            {Object.entries(EVENT_TYPE_CELL_STYLES).map(([key, config]) => (
+              <div key={key} className="flex items-center gap-1.5">
+                <span className={`w-3.5 h-3.5 rounded-md ${config.bg} border ${config.border} flex-shrink-0 shadow-2xs`} />
+                <span className="font-medium text-slate-800">{config.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

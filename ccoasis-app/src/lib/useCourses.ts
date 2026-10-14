@@ -24,10 +24,13 @@ interface UseCoursesReturn {
   error: string | null;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  showArchived: boolean;
+  setShowArchived: (show: boolean) => void;
   refresh: () => Promise<void>;
   createCourse: (data: CourseFormData) => Promise<{ ok: boolean; error?: string }>;
   updateCourse: (id: string, data: CourseFormData) => Promise<{ ok: boolean; error?: string }>;
   softDeleteCourse: (id: string) => Promise<{ ok: boolean; error?: string }>;
+  restoreCourse: (id: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 export function useCourses(): UseCoursesReturn {
@@ -35,6 +38,7 @@ export function useCourses(): UseCoursesReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -48,11 +52,13 @@ export function useCourses(): UseCoursesReturn {
     setIsLoading(true);
     setError(null);
     try {
-      let query = supabase
-        .from('courses')
-        .select('*')
-        .is('deleted_at', null)
-        .order('title', { ascending: true });
+      let query = supabase.from('courses').select('*');
+
+      if (showArchived) {
+        query = query.not('deleted_at', 'is', null).order('deleted_at', { ascending: false });
+      } else {
+        query = query.is('deleted_at', null).order('title', { ascending: true });
+      }
 
       if (searchQuery.trim()) {
         const term = `%${searchQuery.trim()}%`;
@@ -73,7 +79,7 @@ export function useCourses(): UseCoursesReturn {
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, showArchived]);
 
   useEffect(() => {
     fetchCourses();
@@ -148,15 +154,39 @@ export function useCourses(): UseCoursesReturn {
     }
   };
 
+  const restoreCourse = async (id: string): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const { error: resErr } = await supabase
+        .from('courses')
+        .update({
+          deleted_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (resErr) {
+        return { ok: false, error: parseCourseError(resErr) };
+      }
+
+      await fetchCourses();
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: parseCourseError(err) };
+    }
+  };
+
   return {
     courses,
     isLoading,
     error,
     searchQuery,
     setSearchQuery,
+    showArchived,
+    setShowArchived,
     refresh: fetchCourses,
     createCourse,
     updateCourse,
     softDeleteCourse,
+    restoreCourse,
   };
 }

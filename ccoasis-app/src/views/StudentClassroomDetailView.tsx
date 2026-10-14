@@ -71,7 +71,7 @@ export const StudentClassroomDetailView: React.FC = () => {
             No se pudo acceder a este ciclo
           </h3>
           <p className="text-sm text-rose-700 max-w-md mx-auto">
-            {error || 'El ciclo no existe o no estás inscrito en él.'}
+            {error || 'Este curso o ciclo ya no se encuentra disponible.'}
           </p>
           <button
             onClick={() => refresh()}

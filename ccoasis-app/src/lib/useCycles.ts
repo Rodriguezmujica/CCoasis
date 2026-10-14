@@ -38,11 +38,14 @@ interface UseCyclesReturn {
   setCourseFilter: (courseId: string | 'todos') => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
+  showArchived: boolean;
+  setShowArchived: (show: boolean) => void;
   refresh: () => Promise<void>;
   createCycle: (data: CycleFormData) => Promise<{ ok: boolean; error?: string }>;
   updateCycle: (id: string, data: CycleFormData) => Promise<{ ok: boolean; error?: string }>;
   updateCycleStatus: (id: string, status: CycleStatus) => Promise<{ ok: boolean; error?: string }>;
   softDeleteCycle: (id: string) => Promise<{ ok: boolean; error?: string }>;
+  restoreCycle: (id: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 export function useCycles(): UseCyclesReturn {
@@ -54,6 +57,7 @@ export function useCycles(): UseCyclesReturn {
   const [statusFilter, setStatusFilter] = useState<CycleStatus | 'todos'>('todos');
   const [courseFilter, setCourseFilter] = useState<string | 'todos'>('todos');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -106,9 +110,13 @@ export function useCycles(): UseCyclesReturn {
           course:courses ( id, title ),
           teacher:persons!cycles_teacher_id_fkey ( id, first_name, last_name, email, status ),
           enrollments ( id )
-        `)
-        .is('deleted_at', null)
-        .order('start_date', { ascending: false });
+        `);
+
+      if (showArchived) {
+        query = query.not('deleted_at', 'is', null).order('deleted_at', { ascending: false });
+      } else {
+        query = query.is('deleted_at', null).order('start_date', { ascending: false });
+      }
 
       if (statusFilter !== 'todos') {
         query = query.eq('status', statusFilter);
@@ -143,7 +151,7 @@ export function useCycles(): UseCyclesReturn {
     } finally {
       if (mountedRef.current) setIsLoading(false);
     }
-  }, [statusFilter, courseFilter, searchQuery]);
+  }, [statusFilter, courseFilter, searchQuery, showArchived]);
 
   useEffect(() => {
     fetchTeachers();
@@ -250,6 +258,27 @@ export function useCycles(): UseCyclesReturn {
     }
   };
 
+  const restoreCycle = async (id: string): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const { error: resErr } = await supabase
+        .from('cycles')
+        .update({
+          deleted_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (resErr) {
+        return { ok: false, error: parseCycleError(resErr) };
+      }
+
+      await fetchCycles();
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: parseCycleError(err) };
+    }
+  };
+
   return {
     cycles,
     teachers,
@@ -262,10 +291,13 @@ export function useCycles(): UseCyclesReturn {
     setCourseFilter,
     searchQuery,
     setSearchQuery,
+    showArchived,
+    setShowArchived,
     refresh: fetchCycles,
     createCycle,
     updateCycle,
     updateCycleStatus,
     softDeleteCycle,
+    restoreCycle,
   };
 }

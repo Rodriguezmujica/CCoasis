@@ -22,12 +22,14 @@ export interface StudentCycleInfo {
   start_date: string;
   end_date: string | null;
   status: CycleStatus;
+  deleted_at?: string | null;
   course: {
     id: string;
     title: string;
     description: string | null;
     passing_grade: number;
     min_attendance_pct: number;
+    deleted_at?: string | null;
   } | null;
   teacher: {
     id: string;
@@ -134,17 +136,29 @@ export function useStudentClassroom(cycleId: string) {
           start_date,
           end_date,
           status,
-          course:courses ( id, title, description, passing_grade, min_attendance_pct ),
+          deleted_at,
+          course:courses ( id, title, description, passing_grade, min_attendance_pct, deleted_at ),
           teacher:persons!cycles_teacher_id_fkey ( id, first_name, last_name, email )
         `)
         .eq('id', cycleId)
         .is('deleted_at', null)
-        .single();
+        .maybeSingle();
 
       if (!mountedRef.current) return;
 
       if (cycleErr) {
         setError(parseClassroomError(cycleErr));
+        setIsLoading(false);
+        return;
+      }
+
+      if (
+        !cycleData ||
+        cycleData.deleted_at !== null ||
+        !cycleData.course ||
+        (cycleData.course as any)?.deleted_at !== null
+      ) {
+        setError('Este curso o ciclo ya no se encuentra disponible.');
         setIsLoading(false);
         return;
       }

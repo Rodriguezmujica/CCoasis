@@ -50,28 +50,31 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="bg-white rounded-3xl p-4 sm:p-5 border border-[#d4d7dc] shadow-sm mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       {/* Controles de selección de periodo */}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        <div className="flex items-center gap-1.5 text-slate-700 font-medium text-sm">
-          <Calendar className="w-4 h-4 text-slate-400" />
+        <div className="flex items-center gap-1.5 text-[#1a1a1a] font-bold text-sm">
+          <Calendar className="w-4 h-4 text-[#0e7c86]" aria-hidden="true" />
           <span className="hidden sm:inline">Periodo:</span>
         </div>
 
         {/* Botón mes anterior */}
         <button
+          type="button"
           onClick={handlePrevMonth}
           title="Mes anterior"
-          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200/60"
+          aria-label="Mes anterior"
+          className="p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-[#1a1a1a] hover:bg-[#f5f5f5] rounded-xl transition-colors border border-[#858a93]"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Selector de Mes */}
         <select
+          aria-label="Seleccionar mes"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-slate-800 text-sm font-medium rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+          className="bg-white hover:bg-[#f5f5f5] border border-[#858a93] text-[#1a1a1a] text-base font-medium rounded-xl px-3.5 py-2.5 min-h-[44px] focus:border-[#0e7c86] focus:outline-none transition-colors"
         >
           <option value={0}>Todo el año</option>
           {MONTH_NAMES.map((name, index) => (
@@ -83,9 +86,10 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
 
         {/* Selector de Año */}
         <select
+          aria-label="Seleccionar año"
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="bg-slate-50 hover:bg-slate-100/80 border border-slate-200 text-slate-800 text-sm font-medium rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+          className="bg-white hover:bg-[#f5f5f5] border border-[#858a93] text-[#1a1a1a] text-base font-medium rounded-xl px-3.5 py-2.5 min-h-[44px] focus:border-[#0e7c86] focus:outline-none transition-colors"
         >
           {years.map((y) => (
             <option key={y} value={y}>
@@ -96,11 +100,13 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
 
         {/* Botón mes siguiente */}
         <button
+          type="button"
           onClick={handleNextMonth}
           title="Mes siguiente"
-          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200/60"
+          aria-label="Mes siguiente"
+          className="p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-[#1a1a1a] hover:bg-[#f5f5f5] rounded-xl transition-colors border border-[#858a93]"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -110,9 +116,9 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         <button
           type="button"
           onClick={onOpenCategories}
-          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition-colors"
+          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] text-sm font-bold text-[#1a1a1a] bg-white hover:bg-[#f5f5f5] border border-[#858a93] rounded-xl transition-colors shadow-sm"
         >
-          <Tags className="w-4 h-4 text-slate-600" />
+          <Tags className="w-4 h-4 text-[#0e7c86]" aria-hidden="true" />
           <span>Categorías</span>
         </button>
 
@@ -126,10 +132,10 @@ export const PeriodSelector: React.FC<PeriodSelectorProps> = ({
               ? 'No hay movimientos en este periodo para exportar'
               : 'Descargar archivo CSV compatible con Excel'
           }
-          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-800 bg-emerald-100 hover:bg-emerald-200 active:bg-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors shadow-sm"
+          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] text-sm font-bold text-[#0a5961] bg-[#d9f7f8] hover:bg-[#aaeif0] border border-[#0e7c86] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors shadow-sm"
         >
-          <Download className="w-4 h-4 text-emerald-800" />
-          <span>Exportar a CSV</span>
+          <Download className="w-4 h-4 text-[#0e7c86]" aria-hidden="true" />
+          <span>Exportar CSV</span>
         </button>
       </div>
     </div>

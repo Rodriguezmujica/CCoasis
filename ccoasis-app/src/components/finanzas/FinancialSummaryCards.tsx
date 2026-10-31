@@ -21,22 +21,25 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
       {/* Balances generales del periodo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Total Ingresos */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+        <div className="bg-white rounded-3xl p-5 border border-[#d4d7dc] shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#4a4f57]">
               Total Ingresos
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div
+              className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-600 flex items-center justify-center"
+              aria-hidden="true"
+            >
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-800 tracking-tight">
               +{formatCurrency(summary.totalIncome)}
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-2">
-              <span>{periodLabel}</span>
-              <span className="font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
+            <div className="flex items-center justify-between text-xs text-[#4a4f57] mt-2.5">
+              <span className="font-medium">{periodLabel}</span>
+              <span className="font-bold bg-emerald-100 text-emerald-950 border border-emerald-600 px-2.5 py-0.5 rounded-full">
                 {summary.offeringsCount} {summary.offeringsCount === 1 ? 'ofrenda' : 'ofrendas'}
               </span>
             </div>
@@ -44,44 +47,44 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
         </div>
 
         {/* Total Gastos */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
+        <div className="bg-white rounded-3xl p-5 border border-[#d4d7dc] shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Total Gastos
+            <span className="text-xs font-bold uppercase tracking-wider text-[#4a4f57]">
+              Total Egresos
             </span>
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+            <div
+              className="w-10 h-10 rounded-xl bg-rose-100 text-rose-950 border border-rose-600 flex items-center justify-center"
+              aria-hidden="true"
+            >
               <TrendingDown className="w-5 h-5" />
             </div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-rose-600 tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-rose-800 tracking-tight">
               -{formatCurrency(summary.totalExpenses)}
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-2">
-              <span>{periodLabel}</span>
-              <span className="font-medium bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full">
+            <div className="flex items-center justify-between text-xs text-[#4a4f57] mt-2.5">
+              <span className="font-medium">{periodLabel}</span>
+              <span className="font-bold bg-rose-100 text-rose-950 border border-rose-600 px-2.5 py-0.5 rounded-full">
                 {summary.expensesCount} {summary.expensesCount === 1 ? 'gasto' : 'gastos'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Balance Total */}
-        <div
-          className={`bg-white rounded-2xl p-5 border shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${
-            isPositiveBalance
-              ? 'border-emerald-200/80 bg-gradient-to-br from-white to-emerald-50/20'
-              : 'border-rose-200/80 bg-gradient-to-br from-white to-rose-50/20'
-          }`}
-        >
+        {/* Balance Neto */}
+        <div className="bg-white rounded-3xl p-5 border border-[#d4d7dc] shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Balance Total
+            <span className="text-xs font-bold uppercase tracking-wider text-[#4a4f57]">
+              Balance Neto
             </span>
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                isPositiveBalance ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+              className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                isPositiveBalance
+                  ? 'bg-emerald-100 text-emerald-950 border-emerald-600'
+                  : 'bg-rose-100 text-rose-950 border-rose-600'
               }`}
+              aria-hidden="true"
             >
               <Wallet className="w-5 h-5" />
             </div>
@@ -89,18 +92,18 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
           <div>
             <div
               className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                isPositiveBalance ? 'text-slate-900' : 'text-rose-600'
+                isPositiveBalance ? 'text-emerald-800' : 'text-rose-800'
               }`}
             >
               {formatCurrency(summary.netBalance)}
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-2">
-              <span>Neto del periodo</span>
+            <div className="flex items-center justify-between text-xs text-[#4a4f57] mt-2.5">
+              <span className="font-medium">Neto del periodo</span>
               <span
-                className={`font-semibold px-2 py-0.5 rounded-full ${
+                className={`font-bold px-2.5 py-0.5 rounded-full border ${
                   isPositiveBalance
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-rose-100 text-rose-800'
+                    ? 'bg-emerald-100 text-emerald-950 border-emerald-600'
+                    : 'bg-rose-100 text-rose-950 border-rose-600'
                 }`}
               >
                 {isPositiveBalance ? 'Favorable' : 'Déficit'}
@@ -113,20 +116,23 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
       {/* Desglose resumido de tesorería: En Caja Efectivo y En Banco / Digital */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* En Caja Efectivo */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-amber-200/70 shadow-sm flex flex-col justify-between transition-all hover:shadow-md bg-gradient-to-br from-white via-white to-amber-50/30">
+        <div className="bg-white rounded-3xl p-5 border border-[#d4d7dc] shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl bg-amber-100 text-amber-950 border border-amber-600 flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
                 <Banknote className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a] block">
                   En Caja Efectivo
                 </span>
-                <span className="text-[11px] text-slate-400">Total disponible en efectivo</span>
+                <span className="text-xs text-[#4a4f57]">Total disponible en efectivo</span>
               </div>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-600">
               Efectivo
             </span>
           </div>
@@ -134,16 +140,16 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
           <div className="mt-2">
             <div
               className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                isPositiveCash ? 'text-slate-900' : 'text-rose-600'
+                isPositiveCash ? 'text-[#1a1a1a]' : 'text-rose-800'
               }`}
             >
               {formatCurrency(summary.cashBalance)}
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
-              <span className="text-emerald-700 font-medium">
+            <div className="flex items-center justify-between text-xs text-[#4a4f57] mt-2.5 pt-2.5 border-t border-[#e5e7eb]">
+              <span className="text-emerald-800 font-bold">
                 +{formatCurrency(summary.cashIncome)} ingresos
               </span>
-              <span className="text-rose-600 font-medium">
+              <span className="text-rose-800 font-bold">
                 -{formatCurrency(summary.cashExpenses)} gastos
               </span>
             </div>
@@ -151,20 +157,23 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
         </div>
 
         {/* En Banco / Digital */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-sky-200/70 shadow-sm flex flex-col justify-between transition-all hover:shadow-md bg-gradient-to-br from-white via-white to-sky-50/30">
+        <div className="bg-white rounded-3xl p-5 border border-[#d4d7dc] shadow-sm flex flex-col justify-between transition-all hover:shadow-md">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
                 <Landmark className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a] block">
                   En Banco / Digital
                 </span>
-                <span className="text-[11px] text-slate-400">Total disponible en cuenta</span>
+                <span className="text-xs text-[#4a4f57]">Total disponible en cuenta</span>
               </div>
             </div>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-800 border border-sky-200/60">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86]">
               Banco / Bizum
             </span>
           </div>
@@ -172,16 +181,16 @@ export const FinancialSummaryCards: React.FC<FinancialSummaryCardsProps> = ({
           <div className="mt-2">
             <div
               className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                isPositiveBank ? 'text-slate-900' : 'text-rose-600'
+                isPositiveBank ? 'text-[#1a1a1a]' : 'text-rose-800'
               }`}
             >
               {formatCurrency(summary.bankBalance)}
             </div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
-              <span className="text-emerald-700 font-medium">
+            <div className="flex items-center justify-between text-xs text-[#4a4f57] mt-2.5 pt-2.5 border-t border-[#e5e7eb]">
+              <span className="text-emerald-800 font-bold">
                 +{formatCurrency(summary.bankIncome)} ingresos
               </span>
-              <span className="text-rose-600 font-medium">
+              <span className="text-rose-800 font-bold">
                 -{formatCurrency(summary.bankExpenses)} gastos
               </span>
             </div>

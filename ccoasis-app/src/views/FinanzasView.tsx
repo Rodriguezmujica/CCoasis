@@ -6,6 +6,7 @@ import {
   RefreshCw,
   AlertCircle,
   ShieldCheck,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useFinances, formatCurrency } from '../lib/useFinances';
@@ -62,44 +63,72 @@ export const FinanzasView: React.FC = () => {
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
       {/* Cabecera de la vista */}
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div
+              className="w-11 h-11 rounded-[12px] bg-[#0e7c86] flex items-center justify-center text-white shadow-sm shrink-0"
+              aria-hidden="true"
+            >
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Finanzas</h1>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-[24px] sm:text-[25px] font-extrabold oasis-text-gradient tracking-tight leading-tight">
+                  Gestión Financiera
+                </h1>
+                <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#0e7c86]" aria-hidden="true" />
                   {isAdmin ? 'Administrador' : isTesorero ? 'Tesorero' : 'Finanzas'}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500">
+              <p className="text-sm text-[#4a4f57] mt-0.5">
                 Gestión de ofrendas, egresos con comprobantes y balance en Euros (€)
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={isLoading}
-            className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/80 shadow-sm transition-colors"
-            title="Recargar datos"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-            <span>Actualizar</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={refresh}
+              disabled={isLoading}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-bold text-[#1a1a1a] bg-white hover:bg-[#f5f5f5] border border-[#858a93] shadow-sm transition-colors"
+              title="Recargar datos"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0e7c86]' : 'text-[#4a4f57]'}`}
+                aria-hidden="true"
+              />
+              <span>Actualizar</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsExpenseModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-bold text-[#1a1a1a] bg-white hover:bg-[#f5f5f5] border border-[#858a93] shadow-sm transition-colors"
+            >
+              <Plus className="w-4 h-4 text-[#9b1c1c]" aria-hidden="true" />
+              <span>+ Registrar Gasto</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsOfferingModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-bold text-white bg-[#0e7c86] hover:bg-[#0a5961] shadow-sm transition-colors"
+            >
+              <Plus className="w-5 h-5" aria-hidden="true" />
+              <span>+ Registrar Ofrenda</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Alerta de error general */}
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-start gap-3 shadow-sm">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-600 text-rose-950 text-sm flex items-start gap-3 shadow-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-700 mt-0.5" aria-hidden="true" />
           <div className="flex-1">
-            <p className="font-semibold">Atención</p>
+            <p className="font-bold">Atención</p>
             <p className="text-xs sm:text-sm mt-0.5">{error}</p>
           </div>
         </div>
@@ -119,20 +148,23 @@ export const FinanzasView: React.FC = () => {
       {/* Tarjetas superiores de Resumen y Balance */}
       <FinancialSummaryCards summary={summary} periodLabel={periodLabel} />
 
-      {/* Selector de pestañas móvil y escritorio */}
-      <div className="flex border-b border-slate-200 mb-6 bg-slate-100/70 p-1 rounded-2xl">
+      {/* Pestañas de navegación interna */}
+      <div className="flex border-b border-[#d4d7dc] mb-6 bg-white rounded-t-2xl px-2 pt-1 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('ofrendas')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2.5 py-3 px-4 min-h-[44px] text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${
             activeTab === 'ofrendas'
-              ? 'bg-white text-emerald-800 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'border-[#0e7c86] text-[#0e7c86] bg-[#d9f7f8]/50 rounded-t-xl'
+              : 'border-transparent text-[#4a4f57] hover:text-[#1a1a1a] hover:border-[#858a93]'
           }`}
         >
-          <TrendingUp className="w-4 h-4 text-emerald-600" />
+          <TrendingUp
+            className={`w-4 h-4 ${activeTab === 'ofrendas' ? 'text-[#0e7c86]' : 'text-[#4a4f57]'}`}
+            aria-hidden="true"
+          />
           <span>Ofrendas / Ingresos</span>
-          <span className="hidden sm:inline-block ml-1 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
+          <span className="hidden sm:inline-block ml-1 text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-600 font-bold">
             {formatCurrency(summary.totalIncome)}
           </span>
         </button>
@@ -140,15 +172,18 @@ export const FinanzasView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('gastos')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2.5 py-3 px-4 min-h-[44px] text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${
             activeTab === 'gastos'
-              ? 'bg-white text-rose-800 shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'border-[#0e7c86] text-[#0e7c86] bg-[#d9f7f8]/50 rounded-t-xl'
+              : 'border-transparent text-[#4a4f57] hover:text-[#1a1a1a] hover:border-[#858a93]'
           }`}
         >
-          <TrendingDown className="w-4 h-4 text-rose-600" />
+          <TrendingDown
+            className={`w-4 h-4 ${activeTab === 'gastos' ? 'text-[#0e7c86]' : 'text-[#4a4f57]'}`}
+            aria-hidden="true"
+          />
           <span>Gastos / Egresos</span>
-          <span className="hidden sm:inline-block ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-semibold">
+          <span className="hidden sm:inline-block ml-1 text-xs px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-950 border border-rose-600 font-bold">
             {formatCurrency(summary.totalExpenses)}
           </span>
         </button>

@@ -70,7 +70,7 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
       message: (
         <div>
           <p>¿Seguro que deseas eliminar la categoría <strong>"{cat.name}"</strong>?</p>
-          <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 mt-2">
+          <p className="text-xs font-medium text-amber-950 bg-amber-100 p-2.5 rounded-xl border border-amber-600 mt-2">
             Solo se puede eliminar si no tiene ofrendas ni gastos asociados en el sistema. Esta acción es irreversible.
           </p>
         </div>
@@ -97,45 +97,54 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-[#d4d7dc] overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Cabecera */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-              <Tags className="w-5 h-5" />
+        <div className="flex items-center justify-between px-6 py-5 oasis-title-gradient on-magenta">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div
+              className="w-11 h-11 rounded-xl bg-white/15 border border-white/25 text-white flex items-center justify-center shrink-0"
+              aria-hidden="true"
+            >
+              <Tags className="w-6 h-6" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Gestión de Categorías</h2>
-              <p className="text-xs text-slate-500">Categorías contables para ingresos y egresos</p>
+            <div className="min-w-0">
+              <h2 className="text-2xl font-extrabold text-white leading-tight">
+                Gestión de Categorías
+              </h2>
+              <p className="text-xs text-white font-medium mt-0.5">
+                Categorías contables para ingresos y egresos
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors"
+            aria-label="Cerrar"
+            className="p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-white hover:bg-white/15 rounded-xl transition-colors shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Mensajes de error o éxito */}
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-2.5">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-600 text-rose-950 text-sm font-medium flex items-start gap-2.5">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-700" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+            <div className="p-3.5 rounded-xl bg-emerald-100 border border-emerald-600 text-emerald-950 text-sm font-bold">
               {successMsg}
             </div>
           )}
 
           {/* Formulario para crear nueva categoría */}
-          <form onSubmit={handleCreate} className="p-4 bg-slate-50/70 border border-slate-200 rounded-2xl space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+          <form onSubmit={handleCreate} className="p-4 sm:p-5 bg-[#f5f5f5] border border-[#d4d7dc] rounded-2xl space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a]">
               Crear nueva categoría
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
@@ -145,15 +154,16 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
                   placeholder="Nombre de la categoría..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                  className="w-full py-2.5 px-3.5 min-h-[44px] rounded-xl border border-[#858a93] text-[#1a1a1a] text-base placeholder-[#4a4f57]/70 focus:border-[#0e7c86] focus:outline-none bg-white"
                 />
               </div>
 
               <div className="sm:col-span-3">
                 <select
+                  aria-label="Tipo de categoría"
                   value={type}
                   onChange={(e) => setType(e.target.value as CategoryType)}
-                  className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                  className="w-full py-2.5 px-3 min-h-[44px] rounded-xl border border-[#858a93] text-[#1a1a1a] text-base focus:border-[#0e7c86] focus:outline-none bg-white"
                 >
                   <option value="ingreso">Ingreso</option>
                   <option value="gasto">Gasto</option>
@@ -164,13 +174,13 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting || !name.trim()}
-                  className="w-full py-2.5 px-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                  className="w-full py-2.5 px-3 min-h-[44px] bg-[#0e7c86] hover:bg-[#0a5961] disabled:opacity-50 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-4 h-4" aria-hidden="true" />
                       <span>Crear</span>
                     </>
                   )}
@@ -181,18 +191,18 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
 
           {/* Filtros de la lista */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1a1a1a]">
                 Categorías existentes ({categories.length})
               </span>
-              <div className="flex bg-slate-100 p-1 rounded-xl">
+              <div className="flex bg-[#f5f5f5] border border-[#d4d7dc] p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setActiveFilter('todas')}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold transition-colors ${
                     activeFilter === 'todas'
-                      ? 'bg-white text-slate-800 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-[#0e7c86] text-white shadow-sm'
+                      : 'text-[#4a4f57] hover:text-[#1a1a1a]'
                   }`}
                 >
                   Todas
@@ -200,10 +210,10 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveFilter('ingreso')}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold transition-colors ${
                     activeFilter === 'ingreso'
-                      ? 'bg-white text-emerald-700 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-[#0e7c86] text-white shadow-sm'
+                      : 'text-[#4a4f57] hover:text-[#1a1a1a]'
                   }`}
                 >
                   Ingresos
@@ -211,10 +221,10 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveFilter('gasto')}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-bold transition-colors ${
                     activeFilter === 'gasto'
-                      ? 'bg-white text-rose-700 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'bg-[#0e7c86] text-white shadow-sm'
+                      : 'text-[#4a4f57] hover:text-[#1a1a1a]'
                   }`}
                 >
                   Gastos
@@ -225,28 +235,28 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
             {/* Listado de categorías */}
             <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
               {filteredCategories.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-sm">
+                <div className="text-center py-8 text-[#4a4f57] text-sm font-medium">
                   No hay categorías en esta sección.
                 </div>
               ) : (
                 filteredCategories.map((c) => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition-colors"
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-[#d4d7dc] hover:border-[#858a93] transition-colors"
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-3">
                       {c.type === 'ingreso' ? (
-                        <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4" />
+                        <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-600 flex items-center justify-center shrink-0">
+                          <TrendingUp className="w-4 h-4" aria-hidden="true" />
                         </div>
                       ) : (
-                        <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center">
-                          <TrendingDown className="w-4 h-4" />
+                        <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-950 border border-rose-600 flex items-center justify-center shrink-0">
+                          <TrendingDown className="w-4 h-4" aria-hidden="true" />
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{c.name}</p>
-                        <p className="text-xs text-slate-400 capitalize">Tipo: {c.type}</p>
+                        <p className="text-sm font-bold text-[#1a1a1a]">{c.name}</p>
+                        <p className="text-xs text-[#4a4f57] capitalize">Tipo: {c.type}</p>
                       </div>
                     </div>
 
@@ -254,13 +264,14 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
                       type="button"
                       onClick={() => handleDelete(c)}
                       disabled={deletingId === c.id}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      aria-label={`Eliminar categoría ${c.name}`}
+                      className="p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-[#4a4f57] hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors"
                       title="Eliminar categoría"
                     >
                       {deletingId === c.id ? (
                         <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
                       ) : (
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       )}
                     </button>
                   </div>
@@ -271,11 +282,11 @@ export const CategoriesModal: React.FC<CategoriesModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-end">
+        <div className="px-6 py-4 border-t border-[#d4d7dc] bg-[#f5f5f5] flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors"
+            className="px-5 py-2.5 min-h-[44px] text-sm font-bold text-[#1a1a1a] bg-white hover:bg-[#ebedef] border border-[#858a93] rounded-xl transition-colors"
           >
             Cerrar
           </button>

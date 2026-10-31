@@ -77,44 +77,54 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
   };
 
   const inputClass = (field: string) =>
-    `w-full px-3 py-2 rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      errors[field] ? 'border-red-300 bg-red-50' : 'border-slate-300 bg-white hover:border-slate-400'
+    `w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border text-base text-[#1a1a1a] placeholder:text-[#5b6068] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0e7c86] ${
+      errors[field]
+        ? 'border-[#9b1c1c] bg-[#fdecec]'
+        : 'border-[#858a93] bg-white hover:border-[#4a4f57]'
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1a1a]/55 p-4 overflow-y-auto"
+      onClick={onClose}
+    >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-3xl shadow-2xl border border-[#d4d7dc] w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
-          <h2 className="text-lg font-bold text-slate-900">
+        {/* Cabecera con título en 24px negrita blanca sobre .oasis-title-gradient */}
+        <div className="oasis-title-gradient on-magenta flex items-center justify-between px-6 py-5 sticky top-0 z-10">
+          <h2 className="text-2xl font-extrabold text-white leading-tight">
             {isEditing ? 'Editar persona' : 'Nueva persona'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="min-w-[44px] min-h-[44px] p-2 rounded-xl text-white hover:bg-white/20 inline-flex items-center justify-center transition-colors"
             aria-label="Cerrar"
+            title="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Server error banner */}
+        {/* Banner de error del servidor */}
         {serverError && (
-          <div className="mx-6 mt-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          <div
+            role="alert"
+            className="mx-6 mt-4 flex items-start gap-2.5 p-3.5 rounded-2xl bg-[#fdecec] border border-rose-300 text-[#9b1c1c] text-sm"
+          >
             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <span>{serverError}</span>
           </div>
         )}
 
-        {/* Form */}
+        {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Nombre y Apellido */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nombre *</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Nombre *</label>
               <input
                 type="text"
                 value={form.first_name}
@@ -123,10 +133,12 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
                 placeholder="Ej: María"
                 autoFocus
               />
-              {errors.first_name && <p className="text-xs text-red-500 mt-1">{errors.first_name}</p>}
+              {errors.first_name && (
+                <p className="text-xs font-medium text-[#9b1c1c] mt-1">{errors.first_name}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Apellido *</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Apellido *</label>
               <input
                 type="text"
                 value={form.last_name}
@@ -134,14 +146,18 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
                 className={inputClass('last_name')}
                 placeholder="Ej: García"
               />
-              {errors.last_name && <p className="text-xs text-red-500 mt-1">{errors.last_name}</p>}
+              {errors.last_name && (
+                <p className="text-xs font-medium text-[#9b1c1c] mt-1">{errors.last_name}</p>
+              )}
             </div>
           </div>
 
           {/* Email y Teléfono */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Correo electrónico</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
+                Correo electrónico
+              </label>
               <input
                 type="email"
                 value={form.email}
@@ -149,10 +165,12 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
                 className={inputClass('email')}
                 placeholder="correo@ejemplo.com"
               />
-              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-xs font-medium text-[#9b1c1c] mt-1">{errors.email}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Teléfono</label>
               <input
                 type="tel"
                 value={form.phone}
@@ -166,7 +184,9 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
           {/* Fechas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de nacimiento</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
+                Fecha de nacimiento
+              </label>
               <input
                 type="date"
                 value={form.birth_date}
@@ -175,20 +195,24 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de bautismo</label>
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
+                Fecha de bautismo
+              </label>
               <input
                 type="date"
                 value={form.baptism_date}
                 onChange={(e) => updateField('baptism_date', e.target.value)}
                 className={inputClass('baptism_date')}
               />
-              {errors.baptism_date && <p className="text-xs text-red-500 mt-1">{errors.baptism_date}</p>}
+              {errors.baptism_date && (
+                <p className="text-xs font-medium text-[#9b1c1c] mt-1">{errors.baptism_date}</p>
+              )}
             </div>
           </div>
 
           {/* Dirección */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+            <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Dirección</label>
             <input
               type="text"
               value={form.address}
@@ -200,7 +224,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
 
           {/* Estado */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Estado</label>
+            <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Estado</label>
             <select
               value={form.status}
               onChange={(e) => updateField('status', e.target.value)}
@@ -216,7 +240,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
 
           {/* Notas */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Notas</label>
+            <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Notas</label>
             <textarea
               value={form.notes}
               onChange={(e) => updateField('notes', e.target.value)}
@@ -226,12 +250,12 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
+          {/* Acciones */}
+          <div className="flex justify-end gap-3 pt-3 border-t border-[#d4d7dc]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 border border-slate-300 transition-colors"
+              className="min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold text-[#1a1a1a] bg-white hover:bg-[#ebedef] border border-[#858a93] transition-colors"
               disabled={isSaving}
             >
               Cancelar
@@ -239,7 +263,7 @@ export const PersonForm: React.FC<PersonFormProps> = ({ person, onSave, onClose 
             <button
               type="submit"
               disabled={isSaving}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="min-h-[44px] px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#0e7c86] hover:bg-[#0a5961] disabled:opacity-50 transition-colors inline-flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               {isSaving ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear persona'}

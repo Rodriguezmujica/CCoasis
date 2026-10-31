@@ -78,7 +78,7 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
             <p>
               Estás a punto de quitarte el rol de <strong>Administrador</strong> a ti mismo.
             </p>
-            <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 mt-2 font-medium">
+            <p className="text-xs text-[#713f12] bg-[#fdf3d6] p-2.5 rounded-xl border border-[#a8741a] mt-2 font-medium">
               Si continúas, perderás el acceso a las funciones de administración y a esta sección de inmediato. ¿Deseas continuar?
             </p>
           </div>
@@ -109,28 +109,28 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white rounded-3xl border border-[#d4d7dc] p-5">
       <div className="flex items-center gap-2 mb-4">
-        <ShieldCheck className="w-5 h-5 text-blue-600" />
-        <h3 className="font-semibold text-slate-900">Acceso a la app</h3>
+        <ShieldCheck className="w-5 h-5 text-[#0e7c86]" />
+        <h3 className="font-bold text-base text-[#1a1a1a]">Acceso a la app</h3>
       </div>
 
       {isLoadingLink ? (
-        <div className="flex items-center gap-2 text-slate-500 text-sm">
-          <Loader2 className="w-4 h-4 animate-spin" />
+        <div className="flex items-center gap-2 text-[#4a4f57] text-sm">
+          <Loader2 className="w-4 h-4 animate-spin text-[#0e7c86]" />
           <span>Cargando...</span>
         </div>
       ) : userLink.user_id ? (
         /* ── Cuenta vinculada ── */
         <div className="space-y-4">
-          <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-sm">
-            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span className="font-medium">Cuenta vinculada</span>
+          <div className="flex items-center gap-2 text-[#14532d] bg-[#e3f5e9] border border-[#2f7d4f] rounded-xl px-3.5 py-2.5 text-sm">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-[#2f7d4f]" />
+            <span className="font-semibold">Cuenta vinculada</span>
           </div>
 
-          {/* Role checkboxes */}
+          {/* Casillas de rol */}
           <div>
-            <p className="text-sm font-medium text-slate-700 mb-2">Roles asignados:</p>
+            <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Roles asignados:</p>
             <div className="space-y-2">
               {ALL_ROLES.map((role) => {
                 const checked = userLink.roles.includes(role);
@@ -138,10 +138,10 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
                 return (
                   <label
                     key={role}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors ${
+                    className={`min-h-[44px] flex items-center gap-3 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-colors ${
                       checked
-                        ? 'bg-blue-50 border-blue-200'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
+                        ? 'bg-[#d9f7f8] border-[#0e7c86] text-[#0a5961]'
+                        : 'bg-white border-[#d4d7dc] hover:border-[#858a93] text-[#1a1a1a]'
                     } ${isToggling ? 'opacity-60 pointer-events-none' : ''}`}
                   >
                     <input
@@ -149,10 +149,12 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
                       checked={checked}
                       onChange={() => handleRoleToggle(role)}
                       disabled={isToggling}
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-[#858a93] text-[#0e7c86] focus:ring-[#0e7c86]"
                     />
-                    <span className="text-sm font-medium text-slate-700">{ROLE_LABELS[role]}</span>
-                    {isToggling && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600 ml-auto" />}
+                    <span className="text-sm font-semibold">{ROLE_LABELS[role]}</span>
+                    {isToggling && (
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0e7c86] ml-auto" />
+                    )}
                   </label>
                 );
               })}
@@ -160,7 +162,7 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
           </div>
 
           {roleError && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#fdecec] border border-rose-300 text-[#9b1c1c] text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{roleError}</span>
             </div>
@@ -169,15 +171,15 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
       ) : (
         /* ── Sin cuenta vinculada ── */
         <div className="space-y-3">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-[#4a4f57]">
             Esta persona no tiene cuenta de usuario vinculada. Introduce el correo de una cuenta
             existente para vincularla.
           </p>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
               Correo de la cuenta
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 value={linkEmail}
@@ -187,12 +189,13 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
                   setLinkSuccess(null);
                 }}
                 placeholder="usuario@ejemplo.com"
-                className="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl border border-[#858a93] text-base text-[#1a1a1a] placeholder:text-[#5b6068] bg-white focus:outline-none focus:ring-2 focus:ring-[#0e7c86]"
               />
               <button
+                type="button"
                 onClick={handleLink}
                 disabled={isLinking}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2 whitespace-nowrap"
+                className="min-h-[44px] px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#0e7c86] hover:bg-[#0a5961] disabled:opacity-50 transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 <Link2 className="w-4 h-4" />
                 {isLinking ? 'Vinculando...' : 'Vincular'}
@@ -201,14 +204,14 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
           </div>
 
           {linkError && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#fdecec] border border-rose-300 text-[#9b1c1c] text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{linkError}</span>
             </div>
           )}
 
           {linkSuccess && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-[#e3f5e9] border border-[#2f7d4f] text-[#14532d] text-sm">
               <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{linkSuccess}</span>
             </div>

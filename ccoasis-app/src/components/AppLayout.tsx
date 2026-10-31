@@ -79,12 +79,21 @@ export const AppLayout: React.FC = () => {
 
   const primaryRoleLabel =
     roles.length > 0 ? roles.map((r) => ROLE_LABELS[r] || r).join(', ') : 'Usuario';
+  const mainRoleLabel = roles.includes('admin')
+    ? 'Administrador'
+    : roles.includes('tesorero')
+    ? 'Tesorero'
+    : roles.includes('maestro')
+    ? 'Maestro'
+    : roles[0]
+    ? ROLE_LABELS[roles[0]] || roles[0]
+    : 'Usuario';
 
   return (
     <NotificationsProvider>
-      <div className="min-h-screen bg-[#f5f5f5] flex flex-col md:grid md:grid-cols-[256px_1fr] pb-20 md:pb-0">
-        {/* Sidebar izquierdo en escritorio (256px, fondo blanco como en la maqueta) */}
-        <aside className="hidden md:flex md:flex-col bg-white border-r border-[#d4d7dc] min-h-screen">
+      <div className="min-h-screen bg-[#f5f5f5] flex flex-col md:grid md:grid-cols-[256px_minmax(0,1fr)] pb-20 md:pb-0">
+        {/* Sidebar izquierdo en escritorio (256px fijos, fondo blanco como en la maqueta) */}
+        <aside className="hidden md:flex md:flex-col md:w-[256px] md:max-w-[256px] min-w-0 bg-white border-r border-[#d4d7dc] min-h-screen">
           {/* a) Parte superior cian (#23d5da) con el logo /logo.png grande dentro de tarjeta blanca redondeada */}
           <div className="on-cyan bg-[#23d5da] text-[#1a1a1a] px-4 py-3.5 flex flex-col items-start gap-1.5">
             <img
@@ -96,28 +105,34 @@ export const AppLayout: React.FC = () => {
           </div>
 
           {/* b) Franja horizontal magenta (#ae4a84) con texto en blanco en mayúsculas */}
-          <div className="on-magenta bg-[#ae4a84] text-white px-4 py-[7px] text-xs font-semibold flex items-center justify-between gap-2">
-            <span className="uppercase tracking-wider font-bold">GESTIÓN ECLESIAL</span>
-            <span className="truncate">{primaryRoleLabel}</span>
+          <div className="on-magenta bg-[#ae4a84] text-white px-4 py-[7px] text-xs font-semibold flex items-center justify-between gap-2 min-w-0">
+            <span className="uppercase tracking-wider font-bold whitespace-nowrap">
+              GESTIÓN ECLESIAL
+            </span>
+            <span className="truncate text-[11px] font-medium" title={primaryRoleLabel}>
+              {mainRoleLabel}
+            </span>
           </div>
 
-          {/* c) Tarjeta del usuario dentro del sidebar blanco */}
-          <div className="m-3 p-3 bg-[#f5f5f5] border border-[#d4d7dc] rounded-[12px] grid gap-2.5">
-            <div className="flex items-center justify-between gap-2 text-xs font-medium">
-              <div className="flex items-center gap-2 min-w-0">
+          {/* c) Tarjeta del usuario dentro del sidebar blanco (encuadre estricto dentro de los 256px) */}
+          <div className="m-3 p-3 bg-[#f5f5f5] border border-[#d4d7dc] rounded-[12px] flex flex-col gap-2.5 min-w-0">
+            <div className="flex items-center justify-between gap-1.5 text-xs font-medium min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <UserIcon className="w-4 h-4 text-[#4a4f57] flex-shrink-0" aria-hidden="true" />
-                <span className="truncate text-[#1a1a1a]" title={user?.email}>
+                <span className="truncate text-[#1a1a1a] block min-w-0" title={user?.email}>
                   {user?.email}
                 </span>
               </div>
-              <NotificationsBell />
+              <div className="flex-shrink-0 -mr-1">
+                <NotificationsBell />
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 min-w-0">
               {roles.map((r) => (
                 <span
                   key={r}
-                  className={`inline-block text-xs font-semibold px-2.5 py-[3px] rounded-full ${
+                  className={`inline-block text-[11px] font-semibold px-2.5 py-[3px] rounded-full max-w-full truncate ${
                     ROLE_COLORS[r] || 'bg-[#ebedef] text-[#1a1a1a]'
                   }`}
                 >
@@ -129,10 +144,10 @@ export const AppLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsSelfPasswordModalOpen(true)}
-              className="w-full min-h-[44px] px-2 rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-[13px] font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
+              className="w-full min-h-[44px] px-2.5 rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-[13px] font-semibold inline-flex items-center justify-center gap-2 transition-colors min-w-0"
             >
-              <KeyRound className="w-5 h-5 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
-              <span>Cambiar mi contraseña</span>
+              <KeyRound className="w-4 h-4 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">Cambiar mi contraseña</span>
             </button>
           </div>
 
@@ -142,7 +157,7 @@ export const AppLayout: React.FC = () => {
           </div>
           <nav
             aria-label="Módulos"
-            className="px-3 py-1 grid gap-1 flex-1 content-start bg-white"
+            className="px-3 py-1 flex flex-col gap-1 flex-1 bg-white min-w-0"
           >
             {navItems.map((item) => {
               const IconComponent = item.icon;
@@ -216,9 +231,11 @@ export const AppLayout: React.FC = () => {
           </header>
 
           {/* Franja delgada magenta móvil */}
-          <div className="on-magenta bg-[#ae4a84] text-white px-4 py-[7px] text-xs font-semibold flex items-center justify-between gap-2">
-            <span className="truncate">{user?.email}</span>
-            <span className="flex-shrink-0">Rol: {primaryRoleLabel}</span>
+          <div className="on-magenta bg-[#ae4a84] text-white px-4 py-[7px] text-xs font-semibold flex items-center justify-between gap-2 min-w-0">
+            <span className="truncate min-w-0">{user?.email}</span>
+            <span className="flex-shrink-0" title={primaryRoleLabel}>
+              Rol: {mainRoleLabel}
+            </span>
           </div>
         </div>
 

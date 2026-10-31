@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAvailableNavItems, getMobileNavItems } from '../config/navigation';
 import { ROLE_LABELS } from '../types/persons';
@@ -96,11 +96,17 @@ export const AppLayout: React.FC = () => {
         <aside className="hidden md:flex md:flex-col md:w-[256px] md:max-w-[256px] min-w-0 bg-white border-r border-[#d4d7dc] min-h-screen">
           {/* a) Parte superior cian (#23d5da) con el logo /logo.png grande dentro de tarjeta blanca redondeada */}
           <div className="on-cyan bg-[#23d5da] text-[#1a1a1a] px-4 py-3.5 flex flex-col items-start gap-1.5">
-            <img
-              src="/logo.png"
-              alt="Centro Cristiano Oasis"
-              className="w-[164px] h-auto bg-white rounded-[10px] px-2.5 py-1.5 object-contain"
-            />
+            <Link
+              to="/calendario"
+              aria-label="Ir al inicio - Calendario"
+              className="inline-block rounded-[10px]"
+            >
+              <img
+                src="/logo.png"
+                alt="Centro Cristiano Oasis"
+                className="w-[164px] h-auto bg-white rounded-[10px] px-2.5 py-1.5 object-contain block"
+              />
+            </Link>
             <span className="text-xs font-bold text-[#1a1a1a]">Gestión Eclesial</span>
           </div>
 
@@ -197,11 +203,17 @@ export const AppLayout: React.FC = () => {
         <div className="md:hidden sticky top-0 z-30">
           <header className="on-cyan bg-[#23d5da] text-[#1a1a1a] px-4 py-2.5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <img
-                src="/logo.png"
-                alt="Centro Cristiano Oasis"
-                className="h-10 w-auto bg-white rounded-[8px] px-2 py-1 object-contain flex-shrink-0"
-              />
+              <Link
+                to="/calendario"
+                aria-label="Ir al inicio - Calendario"
+                className="inline-flex rounded-[8px] flex-shrink-0"
+              >
+                <img
+                  src="/logo.png"
+                  alt="Centro Cristiano Oasis"
+                  className="h-10 w-auto bg-white rounded-[8px] px-2 py-1 object-contain block"
+                />
+              </Link>
               <span className="text-xs font-semibold text-[#1a1a1a] truncate">
                 Gestión Eclesial
               </span>

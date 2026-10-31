@@ -35,10 +35,10 @@ export const CYCLE_STATUS_OPTIONS: { value: CycleStatus; label: string }[] = [
 ];
 
 export const CYCLE_STATUS_COLORS: Record<CycleStatus, string> = {
-  planificado: 'bg-amber-100 text-amber-800 border-amber-200',
-  en_curso: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  cerrado: 'bg-slate-200 text-slate-700 border-slate-300',
-  archivado: 'bg-rose-100 text-rose-700 border-rose-200',
+  planificado: 'bg-amber-100 text-amber-950 border-amber-600',
+  en_curso: 'bg-emerald-100 text-emerald-950 border-emerald-600',
+  cerrado: 'bg-slate-100 text-slate-800 border-slate-400',
+  archivado: 'bg-rose-100 text-rose-950 border-rose-600',
 };
 
 export interface Cycle {

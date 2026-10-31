@@ -56,68 +56,67 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-[#d4d7dc]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="oasis-title-gradient on-magenta px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-              <UserPlus className="w-4 h-4" />
-            </div>
+            <UserPlus className="w-6 h-6 text-white flex-shrink-0" />
             <div>
-              <h2 className="font-bold text-slate-900 text-base">Inscribir Alumno</h2>
-              <p className="text-xs text-slate-500">Solo miembros activos o visitas</p>
+              <h2 className="font-extrabold text-white text-2xl leading-tight">Inscribir Alumno</h2>
+              <p className="text-xs text-white/90">Solo miembros activos o visitas</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+            aria-label="Cerrar"
+            className="min-w-[44px] min-h-[44px] p-2 rounded-xl text-white hover:bg-white/15 transition-colors flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-xs flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Buscador de candidatos */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
               Buscar Persona
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4f57]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Filtrar por nombre o correo..."
-                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full min-h-[44px] pl-10 pr-3.5 py-2 text-base text-[#1a1a1a] placeholder:text-[#4a4f57] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] bg-white"
               />
             </div>
           </div>
 
           {/* Lista de candidatos elegibles */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
               Seleccionar Alumno ({availableCandidates.length} disponibles)
             </label>
 
             {availableCandidates.length === 0 ? (
-              <div className="p-4 border border-dashed border-slate-200 rounded-xl text-center bg-slate-50 text-xs text-slate-500">
+              <div className="p-4 border border-dashed border-[#d4d7dc] rounded-2xl text-center bg-[#f5f5f5] text-xs text-[#4a4f57]">
                 {candidates.length === 0
                   ? 'No hay personas registradas en el directorio.'
                   : 'No hay más personas con estado "Activo" o "Visita" disponibles para inscribir en este ciclo.'}
               </div>
             ) : (
-              <div className="max-h-52 overflow-y-auto space-y-1.5 border border-slate-200 rounded-xl p-2 bg-slate-50/50">
+              <div className="max-h-52 overflow-y-auto space-y-1.5 border border-[#d4d7dc] rounded-2xl p-2 bg-[#f5f5f5]/60">
                 {availableCandidates.map((candidate) => {
                   const isSelected = selectedPersonId === candidate.id;
                   return (
@@ -125,33 +124,33 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
                       type="button"
                       key={candidate.id}
                       onClick={() => setSelectedPersonId(candidate.id)}
-                      className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs ${
+                      className={`w-full min-h-[44px] text-left p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs ${
                         isSelected
-                          ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-sm'
-                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
+                          ? 'bg-[#d9f7f8] border-[#0e7c86] text-[#0a5961] shadow-xs font-bold'
+                          : 'bg-white border-[#d4d7dc] hover:border-[#0e7c86] text-[#1a1a1a]'
                       }`}
                     >
                       <div className="flex-1 min-w-0 pr-2">
-                        <div className="font-semibold truncate">
+                        <div className="font-extrabold truncate">
                           {candidate.first_name} {candidate.last_name}
                         </div>
                         {candidate.email && (
-                          <div className="text-[11px] text-slate-400 truncate">
+                          <div className="text-[11px] text-[#4a4f57] truncate">
                             {candidate.email}
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
                             candidate.status === 'activo'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-sky-100 text-sky-800'
+                              ? 'bg-emerald-100 text-emerald-950 border-emerald-600'
+                              : 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]'
                           }`}
                         >
                           {candidate.status}
                         </span>
-                        {isSelected && <Check className="w-4 h-4 text-blue-600" />}
+                        {isSelected && <Check className="w-4 h-4 text-[#0e7c86]" />}
                       </div>
                     </button>
                   );
@@ -162,13 +161,13 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
 
           {/* Estado inicial de inscripción */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
               Estado de la inscripción
             </label>
             <select
               value={enrollmentStatus}
               onChange={(e) => setEnrollmentStatus(e.target.value as EnrollmentStatus)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full min-h-[44px] px-3.5 py-2 text-base font-medium text-[#1a1a1a] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] bg-white"
             >
               {ENROLLMENT_STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -179,21 +178,21 @@ export const EnrollmentModal: React.FC<EnrollmentModalProps> = ({
           </div>
 
           {/* Botones de acción */}
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-[#e5e7eb]">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              className="min-h-[44px] px-4 py-2.5 text-sm font-bold text-[#1a1a1a] hover:bg-[#f5f5f5] border border-[#858a93] rounded-xl transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !selectedPersonId}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+              className="min-h-[44px] flex items-center gap-2 px-5 py-2.5 bg-[#0e7c86] text-white rounded-xl text-sm font-extrabold hover:bg-[#0a5961] disabled:opacity-50 transition-colors shadow-sm"
             >
-              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>Inscribir en el ciclo</span>
             </button>
           </div>

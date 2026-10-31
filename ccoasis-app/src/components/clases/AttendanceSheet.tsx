@@ -147,12 +147,12 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm space-y-4 p-4 sm:p-6">
+    <div className="bg-white rounded-3xl border border-[#d4d7dc] overflow-hidden shadow-xs space-y-4 p-5 sm:p-6">
       {/* Encabezado de la sesión seleccionada */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#e5e7eb]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+            <span className="text-xs font-extrabold text-[#0e7c86] uppercase tracking-wider">
               {new Date(session.session_date).toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
@@ -161,26 +161,26 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
               })}
             </span>
             {isCycleClosed && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full">
                 <Lock className="w-3 h-3" /> Solo lectura
               </span>
             )}
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mt-0.5">{session.topic}</h3>
+          <h3 className="text-lg font-extrabold text-[#1a1a1a] mt-0.5">{session.topic}</h3>
           {session.description && (
-            <p className="text-xs text-slate-500 mt-0.5">{session.description}</p>
+            <p className="text-xs text-[#4a4f57] mt-0.5">{session.description}</p>
           )}
         </div>
 
         {/* Resumen rápido de la sesión */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
+          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 font-extrabold border border-emerald-600">
             {counts.presentes} Presentes
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold border border-rose-200">
+          <span className="px-2.5 py-1 rounded-full bg-rose-100 text-rose-950 font-extrabold border border-rose-600">
             {counts.ausentes} Ausentes
           </span>
-          <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 font-extrabold border border-amber-600">
             {counts.justificados} Justificados
           </span>
         </div>
@@ -188,8 +188,8 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
 
       {/* Alerta si el ciclo está cerrado */}
       {isCycleClosed && (
-        <div className="p-3.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-700 text-xs flex items-center gap-2">
-          <Lock className="w-4 h-4 text-slate-500 flex-shrink-0" />
+        <div className="p-3.5 bg-slate-100 border border-[#d4d7dc] rounded-2xl text-[#1a1a1a] text-xs flex items-center gap-2">
+          <Lock className="w-4 h-4 text-[#4a4f57] flex-shrink-0" />
           <span>
             <strong>Ciclo Cerrado:</strong> La asistencia de esta sesión está bloqueada y no se puede modificar.
           </span>
@@ -198,15 +198,15 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
 
       {/* Mensajes de error o éxito */}
       {error && (
-        <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+        <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {saveSuccess && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-2xl text-emerald-950 text-xs font-semibold flex items-center gap-2">
+          <CheckCheck className="w-4 h-4 text-emerald-700 flex-shrink-0" />
           <span>Asistencia guardada correctamente en la base de datos.</span>
         </div>
       )}
@@ -214,18 +214,18 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
       {/* Botones de acción rápida por lote (Mobile y Escritorio) */}
       {!isCycleClosed && (
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={() => handleMarkAll('presente')}
-              className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl border border-emerald-600 bg-emerald-50 text-emerald-950 text-xs font-extrabold hover:bg-emerald-100 transition-colors"
             >
               Marcar todos Presentes
             </button>
             <button
               type="button"
               onClick={() => handleMarkAll('ausente')}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl border border-[#858a93] bg-white text-[#1a1a1a] text-xs font-extrabold hover:bg-[#f5f5f5] transition-colors"
             >
               Marcar todos Ausentes
             </button>
@@ -235,7 +235,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+            className="min-h-[44px] flex items-center gap-2 px-4 py-2.5 bg-[#0e7c86] text-white rounded-xl text-xs font-extrabold hover:bg-[#0a5961] disabled:opacity-50 transition-colors shadow-sm"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -249,7 +249,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
 
       {/* Lista de alumnos para toma de asistencia */}
       {enrollments.length === 0 ? (
-        <div className="p-8 border border-dashed border-slate-200 rounded-2xl text-center text-slate-500 text-sm">
+        <div className="p-8 border border-dashed border-[#d4d7dc] rounded-2xl text-center text-[#4a4f57] text-sm">
           No hay alumnos inscritos en este ciclo para tomar asistencia.
         </div>
       ) : (
@@ -263,32 +263,32 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
             return (
               <div
                 key={enrollment.id}
-                className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+                className={`p-4 rounded-2xl border transition-all ${
                   currentMark === 'presente'
-                    ? 'border-emerald-200 bg-emerald-50/20'
+                    ? 'border-emerald-300 bg-emerald-50/30'
                     : currentMark === 'justificado'
-                    ? 'border-amber-200 bg-amber-50/20'
-                    : 'border-slate-200 bg-white'
+                    ? 'border-amber-300 bg-amber-50/30'
+                    : 'border-[#d4d7dc] bg-white'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   {/* Info del alumno */}
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] font-extrabold text-sm flex items-center justify-center flex-shrink-0">
                       {person.first_name[0]}
                       {person.last_name[0]}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">
+                      <div className="font-extrabold text-[#1a1a1a] text-sm">
                         {person.first_name} {person.last_name}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-[#4a4f57]">
                         {person.email && <span>{person.email}</span>}
                         <span
-                          className={`px-1.5 py-0.2 rounded text-[10px] font-medium ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
                             enrollment.status === 'retirado'
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'text-slate-400'
+                              ? 'bg-rose-100 text-rose-950 border-rose-600'
+                              : 'bg-slate-100 text-slate-800 border-slate-400'
                           }`}
                         >
                           {enrollment.status}
@@ -304,7 +304,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
                       type="button"
                       disabled={isCycleClosed}
                       onClick={() => handleMarkChange(person.id, 'presente')}
-                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs border flex items-center justify-center gap-1.5 transition-all ${
                         currentMark === 'presente'
                           ? ATTENDANCE_MARK_STYLES.presente.active
                           : ATTENDANCE_MARK_STYLES.presente.inactive
@@ -319,7 +319,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
                       type="button"
                       disabled={isCycleClosed}
                       onClick={() => handleMarkChange(person.id, 'ausente')}
-                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs border flex items-center justify-center gap-1.5 transition-all ${
                         currentMark === 'ausente'
                           ? ATTENDANCE_MARK_STYLES.ausente.active
                           : ATTENDANCE_MARK_STYLES.ausente.inactive
@@ -334,7 +334,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
                       type="button"
                       disabled={isCycleClosed}
                       onClick={() => handleMarkChange(person.id, 'justificado')}
-                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition-all ${
+                      className={`min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-xs border flex items-center justify-center gap-1.5 transition-all ${
                         currentMark === 'justificado'
                           ? ATTENDANCE_MARK_STYLES.justificado.active
                           : ATTENDANCE_MARK_STYLES.justificado.inactive
@@ -351,10 +351,11 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
                         onClick={() =>
                           setShowNotes((prev) => ({ ...prev, [person.id]: !prev[person.id] }))
                         }
-                        className={`hidden sm:flex p-2.5 rounded-xl border transition-colors ${
+                        aria-label={`Añadir observación para ${person.first_name} ${person.last_name}`}
+                        className={`hidden sm:flex min-w-[44px] min-h-[44px] p-2.5 rounded-xl border transition-colors items-center justify-center ${
                           currentNotes
-                            ? 'bg-blue-50 border-blue-200 text-blue-700'
-                            : 'border-slate-200 text-slate-400 hover:text-slate-600'
+                            ? 'bg-[#d9f7f8] border-[#0e7c86] text-[#0a5961]'
+                            : 'border-[#858a93] text-[#4a4f57] hover:text-[#1a1a1a] hover:bg-[#f5f5f5]'
                         }`}
                         title="Añadir nota de asistencia"
                       >
@@ -366,14 +367,14 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
 
                 {/* Campo de notas / justificación */}
                 {(isNoteOpen || currentNotes) && (
-                  <div className="mt-2.5 pt-2.5 border-t border-slate-100">
+                  <div className="mt-3 pt-3 border-t border-[#e5e7eb]">
                     <input
                       type="text"
                       disabled={isCycleClosed}
                       placeholder="Observación o motivo de justificación..."
                       value={currentNotes}
                       onChange={(e) => handleNotesChange(person.id, e.target.value)}
-                      className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white disabled:bg-slate-100 disabled:text-slate-500"
+                      className="w-full min-h-[44px] text-base text-[#1a1a1a] placeholder:text-[#4a4f57] px-3.5 py-2 border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] bg-white disabled:bg-slate-100 disabled:text-slate-500"
                     />
                   </div>
                 )}
@@ -390,7 +391,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+            className="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-6 py-3 bg-[#0e7c86] text-white rounded-xl text-sm font-extrabold hover:bg-[#0a5961] disabled:opacity-50 transition-colors shadow-sm"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

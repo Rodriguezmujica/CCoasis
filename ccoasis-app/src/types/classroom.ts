@@ -9,9 +9,9 @@ export const ENROLLMENT_STATUS_OPTIONS: { value: EnrollmentStatus; label: string
 ];
 
 export const ENROLLMENT_STATUS_COLORS: Record<EnrollmentStatus, string> = {
-  inscrito: 'bg-blue-100 text-blue-800 border-blue-200',
-  completado: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  retirado: 'bg-slate-100 text-slate-700 border-slate-300',
+  inscrito: 'bg-emerald-100 text-emerald-950 border-emerald-600',
+  completado: 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]',
+  retirado: 'bg-slate-100 text-slate-800 border-slate-400',
 };
 
 export interface EnrollmentPerson {
@@ -47,18 +47,18 @@ export const ATTENDANCE_MARK_STYLES: Record<
 > = {
   presente: {
     active: 'bg-emerald-700 text-white border-emerald-800 shadow-sm font-bold',
-    inactive: 'bg-white text-emerald-800 border-emerald-200 hover:bg-emerald-50',
-    badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    inactive: 'bg-white text-emerald-900 border-emerald-600 hover:bg-emerald-50 font-semibold',
+    badge: 'bg-emerald-100 text-emerald-950 border-emerald-600',
   },
   ausente: {
     active: 'bg-rose-700 text-white border-rose-800 shadow-sm font-bold',
-    inactive: 'bg-white text-rose-800 border-rose-200 hover:bg-rose-50',
-    badge: 'bg-rose-100 text-rose-800 border-rose-200',
+    inactive: 'bg-white text-rose-900 border-rose-600 hover:bg-rose-50 font-semibold',
+    badge: 'bg-rose-100 text-rose-950 border-rose-600',
   },
   justificado: {
     active: 'bg-amber-700 text-white border-amber-800 shadow-sm font-bold',
-    inactive: 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50',
-    badge: 'bg-amber-100 text-amber-800 border-amber-200',
+    inactive: 'bg-white text-amber-900 border-amber-600 hover:bg-amber-50 font-semibold',
+    badge: 'bg-amber-100 text-amber-950 border-amber-600',
   },
 };
 

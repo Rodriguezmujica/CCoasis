@@ -63,34 +63,34 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4">
-      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4">
+      <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-[#d4d7dc] w-full sm:max-w-lg max-h-[90dvh] overflow-y-auto">
         {/* Cabecera */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-200 sticky top-0 bg-white z-10">
-          <h2 className="font-black text-slate-900 text-base">
+        <div className="oasis-title-gradient on-magenta flex items-center justify-between px-6 py-4 rounded-t-3xl sticky top-0 z-10">
+          <h2 className="font-extrabold text-white text-2xl">
             {isEditing ? 'Editar Tarea' : 'Nueva Tarea'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="min-w-[44px] min-h-[44px] p-2 rounded-xl text-white hover:bg-white/15 transition-colors flex items-center justify-center"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {isCycleClosed && (
-            <div className="p-3 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="p-3.5 bg-slate-100 border border-[#d4d7dc] rounded-2xl text-[#1a1a1a] text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#4a4f57]" />
               <span>El ciclo está cerrado. No se pueden modificar las tareas.</span>
             </div>
           )}
 
           {/* Título */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
-              Título de la tarea <span className="text-red-500">*</span>
+            <label className="block text-sm font-bold text-[#1a1a1a]">
+              Título de la tarea <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -99,15 +99,15 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               placeholder="Ej: Ensayo sobre el libro de Marcos"
               maxLength={200}
               disabled={isCycleClosed}
-              className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+              className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-[#1a1a1a] placeholder:text-[#4a4f57] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] disabled:bg-slate-50 disabled:text-slate-400"
               required
             />
           </div>
 
           {/* Instrucciones */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
-              Instrucciones <span className="text-slate-400 font-normal">(opcional)</span>
+            <label className="block text-sm font-bold text-[#1a1a1a]">
+              Instrucciones <span className="text-[#4a4f57] font-normal">(opcional)</span>
             </label>
             <textarea
               value={instructions}
@@ -116,40 +116,40 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               rows={4}
               maxLength={2000}
               disabled={isCycleClosed}
-              className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none disabled:bg-slate-50 disabled:text-slate-400"
+              className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-[#1a1a1a] placeholder:text-[#4a4f57] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] resize-none disabled:bg-slate-50 disabled:text-slate-400"
             />
           </div>
 
           {/* Fecha límite */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              Fecha límite <span className="text-slate-400 font-normal">(opcional)</span>
+            <label className="text-sm font-bold text-[#1a1a1a] flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-[#0e7c86]" />
+              Fecha límite <span className="text-[#4a4f57] font-normal">(opcional)</span>
             </label>
             <input
               type="datetime-local"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               disabled={isCycleClosed}
-              className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-50 disabled:text-slate-400"
+              className="w-full min-h-[44px] px-3.5 py-2.5 text-base text-[#1a1a1a] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] disabled:bg-slate-50 disabled:text-slate-400"
             />
           </div>
 
           {/* Error */}
           {errorMsg && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-xs">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Botones */}
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-3 pt-2 border-t border-[#e5e7eb]">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="flex-1 py-3 rounded-xl border border-slate-300 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex-1 min-h-[44px] py-2.5 rounded-xl border border-[#858a93] text-sm font-bold text-[#1a1a1a] hover:bg-[#f5f5f5] transition-colors"
             >
               Cancelar
             </button>
@@ -157,7 +157,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
               <button
                 type="submit"
                 disabled={!isValid || isSaving}
-                className="flex-1 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-[#0e7c86] text-white text-sm font-extrabold hover:bg-[#0a5961] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 {isSaving ? (
                   <>

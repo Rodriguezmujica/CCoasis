@@ -153,30 +153,30 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm space-y-4 p-4 sm:p-6">
+    <div className="bg-white rounded-3xl border border-[#d4d7dc] overflow-hidden shadow-xs space-y-4 p-5 sm:p-6">
       {/* Cabecera de la evaluación */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-[#e5e7eb]">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
-              <Award className="w-3.5 h-3.5 text-amber-500" />
+            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-950 bg-amber-100 border border-amber-600 px-2.5 py-0.5 rounded-full">
+              <Award className="w-3.5 h-3.5 text-amber-800" />
               Puntaje Máximo: {evaluation.max_score} pts
             </span>
             {evaluation.due_date && (
-              <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                <Calendar className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 text-xs text-[#4a4f57]">
+                <Calendar className="w-3.5 h-3.5 text-[#0e7c86]" />
                 Fecha límite: {new Date(evaluation.due_date).toLocaleDateString('es-ES')}
               </span>
             )}
             {isCycleClosed && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full">
                 <Lock className="w-3 h-3" /> Solo lectura
               </span>
             )}
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mt-1">{evaluation.title}</h3>
+          <h3 className="text-lg font-extrabold text-[#1a1a1a] mt-1">{evaluation.title}</h3>
           {evaluation.description && (
-            <p className="text-xs text-slate-500 mt-0.5">{evaluation.description}</p>
+            <p className="text-xs text-[#4a4f57] mt-0.5">{evaluation.description}</p>
           )}
         </div>
 
@@ -185,7 +185,7 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
             type="button"
             onClick={handleSave}
             disabled={isSaving || hasErrors}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm self-start sm:self-auto"
+            className="min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0e7c86] text-white rounded-xl text-xs font-extrabold hover:bg-[#0a5961] disabled:opacity-50 transition-colors shadow-sm self-start sm:self-auto"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -199,8 +199,8 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
 
       {/* Alerta si el ciclo está cerrado */}
       {isCycleClosed && (
-        <div className="p-3.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-700 text-xs flex items-center gap-2">
-          <Lock className="w-4 h-4 text-slate-500 flex-shrink-0" />
+        <div className="p-3.5 bg-slate-100 border border-[#d4d7dc] rounded-2xl text-[#1a1a1a] text-xs flex items-center gap-2">
+          <Lock className="w-4 h-4 text-[#4a4f57] flex-shrink-0" />
           <span>
             <strong>Ciclo Cerrado:</strong> Las calificaciones están protegidas contra modificaciones.
           </span>
@@ -209,22 +209,22 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
 
       {/* Mensajes de error o confirmación */}
       {error && (
-        <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+        <div className="p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {saveSuccess && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-2xl text-emerald-950 text-xs font-semibold flex items-center gap-2">
+          <CheckCheck className="w-4 h-4 text-emerald-700 flex-shrink-0" />
           <span>Calificaciones guardadas correctamente.</span>
         </div>
       )}
 
       {/* Lista / Rejilla de alumnos para ingresar notas */}
       {enrollments.length === 0 ? (
-        <div className="p-8 border border-dashed border-slate-200 rounded-2xl text-center text-slate-500 text-sm">
+        <div className="p-8 border border-dashed border-[#d4d7dc] rounded-2xl text-center text-[#4a4f57] text-sm">
           No hay alumnos inscritos en este ciclo para calificar.
         </div>
       ) : (
@@ -237,28 +237,28 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
             return (
               <div
                 key={enrollment.id}
-                className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+                className={`p-4 rounded-2xl border transition-all ${
                   validationErr
-                    ? 'border-red-300 bg-red-50/20'
+                    ? 'border-red-400 bg-red-50/30'
                     : item.scoreStr
-                    ? 'border-blue-100 bg-blue-50/10'
-                    : 'border-slate-200 bg-white'
+                    ? 'border-[#0e7c86]/50 bg-[#d9f7f8]/20'
+                    : 'border-[#d4d7dc] bg-white'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   {/* Info del alumno */}
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] font-extrabold text-sm flex items-center justify-center flex-shrink-0">
                       {person.first_name[0]}
                       {person.last_name[0]}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">
+                      <div className="font-extrabold text-[#1a1a1a] text-sm">
                         {person.first_name} {person.last_name}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-[#4a4f57]">
                         {person.email && <span>{person.email}</span>}
-                        <span className="text-slate-400">Estado: {enrollment.status}</span>
+                        <span className="font-semibold">Estado: {enrollment.status}</span>
                       </div>
                     </div>
                   </div>
@@ -266,8 +266,8 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
                   {/* Input de nota con validación (0 <= nota <= max_score) */}
                   <div className="flex items-center gap-3 sm:w-72">
                     <div className="flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-extrabold text-[#1a1a1a] whitespace-nowrap">
                           Nota:
                         </label>
                         <div className="relative flex-1">
@@ -280,20 +280,20 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
                             placeholder={`0 - ${evaluation.max_score}`}
                             value={item.scoreStr}
                             onChange={(e) => handleScoreChange(enrollment.id, e.target.value)}
-                            className={`w-full text-sm font-semibold px-3 py-2 rounded-xl border text-center focus:outline-none focus:ring-2 bg-white disabled:bg-slate-100 disabled:text-slate-500 ${
+                            className={`w-full min-h-[44px] text-base font-extrabold px-3 py-2 rounded-xl border text-center focus:outline-none focus:ring-2 bg-white disabled:bg-slate-100 disabled:text-slate-500 ${
                               validationErr
-                                ? 'border-red-400 focus:ring-red-400 text-red-700 bg-red-50/40'
-                                : 'border-slate-300 focus:ring-blue-500 text-slate-900'
+                                ? 'border-red-500 focus:ring-red-500 text-red-700 bg-red-50/40'
+                                : 'border-[#858a93] focus:ring-[#ae4a84] text-[#1a1a1a]'
                             }`}
                           />
                         </div>
-                        <span className="text-xs font-medium text-slate-400">
+                        <span className="text-xs font-extrabold text-[#4a4f57]">
                           / {evaluation.max_score}
                         </span>
                       </div>
 
                       {validationErr && (
-                        <p className="text-[11px] text-red-600 font-medium mt-1">
+                        <p className="text-xs text-red-600 font-bold mt-1">
                           {validationErr}
                         </p>
                       )}
@@ -302,14 +302,14 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
                 </div>
 
                 {/* Comentarios u observaciones del maestro */}
-                <div className="mt-2.5 pt-2.5 border-t border-slate-100">
+                <div className="mt-3 pt-3 border-t border-[#e5e7eb]">
                   <input
                     type="text"
                     disabled={isCycleClosed}
                     placeholder="Comentario o retroalimentación para el alumno..."
                     value={item.notes}
                     onChange={(e) => handleNotesChange(enrollment.id, e.target.value)}
-                    className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white disabled:bg-slate-100 disabled:text-slate-500"
+                    className="w-full min-h-[44px] text-base text-[#1a1a1a] placeholder:text-[#4a4f57] px-3.5 py-2 border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] bg-white disabled:bg-slate-100 disabled:text-slate-500"
                   />
                 </div>
               </div>
@@ -325,7 +325,7 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
             type="button"
             onClick={handleSave}
             disabled={isSaving || hasErrors}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 px-6 py-3 bg-[#0e7c86] text-white rounded-xl text-sm font-extrabold hover:bg-[#0a5961] disabled:opacity-50 transition-colors shadow-sm"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

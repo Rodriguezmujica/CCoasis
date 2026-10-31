@@ -62,12 +62,12 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
   if (assignments.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-xs">
-        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-400">
+      <div className="bg-white rounded-3xl border border-[#d4d7dc] p-8 text-center space-y-3 shadow-xs">
+        <div className="w-12 h-12 rounded-2xl bg-[#d9f7f8] border border-[#0e7c86]/30 flex items-center justify-center mx-auto text-[#0e7c86]">
           <ClipboardList className="w-6 h-6" />
         </div>
-        <h4 className="font-bold text-slate-800 text-base">Sin tareas asignadas</h4>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+        <h4 className="font-extrabold text-[#1a1a1a] text-base">Sin tareas asignadas</h4>
+        <p className="text-xs sm:text-sm text-[#4a4f57] max-w-md mx-auto">
           Por el momento no hay tareas pendientes en este ciclo. Consulta periódicamente por nuevos trabajos prácticos.
         </p>
       </div>
@@ -77,7 +77,7 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
   return (
     <div className="space-y-4">
       {downloadError && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
           <span>{downloadError}</span>
         </div>
@@ -96,16 +96,16 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
           return (
             <div
               key={assignment.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 hover:border-slate-300 transition-all shadow-xs space-y-4"
+              className="bg-white rounded-3xl border border-[#d4d7dc] p-5 hover:border-[#0e7c86] transition-all shadow-xs space-y-4"
             >
               {/* Encabezado de la tarea */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border ${
+                    className={`inline-flex items-center gap-1.5 text-xs font-extrabold px-2.5 py-1 rounded-full border ${
                       isSubmitted
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                        ? 'bg-emerald-100 text-emerald-950 border-emerald-600'
+                        : 'bg-amber-100 text-amber-950 border-amber-600'
                     }`}
                   >
                     {isSubmitted ? (
@@ -124,10 +124,10 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
                   {/* Indicador de plazo */}
                   {assignment.due_date ? (
                     <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                      className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
                         isOverdue
-                          ? 'bg-rose-50 text-rose-700 border-rose-200'
-                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                          ? 'bg-rose-100 text-rose-950 border-rose-600'
+                          : 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]'
                       }`}
                     >
                       <Clock className="w-3 h-3" />
@@ -140,12 +140,12 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
                       })}
                     </span>
                   ) : (
-                    <span className="text-[11px] text-slate-400">Sin fecha límite</span>
+                    <span className="text-xs text-[#4a4f57]">Sin fecha límite</span>
                   )}
                 </div>
 
                 {isGraded && (
-                  <div className="inline-flex items-center gap-1.5 text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg">
+                  <div className="inline-flex items-center gap-1.5 text-xs font-extrabold bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] px-2.5 py-1 rounded-full">
                     <Award className="w-3.5 h-3.5" />
                     <span>Calificada</span>
                   </div>
@@ -154,11 +154,11 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
               {/* Título e instrucciones */}
               <div>
-                <h4 className="font-bold text-slate-900 text-base sm:text-lg mb-1">
+                <h4 className="font-extrabold text-[#1a1a1a] text-base sm:text-lg mb-1.5">
                   {assignment.title}
                 </h4>
                 {assignment.instructions && (
-                  <p className="text-xs sm:text-sm text-slate-600 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <p className="text-xs sm:text-sm text-[#4a4f57] whitespace-pre-wrap leading-relaxed bg-[#f5f5f5] p-3.5 rounded-2xl border border-[#e5e7eb]">
                     {assignment.instructions}
                   </p>
                 )}
@@ -166,8 +166,8 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
               {/* Resumen de la entrega realizada por el alumno */}
               {submission && (
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between text-slate-500 font-medium">
+                <div className="p-4 rounded-2xl bg-[#f5f5f5] border border-[#d4d7dc] space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between text-[#4a4f57] font-semibold">
                     <span>
                       Entregado el{' '}
                       {new Date(submission.submitted_at).toLocaleDateString('es-ES', {
@@ -181,27 +181,27 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
                   </div>
 
                   {submission.comments && (
-                    <div className="text-slate-700">
-                      <span className="font-semibold text-slate-900 block mb-0.5">
+                    <div className="text-[#1a1a1a]">
+                      <span className="font-extrabold text-[#1a1a1a] block mb-1">
                         Tu comentario:
                       </span>
-                      <p className="italic bg-white p-2 rounded-lg border border-slate-200">
-                        "{submission.comments}"
+                      <p className="italic bg-white p-2.5 rounded-xl border border-[#d4d7dc]">
+                        &quot;{submission.comments}&quot;
                       </p>
                     </div>
                   )}
 
                   {submission.file_url && (
                     <div className="flex items-center justify-between pt-1">
-                      <div className="flex items-center gap-1.5 text-slate-700">
-                        <FileText className="w-4 h-4 text-blue-600" />
-                        <span className="font-medium">Archivo adjuntado</span>
+                      <div className="flex items-center gap-1.5 text-[#1a1a1a]">
+                        <FileText className="w-4 h-4 text-[#0e7c86]" />
+                        <span className="font-bold">Archivo adjuntado</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleDownloadSubmissionFile(submission.file_url!)}
                         disabled={downloadingFilePath === submission.file_url}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 transition-colors"
+                        className="min-h-[40px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#0a5961] bg-[#d9f7f8] hover:bg-[#c2f0f2] border border-[#0e7c86] transition-colors"
                       >
                         {downloadingFilePath === submission.file_url ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -217,22 +217,22 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
               {/* Sección de calificación y retroalimentación del maestro (SOLO LECTURA) */}
               {isGraded && (
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Award className="w-4 h-4 text-amber-600" />
+                <div className="p-4 rounded-2xl bg-[#d9f7f8]/60 border border-[#0e7c86] space-y-2.5">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-xs font-extrabold text-[#0a5961] uppercase tracking-wider flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-[#0e7c86]" />
                       Evaluación del maestro (Solo lectura)
                     </span>
                     {submission && submission.grade !== null && (
-                      <span className="text-sm font-bold bg-white text-slate-900 px-3 py-0.5 rounded-lg border border-amber-300 shadow-xs">
+                      <span className="text-sm font-extrabold bg-white text-[#0a5961] px-3 py-1 rounded-xl border border-[#0e7c86] shadow-xs">
                         Nota: {submission.grade} ptos
                       </span>
                     )}
                   </div>
 
                   {submission?.feedback && (
-                    <div className="text-xs text-slate-800 bg-white p-3 rounded-lg border border-amber-200 leading-relaxed">
-                      <div className="flex items-center gap-1 text-slate-500 font-semibold mb-1">
+                    <div className="text-xs text-[#1a1a1a] bg-white p-3 rounded-xl border border-[#0e7c86]/50 leading-relaxed">
+                      <div className="flex items-center gap-1 text-[#0a5961] font-extrabold mb-1">
                         <MessageSquare className="w-3.5 h-3.5" />
                         <span>Comentarios del maestro:</span>
                       </div>
@@ -247,10 +247,10 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedAssignment(assignment)}
-                  className={`w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 active:scale-98 transition-all ${
+                  className={`w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 active:scale-98 transition-all ${
                     isSubmitted
-                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+                      ? 'bg-[#f5f5f5] hover:bg-slate-200 text-[#1a1a1a] border border-[#858a93]'
+                      : 'bg-[#0e7c86] hover:bg-[#0a5961] text-white shadow-sm'
                   }`}
                 >
                   <Upload className="w-4 h-4" />

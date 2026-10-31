@@ -44,12 +44,12 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
 
   if (materials.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-3 shadow-xs">
-        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto text-slate-400">
+      <div className="bg-white rounded-3xl border border-[#d4d7dc] p-8 text-center space-y-3 shadow-xs">
+        <div className="w-12 h-12 rounded-2xl bg-[#d9f7f8] border border-[#0e7c86]/30 flex items-center justify-center mx-auto text-[#0e7c86]">
           <BookOpen className="w-6 h-6" />
         </div>
-        <h4 className="font-bold text-slate-800 text-base">Sin materiales publicados aún</h4>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+        <h4 className="font-extrabold text-[#1a1a1a] text-base">Sin materiales publicados aún</h4>
+        <p className="text-xs sm:text-sm text-[#4a4f57] max-w-md mx-auto">
           El maestro de este ciclo aún no ha compartido guías, documentos ni enlaces de estudio. Cuando se publiquen, aparecerán aquí.
         </p>
       </div>
@@ -59,13 +59,13 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
   return (
     <div className="space-y-4">
       {downloadError && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
           <span>{downloadError}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {materials.map((item) => {
           const isFile = Boolean(item.file_url);
           const isLink = Boolean(item.external_url);
@@ -73,16 +73,16 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
           return (
             <div
               key={item.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 flex flex-col justify-between hover:border-slate-300 transition-all shadow-xs gap-4"
+              className="bg-white rounded-3xl border border-[#d4d7dc] p-5 flex flex-col justify-between hover:border-[#0e7c86] transition-all shadow-xs gap-4"
             >
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
                         isFile
-                          ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                          : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                          ? 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]'
+                          : 'bg-emerald-100 text-emerald-950 border-emerald-600'
                       }`}
                     >
                       {isFile ? (
@@ -92,17 +92,17 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
                       )}
                     </span>
                     <span
-                      className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded-md border ${
+                      className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
                         isFile
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          ? 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]'
+                          : 'bg-emerald-100 text-emerald-950 border-emerald-600'
                       }`}
                     >
                       {isFile ? 'Archivo adjunto' : 'Enlace web'}
                     </span>
                   </div>
 
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-xs text-[#4a4f57]">
                     {new Date(item.created_at).toLocaleDateString('es-ES', {
                       day: 'numeric',
                       month: 'short',
@@ -110,24 +110,24 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
                   </span>
                 </div>
 
-                <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
+                <h4 className="font-extrabold text-[#1a1a1a] text-sm sm:text-base leading-snug">
                   {item.title}
                 </h4>
 
                 {item.description && (
-                  <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-xs text-[#4a4f57] whitespace-pre-wrap leading-relaxed">
                     {item.description}
                   </p>
                 )}
               </div>
 
               {/* Botón de acción táctil */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-3 border-t border-[#e5e7eb]">
                 {isFile && (
                   <button
                     onClick={() => handleDownloadFile(item)}
                     disabled={downloadingId === item.id}
-                    className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 active:scale-98 transition-all border border-blue-200"
+                    className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-[#0e7c86] hover:bg-[#0a5961] text-white active:scale-98 transition-all shadow-xs"
                   >
                     {downloadingId === item.id ? (
                       <>
@@ -148,7 +148,7 @@ export const StudentMaterialsTab: React.FC<StudentMaterialsTabProps> = ({
                     href={item.external_url || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 active:scale-98 transition-all border border-emerald-200"
+                    className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-100 hover:bg-emerald-200 text-emerald-950 active:scale-98 transition-all border border-emerald-600"
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Abrir enlace externo</span>

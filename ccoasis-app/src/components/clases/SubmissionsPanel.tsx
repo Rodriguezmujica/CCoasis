@@ -110,9 +110,9 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
   if (isLoadingSubmissions) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 flex items-center justify-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-        <span className="text-sm text-slate-500">Cargando entregas...</span>
+      <div className="bg-white rounded-3xl border border-[#d4d7dc] p-8 flex items-center justify-center gap-2">
+        <Loader2 className="w-5 h-5 animate-spin text-[#0e7c86]" />
+        <span className="text-sm text-[#4a4f57]">Cargando entregas...</span>
       </div>
     );
   }
@@ -121,12 +121,12 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
     <div className="space-y-4">
       {/* Resumen */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-xs font-bold text-slate-500">
+        <span className="text-xs font-extrabold text-[#4a4f57]">
           {submittedCount} de {submissions.length} alumnos han entregado
         </span>
-        <div className="flex-1 h-1.5 bg-slate-100 rounded-full min-w-[60px] overflow-hidden">
+        <div className="flex-1 h-2 bg-[#e5e7eb] rounded-full min-w-[60px] overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
+            className="h-full bg-[#0e7c86] rounded-full transition-all"
             style={{ width: `${submissions.length > 0 ? (submittedCount / submissions.length) * 100 : 0}%` }}
           />
         </div>
@@ -134,15 +134,15 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
       {/* Error de descarga */}
       {downloadError && (
-        <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs">
-          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-800 text-xs">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
           <span>{downloadError}</span>
         </div>
       )}
 
       {/* Lista de entregas */}
       {submissions.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500 text-xs">
+        <div className="bg-white rounded-3xl border border-[#d4d7dc] p-8 text-center text-[#4a4f57] text-xs">
           No hay alumnos inscritos para mostrar entregas.
         </div>
       ) : (
@@ -156,34 +156,34 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
             return (
               <div
                 key={sub.id}
-                className={`bg-white rounded-2xl border shadow-xs p-4 space-y-3 transition-colors ${
-                  hasSubmitted ? 'border-slate-200' : 'border-dashed border-slate-300'
+                className={`bg-white rounded-3xl border shadow-xs p-5 space-y-3 transition-colors ${
+                  hasSubmitted ? 'border-[#d4d7dc]' : 'border-dashed border-[#858a93]'
                 }`}
               >
                 {/* Fila principal: alumno + estado */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] font-extrabold text-xs flex items-center justify-center flex-shrink-0">
                       {sub.person.first_name[0]}{sub.person.last_name[0]}
                     </div>
                     <div>
-                      <div className="font-bold text-slate-900 text-sm">
+                      <div className="font-extrabold text-[#1a1a1a] text-sm">
                         {sub.person.first_name} {sub.person.last_name}
                       </div>
                       {sub.person.email && (
-                        <div className="text-[11px] text-slate-400">{sub.person.email}</div>
+                        <div className="text-xs text-[#4a4f57]">{sub.person.email}</div>
                       )}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {hasSubmitted ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-950 bg-emerald-100 border border-emerald-600 px-2.5 py-0.5 rounded-full">
                         <CheckCircle2 className="w-3 h-3" />
                         Entregado
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-950 bg-amber-100 border border-amber-600 px-2.5 py-0.5 rounded-full">
                         <Clock className="w-3 h-3" />
                         Pendiente
                       </span>
@@ -193,16 +193,16 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
                 {/* Si entregó: detalles */}
                 {hasSubmitted && !isPending && (
-                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                  <div className="pt-2 border-t border-[#e5e7eb] space-y-2">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-xs text-[#4a4f57]">
                         Entregado el {formatDateTime(sub.submitted_at)}
                       </span>
 
                       <div className="flex items-center gap-2">
                         {/* Calificación actual */}
                         {sub.grade !== null && (
-                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-extrabold text-[#0a5961] bg-[#d9f7f8] border border-[#0e7c86] px-2.5 py-0.5 rounded-full">
                             Nota: {sub.grade}
                           </span>
                         )}
@@ -212,12 +212,13 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
                           <button
                             onClick={() => handleDownload(sub)}
                             disabled={downloadingId === sub.id}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-60"
+                            aria-label={`Descargar entrega de ${sub.person.first_name} ${sub.person.last_name}`}
+                            className="min-h-[40px] flex items-center gap-1.5 px-3 py-1.5 text-xs font-extrabold text-[#0a5961] bg-[#d9f7f8] border border-[#0e7c86] rounded-xl hover:bg-[#c2f0f2] transition-colors disabled:opacity-60"
                           >
                             {downloadingId === sub.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                              <Download className="w-3 h-3" />
+                              <Download className="w-3.5 h-3.5" />
                             )}
                             <span>Descargar</span>
                           </button>
@@ -227,17 +228,17 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
                     {/* Texto de entrega */}
                     {sub.comments && (
-                      <div className="flex items-start gap-1.5 text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5">
-                        <FileText className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-slate-400" />
+                      <div className="flex items-start gap-2 text-xs text-[#1a1a1a] bg-[#f5f5f5] border border-[#e5e7eb] rounded-2xl p-3">
+                        <FileText className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#0e7c86]" />
                         <p className="leading-relaxed line-clamp-3">{sub.comments}</p>
                       </div>
                     )}
 
                     {/* Feedback ya guardado */}
                     {sub.feedback && !isBeingGraded && (
-                      <div className="flex items-start gap-1.5 text-xs text-blue-700 bg-blue-50 rounded-xl p-2.5">
-                        <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                        <p className="leading-relaxed">{sub.feedback}</p>
+                      <div className="flex items-start gap-2 text-xs text-[#0a5961] bg-[#d9f7f8]/60 border border-[#0e7c86] rounded-2xl p-3">
+                        <MessageSquare className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#0e7c86]" />
+                        <p className="leading-relaxed font-medium">{sub.feedback}</p>
                       </div>
                     )}
                   </div>
@@ -245,11 +246,11 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
 
                 {/* Formulario de calificación */}
                 {isBeingGraded && gradingForm ? (
-                  <div className="pt-3 border-t border-blue-200 space-y-3">
-                    <p className="text-xs font-bold text-blue-700">Calificar entrega</p>
-                    <div className="flex gap-3">
-                      <div className="w-28">
-                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">
+                  <div className="pt-3 border-t border-[#d4d7dc] space-y-3">
+                    <p className="text-xs font-extrabold text-[#0e7c86]">Calificar entrega</p>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="sm:w-32">
+                        <label className="text-xs text-[#1a1a1a] font-bold block mb-1">
                           Calificación
                         </label>
                         <input
@@ -261,11 +262,11 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
                             setGradingForm((f) => f && ({ ...f, grade: e.target.value }))
                           }
                           placeholder="—"
-                          className="w-full px-2.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full min-h-[44px] px-3 py-2 text-base text-[#1a1a1a] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84]"
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="text-[10px] text-slate-500 font-semibold block mb-1">
+                        <label className="text-xs text-[#1a1a1a] font-bold block mb-1">
                           Retroalimentación
                         </label>
                         <textarea
@@ -275,33 +276,33 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
                           }
                           rows={2}
                           placeholder="Comentarios para el alumno..."
-                          className="w-full px-2.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                          className="w-full min-h-[44px] px-3 py-2 text-base text-[#1a1a1a] placeholder:text-[#4a4f57] border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] resize-none"
                         />
                       </div>
                     </div>
 
                     {gradingForm.error && (
-                      <div className="text-xs text-red-600 bg-red-50 rounded-xl p-2 flex items-center gap-1.5">
-                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl p-2.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
                         {gradingForm.error}
                       </div>
                     )}
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2.5">
                       <button
                         onClick={() => setGradingForm(null)}
                         disabled={gradingForm.isSaving}
-                        className="flex-1 py-2 text-xs font-semibold text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors"
+                        className="flex-1 min-h-[44px] py-2 text-xs font-bold text-[#1a1a1a] border border-[#858a93] rounded-xl hover:bg-[#f5f5f5] transition-colors"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={handleSaveGrade}
                         disabled={gradingForm.isSaving}
-                        className="flex-1 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5"
+                        className="flex-1 min-h-[44px] py-2 text-xs font-extrabold text-white bg-[#0e7c86] rounded-xl hover:bg-[#0a5961] transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5"
                       >
                         {gradingForm.isSaving ? (
-                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Guardando...</span></>
+                          <><Loader2 className="w-4 h-4 animate-spin" /><span>Guardando...</span></>
                         ) : (
                           'Guardar calificación'
                         )}
@@ -312,13 +313,13 @@ export const SubmissionsPanel: React.FC<SubmissionsPanelProps> = ({
                   // Botón para abrir el formulario de calificación
                   <button
                     onClick={() => openGradeForm(sub)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-xl border transition-colors ${
+                    className={`w-full min-h-[44px] flex items-center justify-center gap-1.5 py-2.5 text-xs font-extrabold rounded-xl border transition-colors ${
                       justSaved
-                        ? 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                        : 'border-slate-200 text-slate-600 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200'
+                        ? 'border-emerald-600 text-emerald-950 bg-emerald-100 hover:bg-emerald-200'
+                        : 'border-[#d4d7dc] text-[#1a1a1a] bg-[#f5f5f5] hover:bg-[#d9f7f8] hover:text-[#0a5961] hover:border-[#0e7c86]'
                     }`}
                   >
-                    <Star className="w-3.5 h-3.5" />
+                    <Star className="w-4 h-4 text-[#0e7c86]" />
                     <span>
                       {sub.grade !== null || sub.feedback
                         ? 'Editar calificación / feedback'

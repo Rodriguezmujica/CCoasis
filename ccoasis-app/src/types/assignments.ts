@@ -6,6 +6,12 @@ export type ChurchEventRoleType =
   | 'ninos' 
   | 'sonido';
 
+export interface EventServer {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 export interface ChurchEventAssignment {
   id: string;
   event_id: string;
@@ -19,7 +25,7 @@ export interface ChurchEventAssignment {
     last_name: string;
     email?: string | null;
     phone?: string | null;
-  };
+  } | null;
 }
 
 export interface ChurchEventAssignmentFormData {

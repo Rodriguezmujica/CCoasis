@@ -32,6 +32,27 @@ export function parseAssignmentError(error: any): string {
   return msg || 'Ocurrió un error inesperado al gestionar los turnos.';
 }
 
+/** Consulta la vista segura v_event_servers para obtener nombre y apellido de los servidores */
+async function fetchEventServersMap(
+  personIds?: string[]
+): Promise<Map<string, { id: string; first_name: string; last_name: string }>> {
+  try {
+    let query = supabase.from('v_event_servers').select('id, first_name, last_name');
+    if (personIds && personIds.length > 0) {
+      query = query.in('id', personIds);
+    }
+    const { data, error } = await query;
+    if (error) {
+      console.warn('Nota al consultar vista segura v_event_servers:', error.message);
+      return new Map();
+    }
+    return new Map((data || []).map((s: any) => [s.id, s]));
+  } catch (err) {
+    console.warn('Excepción al consultar v_event_servers:', err);
+    return new Map();
+  }
+}
+
 export function useEventAssignments(eventId: string | null) {
   const [assignments, setAssignments] = useState<ChurchEventAssignment[]>([]);
   const [activePersons, setActivePersons] = useState<Person[]>([]);
@@ -47,7 +68,7 @@ export function useEventAssignments(eventId: string | null) {
     };
   }, []);
 
-  // Cargar asignaciones del evento con los datos de cada persona
+  // Cargar asignaciones del evento con los datos de cada servidor desde v_event_servers
   const fetchAssignments = useCallback(async () => {
     if (!eventId) {
       setAssignments([]);
@@ -66,22 +87,56 @@ export function useEventAssignments(eventId: string | null) {
           role_type,
           notes,
           created_at,
-          person:persons (
+          person:v_event_servers (
             id,
             first_name,
-            last_name,
-            email,
-            phone
+            last_name
           )
         `)
         .eq('event_id', eventId)
         .order('created_at', { ascending: true });
 
-      if (fetchErr) throw fetchErr;
+      let rows = data;
+
+      if (fetchErr) {
+        console.warn('Fallback a consulta directa de v_event_servers:', fetchErr.message);
+        const { data: rawAssignments, error: rawErr } = await supabase
+          .from('church_event_assignments')
+          .select('id, event_id, person_id, role_type, notes, created_at')
+          .eq('event_id', eventId)
+          .order('created_at', { ascending: true });
+
+        if (rawErr) throw rawErr;
+
+        const personIds = Array.from(
+          new Set((rawAssignments || []).map((r: any) => r.person_id).filter(Boolean))
+        ) as string[];
+        const serversMap = await fetchEventServersMap(personIds);
+
+        rows = (rawAssignments || []).map((r: any) => ({
+          ...r,
+          person: serversMap.get(r.person_id) || null,
+        }));
+      } else {
+        const unmappedPersonIds = (rows || [])
+          .filter((row: any) => !row.person && row.person_id)
+          .map((row: any) => row.person_id) as string[];
+
+        if (unmappedPersonIds.length > 0) {
+          const fallbackMap = await fetchEventServersMap(unmappedPersonIds);
+          rows = (rows || []).map((row: any) => {
+            const rawPerson = Array.isArray(row.person) ? row.person[0] : row.person;
+            return {
+              ...row,
+              person: rawPerson || fallbackMap.get(row.person_id) || null,
+            };
+          });
+        }
+      }
+
       if (!mountedRef.current) return;
 
-      // Normalizar person si Supabase devuelve array o null
-      const formatted: ChurchEventAssignment[] = (data || []).map((row: any) => ({
+      const formatted: ChurchEventAssignment[] = (rows || []).map((row: any) => ({
         id: row.id,
         event_id: row.event_id,
         person_id: row.person_id,
@@ -224,21 +279,55 @@ export function useBatchEventAssignments(eventIds: string[]) {
           role_type,
           notes,
           created_at,
-          person:persons (
+          person:v_event_servers (
             id,
             first_name,
-            last_name,
-            email,
-            phone
+            last_name
           )
         `)
         .in('event_id', eventIds)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      let rows = data;
+
+      if (error) {
+        console.warn('Fallback batch a consulta directa de v_event_servers:', error.message);
+        const { data: rawAssignments, error: rawErr } = await supabase
+          .from('church_event_assignments')
+          .select('id, event_id, person_id, role_type, notes, created_at')
+          .in('event_id', eventIds)
+          .order('created_at', { ascending: true });
+
+        if (rawErr) throw rawErr;
+
+        const personIds = Array.from(
+          new Set((rawAssignments || []).map((r: any) => r.person_id).filter(Boolean))
+        ) as string[];
+        const serversMap = await fetchEventServersMap(personIds);
+
+        rows = (rawAssignments || []).map((r: any) => ({
+          ...r,
+          person: serversMap.get(r.person_id) || null,
+        }));
+      } else {
+        const unmappedPersonIds = (rows || [])
+          .filter((row: any) => !row.person && row.person_id)
+          .map((row: any) => row.person_id) as string[];
+
+        if (unmappedPersonIds.length > 0) {
+          const fallbackMap = await fetchEventServersMap(unmappedPersonIds);
+          rows = (rows || []).map((row: any) => {
+            const rawPerson = Array.isArray(row.person) ? row.person[0] : row.person;
+            return {
+              ...row,
+              person: rawPerson || fallbackMap.get(row.person_id) || null,
+            };
+          });
+        }
+      }
 
       const map: Record<string, ChurchEventAssignment[]> = {};
-      (data || []).forEach((row: any) => {
+      (rows || []).forEach((row: any) => {
         const item: ChurchEventAssignment = {
           id: row.id,
           event_id: row.event_id,

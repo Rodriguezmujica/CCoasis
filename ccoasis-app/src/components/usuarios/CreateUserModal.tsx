@@ -152,69 +152,77 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/55 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-[#d4d7dc] overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur-md">
-              <UserPlus className="w-5 h-5 text-white" />
+        <div className="px-6 py-5 oasis-title-gradient on-magenta text-white flex items-center justify-between">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div
+              className="w-11 h-11 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0"
+              aria-hidden="true"
+            >
+              <UserPlus className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold leading-tight">Crear nuevo usuario</h2>
-              <p className="text-xs text-white/95">Crea credenciales de acceso y asigna roles</p>
+            <div className="min-w-0">
+              <h2 className="text-2xl font-extrabold text-white leading-tight">
+                Crear nuevo usuario
+              </h2>
+              <p className="text-xs text-white font-medium mt-0.5">
+                Crea credenciales de acceso y asigna roles
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-white hover:bg-white/15 transition-colors disabled:opacity-50"
+            className="p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-xl text-white hover:bg-white/15 transition-colors disabled:opacity-50 shrink-0"
             title="Cerrar"
             aria-label="Cerrar"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
           {formError && (
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600" />
-              <div className="flex-1 font-medium">{formError}</div>
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50 border border-rose-600 text-rose-950 text-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-700" aria-hidden="true" />
+              <div className="flex-1 font-bold">{formError}</div>
             </div>
           )}
 
           {successMessage && (
-            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600" />
-              <span className="font-semibold">{successMessage}</span>
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-100 border border-emerald-600 text-emerald-950 text-sm">
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-800" aria-hidden="true" />
+              <span className="font-bold">{successMessage}</span>
             </div>
           )}
 
           {/* Opción: Vincular a persona existente */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div className="bg-[#f5f5f5] border border-[#d4d7dc] rounded-2xl p-4 space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer select-none min-h-[44px]">
               <input
                 type="checkbox"
                 checked={linkToExisting}
                 onChange={(e) => handleToggleLinkExisting(e.target.checked)}
                 disabled={isSubmitting}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 rounded border-[#858a93] text-[#0e7c86] focus:ring-[#0e7c86] shrink-0"
               />
-              <span className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-                <Link2 className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-bold text-[#1a1a1a] flex items-center gap-1.5">
+                <Link2 className="w-4 h-4 text-[#0e7c86]" aria-hidden="true" />
                 Vincular a una persona ya registrada
               </span>
             </label>
 
             {linkToExisting && (
-              <div className="pt-2 border-t border-slate-200/80">
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">
+              <div className="pt-2.5 border-t border-[#d4d7dc]">
+                <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
                   Seleccionar persona existente (sin cuenta)
                 </label>
                 {unlinkedPersons.length === 0 ? (
-                  <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                  <p className="text-xs font-medium text-amber-950 bg-amber-100 p-3 rounded-xl border border-amber-600">
                     No hay personas sin cuenta registradas en el sistema. Puedes crear el usuario directamente abajo y se creará su ficha automáticamente.
                   </p>
                 ) : (
@@ -222,7 +230,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     value={selectedPersonId}
                     onChange={(e) => handleSelectPerson(e.target.value)}
                     disabled={isSubmitting}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl border border-[#858a93] bg-white text-base text-[#1a1a1a] focus:outline-none focus:border-[#0e7c86]"
                   >
                     <option value="">-- Elige una persona --</option>
                     {unlinkedPersons.map((p) => (
@@ -239,11 +247,14 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
           {/* Campos de Nombre y Apellido */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Nombre <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
+                Nombre <span className="text-[#9b1c1c]">*</span>
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4f57]"
+                  aria-hidden="true"
+                />
                 <input
                   type="text"
                   required
@@ -251,17 +262,20 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   onChange={(e) => setFirstName(e.target.value)}
                   disabled={isSubmitting || (linkToExisting && Boolean(selectedPersonId))}
                   placeholder="Ej. Juan"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 min-h-[44px] rounded-xl border border-[#858a93] text-base text-[#1a1a1a] placeholder-[#4a4f57]/70 focus:outline-none focus:border-[#0e7c86] disabled:bg-[#f5f5f5] disabled:text-[#4a4f57]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Apellido <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
+                Apellido <span className="text-[#9b1c1c]">*</span>
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4f57]"
+                  aria-hidden="true"
+                />
                 <input
                   type="text"
                   required
@@ -269,7 +283,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   onChange={(e) => setLastName(e.target.value)}
                   disabled={isSubmitting || (linkToExisting && Boolean(selectedPersonId))}
                   placeholder="Ej. Pérez"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 min-h-[44px] rounded-xl border border-[#858a93] text-base text-[#1a1a1a] placeholder-[#4a4f57]/70 focus:outline-none focus:border-[#0e7c86] disabled:bg-[#f5f5f5] disabled:text-[#4a4f57]"
                 />
               </div>
             </div>
@@ -277,11 +291,14 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
           {/* Correo Electrónico */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Correo Electrónico <span className="text-rose-500">*</span>
+            <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
+              Correo Electrónico <span className="text-[#9b1c1c]">*</span>
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Mail
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4f57]"
+                aria-hidden="true"
+              />
               <input
                 type="email"
                 required
@@ -289,21 +306,24 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="usuario@ejemplo.com"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                className="w-full pl-10 pr-3.5 py-2.5 min-h-[44px] rounded-xl border border-[#858a93] text-base text-[#1a1a1a] placeholder-[#4a4f57]/70 focus:outline-none focus:border-[#0e7c86] disabled:bg-[#f5f5f5]"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-xs text-[#4a4f57] mt-1">
               Servirá como nombre de usuario para iniciar sesión.
             </p>
           </div>
 
           {/* Contraseña Inicial */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Contraseña Inicial <span className="text-rose-500">*</span>
+            <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-1.5">
+              Contraseña Inicial <span className="text-[#9b1c1c]">*</span>
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a4f57]"
+                aria-hidden="true"
+              />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
@@ -312,27 +332,27 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="Mínimo 6 caracteres"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                className="w-full pl-10 pr-12 py-2.5 min-h-[44px] rounded-xl border border-[#858a93] text-base text-[#1a1a1a] placeholder-[#4a4f57]/70 focus:outline-none focus:border-[#0e7c86] disabled:bg-[#f5f5f5]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-[#4a4f57] hover:text-[#1a1a1a] rounded-xl"
                 title={showPassword ? 'Ocultar' : 'Mostrar'}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-xs text-[#4a4f57] mt-1">
               Comunícale esta contraseña al usuario para su primer ingreso.
             </p>
           </div>
 
           {/* Selección de Roles */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-              Roles en la aplicación <span className="text-rose-500">*</span>
+            <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2">
+              Roles en la aplicación <span className="text-[#9b1c1c]">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {AVAILABLE_ROLES.map(({ role, label }) => {
@@ -340,10 +360,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 return (
                   <label
                     key={role}
-                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-start gap-3 p-3.5 min-h-[44px] rounded-2xl border cursor-pointer transition-all ${
                       isChecked
-                        ? 'bg-blue-50/70 border-blue-600 shadow-sm'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
+                        ? 'bg-[#d9f7f8] border-[#0e7c86] shadow-sm'
+                        : 'bg-white border-[#858a93] hover:bg-[#f5f5f5]'
                     } ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`}
                   >
                     <input
@@ -351,18 +371,18 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       checked={isChecked}
                       onChange={() => handleRoleToggle(role)}
                       disabled={isSubmitting}
-                      className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="w-5 h-5 mt-0.5 rounded border-[#858a93] text-[#0e7c86] focus:ring-[#0e7c86] shrink-0"
                     />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-slate-900">{label}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-[#1a1a1a]">{label}</span>
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${ROLE_BADGE_STYLES[role]}`}
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ROLE_BADGE_STYLES[role]}`}
                         >
                           {role}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5 leading-snug">
+                      <p className="text-xs text-[#4a4f57] mt-0.5 leading-snug">
                         {ROLE_DESCRIPTIONS[role]}
                       </p>
                     </div>
@@ -373,19 +393,19 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
           </div>
 
           {/* Botones de Acción */}
-          <div className="pt-4 border-t border-slate-200 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+          <div className="pt-4 border-t border-[#e5e7eb] flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-bold text-[#1a1a1a] bg-white hover:bg-[#f5f5f5] border border-[#858a93] transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting || Boolean(successMessage)}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-2.5 min-h-[44px] rounded-xl text-sm font-bold text-white bg-[#0e7c86] hover:bg-[#0a5961] shadow-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -394,7 +414,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </>
               ) : (
                 <>
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus className="w-4 h-4" aria-hidden="true" />
                   <span>Crear usuario</span>
                 </>
               )}

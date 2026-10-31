@@ -162,14 +162,15 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold leading-tight">Crear nuevo usuario</h2>
-              <p className="text-xs text-blue-100">Crea credenciales de acceso y asigna roles</p>
+              <p className="text-xs text-white/95">Crea credenciales de acceso y asigna roles</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-white hover:bg-white/15 transition-colors disabled:opacity-50"
             title="Cerrar"
+            aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>
@@ -341,7 +342,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     key={role}
                     className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                       isChecked
-                        ? 'bg-blue-50/70 border-blue-300 shadow-sm'
+                        ? 'bg-blue-50/70 border-blue-600 shadow-sm'
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     } ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`}
                   >

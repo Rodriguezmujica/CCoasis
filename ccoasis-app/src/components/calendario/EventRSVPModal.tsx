@@ -140,7 +140,7 @@ export const EventRSVPModal: React.FC<EventRSVPModalProps> = ({
             </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-blue-100">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-white">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               <span>{formatEventFriendlyDate(event.start_time)}</span>
@@ -158,7 +158,7 @@ export const EventRSVPModal: React.FC<EventRSVPModalProps> = ({
           </div>
 
           {personName && (
-            <div className="mt-2 text-[11px] text-blue-200 font-medium">
+            <div className="mt-2 text-[11px] text-white font-medium">
               Confirmando como: <span className="font-bold text-white">{personName}</span>
             </div>
           )}

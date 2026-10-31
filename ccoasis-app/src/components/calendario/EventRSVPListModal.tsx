@@ -160,7 +160,7 @@ export const EventRSVPListModal: React.FC<EventRSVPListModalProps> = ({
             </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-blue-100">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-white">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               <span>{formatEventFriendlyDate(event.start_time)}</span>

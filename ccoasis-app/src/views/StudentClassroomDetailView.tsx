@@ -223,7 +223,7 @@ export const StudentClassroomDetailView: React.FC = () => {
           <ClipboardList className="w-4 h-4" />
           <span>Tareas</span>
           {pendingAssignmentsCount > 0 ? (
-            <span className="text-[11px] px-2 py-0.2 bg-amber-500 text-white rounded-full font-bold">
+            <span className="text-[11px] px-2 py-0.2 bg-amber-700 text-white rounded-full font-bold">
               {pendingAssignmentsCount}
             </span>
           ) : (

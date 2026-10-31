@@ -152,7 +152,7 @@ export const PersonUserLinkPanel: React.FC<PersonUserLinkPanelProps> = ({
                       className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-sm font-medium text-slate-700">{ROLE_LABELS[role]}</span>
-                    {isToggling && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500 ml-auto" />}
+                    {isToggling && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600 ml-auto" />}
                   </label>
                 );
               })}

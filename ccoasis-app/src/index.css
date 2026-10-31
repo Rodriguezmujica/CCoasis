@@ -58,8 +58,14 @@ body {
 }
 
 @layer utilities {
-  /* Degradado exclusivo para títulos grandes (h1 >= 24px bold, contraste >= 3.41:1) */
+  /* Degradado exclusivo para contenedores con títulos grandes en negrita blanca (>= 24px, contraste >= 3.41:1) */
   .oasis-title-gradient {
+    background-color: #0e7c86;
+    background-image: linear-gradient(135deg, #0f9aa2 0%, #ae4a84 100%);
+    color: #ffffff;
+  }
+
+  .oasis-text-gradient {
     color: var(--primary);
     background-image: linear-gradient(135deg, #0f9aa2 0%, #ae4a84 100%);
     -webkit-background-clip: text;

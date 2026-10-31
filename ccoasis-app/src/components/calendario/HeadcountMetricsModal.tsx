@@ -333,12 +333,12 @@ export const HeadcountMetricsModal: React.FC<HeadcountMetricsModalProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white uppercase tracking-wider">
-                  <TrendingUp className="w-3.5 h-3.5 text-blue-200" />
+                  <TrendingUp className="w-3.5 h-3.5 text-white" />
                   Métricas Eclesiales
                 </span>
                 {isFetching && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-blue-900/50 text-blue-200 border border-blue-400/30">
-                    <RefreshCw className="w-3 h-3 animate-spin text-blue-300" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-blue-900/60 text-white border border-white/30">
+                    <RefreshCw className="w-3 h-3 animate-spin text-white" />
                     Cargando año...
                   </span>
                 )}
@@ -670,7 +670,7 @@ export const HeadcountMetricsModal: React.FC<HeadcountMetricsModalProps> = ({
 
                             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                               <span className="flex items-center gap-1 font-medium text-slate-600">
-                                <CalendarDays className="w-3.5 h-3.5 text-blue-500" />
+                                <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
                                 {formatEventFriendlyDate(ev.start_time)}
                               </span>
                               <span className="flex items-center gap-1">

@@ -46,18 +46,18 @@ export const ATTENDANCE_MARK_STYLES: Record<
   { active: string; inactive: string; badge: string }
 > = {
   presente: {
-    active: 'bg-emerald-600 text-white border-emerald-700 shadow-sm font-bold',
-    inactive: 'bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50',
+    active: 'bg-emerald-700 text-white border-emerald-800 shadow-sm font-bold',
+    inactive: 'bg-white text-emerald-800 border-emerald-200 hover:bg-emerald-50',
     badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   },
   ausente: {
-    active: 'bg-rose-600 text-white border-rose-700 shadow-sm font-bold',
-    inactive: 'bg-white text-rose-700 border-rose-200 hover:bg-rose-50',
+    active: 'bg-rose-700 text-white border-rose-800 shadow-sm font-bold',
+    inactive: 'bg-white text-rose-800 border-rose-200 hover:bg-rose-50',
     badge: 'bg-rose-100 text-rose-800 border-rose-200',
   },
   justificado: {
-    active: 'bg-amber-500 text-white border-amber-600 shadow-sm font-bold',
-    inactive: 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50',
+    active: 'bg-amber-700 text-white border-amber-800 shadow-sm font-bold',
+    inactive: 'bg-white text-amber-800 border-amber-200 hover:bg-amber-50',
     badge: 'bg-amber-100 text-amber-800 border-amber-200',
   },
 };

@@ -175,7 +175,7 @@ export const MaterialsTab: React.FC<MaterialsTabProps> = ({ cycleId, isCycleClos
                     <p className="text-xs text-slate-500 line-clamp-2">{mat.description}</p>
                   )}
                   {mat.external_url && (
-                    <p className="text-[11px] text-blue-500 truncate">{mat.external_url}</p>
+                    <p className="text-[11px] text-blue-600 truncate">{mat.external_url}</p>
                   )}
                 </div>
 

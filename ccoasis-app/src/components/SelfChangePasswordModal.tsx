@@ -104,22 +104,21 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Cabecera */}
-        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex items-center justify-between">
+        <div className="px-6 py-5 oasis-title-gradient on-magenta flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md">
+            <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
               <KeyRound className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold leading-tight">Cambiar mi contraseña</h2>
-              <p className="text-xs text-white/95">Actualiza tu clave de acceso personal</p>
+              <h2 className="text-2xl font-extrabold text-white leading-tight">Cambiar mi contraseña</h2>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-white hover:bg-white/15 transition-colors disabled:opacity-50"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-white hover:bg-white/20 transition-colors disabled:opacity-50"
             title="Cerrar"
             aria-label="Cerrar"
           >
@@ -129,6 +128,7 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <p className="text-xs font-medium text-slate-600">Actualiza tu clave de acceso personal</p>
           {/* Info del usuario logueado */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
@@ -160,7 +160,7 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
               Nueva contraseña <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type={showNewPassword ? 'text' : 'password'}
                 required
@@ -169,14 +169,14 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
                 onChange={(e) => setNewPassword(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="Mínimo 6 caracteres"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                className="w-full min-h-[44px] pl-10 pr-12 py-2.5 rounded-xl border border-slate-300 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
-                title={showNewPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                title={showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -184,7 +184,7 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
             {newPassword.length > 0 && (
               <p
                 className={`text-[11px] mt-1 font-medium ${
-                  isPasswordValid ? 'text-emerald-600' : 'text-amber-600'
+                  isPasswordValid ? 'text-emerald-700' : 'text-amber-700'
                 }`}
               >
                 {isPasswordValid
@@ -200,7 +200,7 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
               Confirmar nueva contraseña <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 required
@@ -209,14 +209,14 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="Repite tu nueva contraseña"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                className="w-full min-h-[44px] pl-10 pr-12 py-2.5 rounded-xl border border-slate-300 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
-                title={showConfirmPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                title={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -224,7 +224,7 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
             {confirmPassword.length > 0 && (
               <p
                 className={`text-[11px] mt-1 font-medium ${
-                  doPasswordsMatch ? 'text-emerald-600' : 'text-rose-600'
+                  doPasswordsMatch ? 'text-emerald-700' : 'text-rose-700'
                 }`}
               >
                 {doPasswordsMatch ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden'}
@@ -238,14 +238,14 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50"
+              className="min-h-[44px] px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !newPassword || !confirmPassword}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:pointer-events-none"
+              className="min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:pointer-events-none"
             >
               {isSubmitting ? (
                 <>

@@ -271,7 +271,7 @@ export const MisClasesView: React.FC = () => {
                 className={`group cursor-pointer bg-white rounded-2xl border p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 active:scale-[0.99] ${
                   isFinished
                     ? 'border-slate-200/90 hover:border-slate-400 bg-gradient-to-b from-white to-slate-50/50'
-                    : 'border-slate-200/80 hover:border-blue-400'
+                    : 'border-slate-200/80 hover:border-blue-600'
                 }`}
               >
                 {/* Cabecera de la tarjeta: Título del curso y estados */}

@@ -239,7 +239,7 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
               )}
 
               {/* Selector de nuevo archivo */}
-              <div className="relative border-2 border-dashed border-slate-200 hover:border-blue-400 rounded-xl p-4 text-center bg-slate-50/50 hover:bg-blue-50/30 transition-colors">
+              <div className="relative border-2 border-dashed border-slate-300 hover:border-blue-600 rounded-xl p-4 text-center bg-slate-50/50 hover:bg-blue-50/30 transition-colors">
                 <input
                   type="file"
                   id="assignment-file"

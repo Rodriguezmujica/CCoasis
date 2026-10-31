@@ -186,7 +186,7 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
                 Archivo <span className="text-red-500">*</span>
               </label>
               <div
-                className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-colors"
+                className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-600 hover:bg-blue-50/30 transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />

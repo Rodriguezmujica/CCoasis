@@ -87,11 +87,11 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ className 
         onClick={handleOpen}
         title="Notificaciones"
         aria-label={`Notificaciones ${unreadCount > 0 ? `(${unreadCount} no leídas)` : ''}`}
-        className={`relative p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:scale-95 ${className}`}
+        className={`relative min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center rounded-xl text-ink hover:bg-black/10 transition-colors active:scale-95 ${className}`}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-rose-600 text-white text-[11px] font-bold rounded-full border-2 border-white shadow-sm animate-pulse">
+          <span className="absolute top-0.5 right-0.5 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-rose-700 text-white text-[11px] font-bold rounded-full border-2 border-white shadow-sm animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -143,7 +143,7 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ className 
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors"
+                  className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-xl transition-colors"
                   aria-label="Cerrar panel"
                 >
                   <X className="w-5 h-5" />
@@ -236,7 +236,8 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ className 
                         type="button"
                         onClick={(e) => handleDelete(e, notif.id)}
                         title="Eliminar notificación"
-                        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all flex-shrink-0 self-center"
+                        aria-label="Eliminar notificación"
+                        className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center text-slate-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all flex-shrink-0 self-center"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

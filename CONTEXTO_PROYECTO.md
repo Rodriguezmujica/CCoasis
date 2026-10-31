@@ -2,7 +2,7 @@
 
 > Lee este archivo completo antes de tocar nada. Es la fuente de verdad sobre qué se ha hecho, qué se decidió y qué falta. Si algo de aquí contradice una suposición tuya, manda este archivo. Si algo te parece mal, dilo antes de cambiarlo.
 
-Última actualización: 8 de octubre de 2026.
+Última actualización: 31 de octubre de 2026.
 
 ## 1. Qué es y para quién
 
@@ -75,11 +75,31 @@ Un usuario con varios roles ve la unión de menús.
 
 ## 7. Base de datos (resumen)
 
-Fuente de verdad: `supabase/migrations/`. **No edites `001` ni `002`.** Cualquier cambio va en un archivo nuevo (`003_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
+Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.** Cualquier cambio va en un archivo nuevo (`017_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
 
-**Tablas:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`.
+**Secuencia real de migraciones en el repositorio (`supabase/migrations/`):**
+- `001_initial_schema.sql`: Esquema base (personas, cursos, ciclos, finanzas, funciones SECURITY DEFINER, RLS base).
+- `002_link_person_user.sql`: Función `link_person_to_user` (vincular persona con cuenta por correo, solo admin).
+- `003_student_read_teachers.sql`: Permite a alumnos ver fichas de los maestros de sus ciclos inscritos.
+- `004_grant_service_role.sql`: Concesión de permisos explícitos al rol `service_role`.
+- `005_finanzas_categories_policy.sql`: Políticas de acceso a categorías financieras.
+- `006_calendar_events.sql`: Eventos del calendario congregacional (`church_events`).
+- `007_event_assignments.sql`: Asignaciones y turnos de servidores en eventos (`church_event_assignments`).
+- `008_event_attendance_headcount.sql`: Registro de asistencia y conteo general a eventos (`church_event_attendance`).
+- `009_announcements.sql`: Avisos y tablón de anuncios (`announcements`).
+- `010_notifications.sql`: Sistema de notificaciones internas (`notifications`).
+- `011_audit_logs.sql`: Registro de auditoría administrativa (`audit_logs`).
+- *(Nota: la migración `012` no existe en la secuencia).*
+- `013_event_rsvps.sql`: Confirmaciones individuales de asistencia a eventos (`church_event_rsvps`).
+- `014_finance_payment_methods.sql`: Métodos de pago y cuenta/fondo en `offerings` y `expenses`.
+- `015_event_servers_view.sql`: Vista segura `v_event_servers` (`security_invoker = false`) y eliminación de la política insegura en `persons`.
+- `016_fix_announcements_policy.sql`: Corrección de la política SELECT de `announcements` (`is_admin() OR ...`) para permitir archivar registros con soft-delete sin error de RLS.
 
-**Vista:** `v_cycle_grades_summary` (promedio normalizado a 0-100, porcentaje de asistencia y `passed`). Es `security_invoker`, respeta RLS y no es accesible para anon. Solo cuenta `presente` como asistencia.
+**Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`.
+
+**Vistas:**
+- `v_cycle_grades_summary` (`security_invoker = true`): promedio normalizado a 0-100, porcentaje de asistencia y `passed`. Respeta RLS y no es accesible para anon. Solo cuenta `presente` como asistencia.
+- `v_event_servers` (`security_invoker = false`): **excepción deliberada a la regla de vistas**. Permite a los usuarios autenticados consultar únicamente `id`, `first_name` y `last_name` de los servidores asignados a turnos en el calendario sin exponer datos personales sensibles de la tabla `persons` (teléfono, dirección, notas). La advertencia "Security Definer View" en el Security Advisor de Supabase para esta vista es esperada y debe ignorarse.
 
 **Storage (buckets privados):**
 - `materials`: ruta `<cycle_id>/<archivo>`.
@@ -104,7 +124,8 @@ Fuente de verdad: `supabase/migrations/`. **No edites `001` ni `002`.** Cualquie
 
 - **Bug de primer login:** consultar `user_roles` dentro de `onAuthStateChange` devolvía vacío y mandaba a `/sin-permisos`. Solución: guardar solo la sesión en ese callback y cargar los roles en un `useEffect` aparte que dependa de `session.user.id`. Mostrar "Cargando..." sin navegar hasta tener sesión y roles. `/sin-permisos` nunca debe redirigir a `/` (provocó un bucle infinito).
 - **Recursión de RLS:** políticas que se consultan entre sí (cycles y enrollments) dan "infinite recursion". Se resolvió con las funciones auxiliares SECURITY DEFINER. Usa siempre esas funciones en políticas nuevas.
-- **Vistas y RLS:** una vista normal salta RLS. Crea las vistas con `WITH (security_invoker = true)` y revoca el acceso a anon.
+- **Vistas y RLS:** una vista normal salta RLS. Por norma general, crea las vistas con `WITH (security_invoker = true)` y revoca el acceso a anon. La excepción deliberada es `public.v_event_servers` (`security_invoker = false`), creada para permitir que cualquier usuario autenticado consulte el nombre de los servidores asignados en el calendario sin vulnerar la privacidad de la tabla `persons` (su alerta "Security Definer View" en el Security Advisor de Supabase es esperada y deliberada).
+- **Políticas SELECT y soft-delete (`deleted_at`):** en tablas con archivado mediante `deleted_at`, la política SELECT del administrador no debe exigir `deleted_at IS NULL` de forma obligatoria. Si se exige, al hacer un `UPDATE ... SET deleted_at = now()` que retorna la fila (típico en `.select()`), la fila modificada deja de pasar la condición SELECT y Postgres arroja `new row violates row-level security policy`. La condición SELECT debe empezar siempre por `is_admin() OR ((deleted_at IS NULL) AND ...)`.
 - **Funciones SQL y orden de creación:** una función `LANGUAGE sql` se valida al crearla, así que las tablas que usa deben existir antes.
 - **GRANTs:** con "Automatically expose new tables" desmarcado, una tabla sin GRANT da `permission denied` aunque la RLS esté bien.
 - El script SQL probado fue en PostgreSQL 16 con auth y storage simulados. En Supabase real, repetir las pruebas con un usuario por rol.

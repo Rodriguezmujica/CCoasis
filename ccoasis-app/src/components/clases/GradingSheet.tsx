@@ -7,6 +7,7 @@ import {
   Lock,
   Award,
   Calendar,
+  MessageSquare,
 } from 'lucide-react';
 import {
   Evaluation,
@@ -277,10 +278,11 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
                             min={0}
                             max={evaluation.max_score}
                             step="any"
+                            aria-label={`Nota de ${person.first_name} ${person.last_name}`}
                             placeholder={`0 - ${evaluation.max_score}`}
                             value={item.scoreStr}
                             onChange={(e) => handleScoreChange(enrollment.id, e.target.value)}
-                            className={`w-full min-h-[44px] text-base font-extrabold px-3 py-2 rounded-xl border text-center focus:outline-none focus:ring-2 bg-white disabled:bg-slate-100 disabled:text-slate-500 ${
+                            className={`w-full min-h-[44px] text-base font-extrabold px-3 py-2 rounded-xl border text-center focus:outline-none focus:ring-2 focus-oasis bg-white disabled:bg-slate-100 disabled:text-slate-500 ${
                               validationErr
                                 ? 'border-red-500 focus:ring-red-500 text-red-700 bg-red-50/40'
                                 : 'border-[#858a93] focus:ring-[#ae4a84] text-[#1a1a1a]'
@@ -302,14 +304,23 @@ export const GradingSheet: React.FC<GradingSheetProps> = ({
                 </div>
 
                 {/* Comentarios u observaciones del maestro */}
-                <div className="mt-3 pt-3 border-t border-[#e5e7eb]">
+                <div className="mt-3 pt-3 border-t border-[#e5e7eb] space-y-1.5">
+                  <label
+                    htmlFor={`notes-${enrollment.id}`}
+                    className="flex items-center gap-1.5 text-xs font-extrabold text-[#1a1a1a] uppercase tracking-wider"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-[#0e7c86]" />
+                    <span>Comentarios / Observaciones del profesor</span>
+                  </label>
                   <input
+                    id={`notes-${enrollment.id}`}
                     type="text"
                     disabled={isCycleClosed}
-                    placeholder="Comentario o retroalimentación para el alumno..."
+                    placeholder="Comentarios u observaciones pedagógicas para este alumno..."
                     value={item.notes}
                     onChange={(e) => handleNotesChange(enrollment.id, e.target.value)}
-                    className="w-full min-h-[44px] text-base text-[#1a1a1a] placeholder:text-[#4a4f57] px-3.5 py-2 border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] bg-white disabled:bg-slate-100 disabled:text-slate-500"
+                    aria-label={`Comentarios u observaciones del profesor para ${person.first_name} ${person.last_name}`}
+                    className="w-full min-h-[44px] text-base text-[#1a1a1a] placeholder:text-[#4a4f57] px-3.5 py-2 border border-[#858a93] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ae4a84] focus-oasis bg-white disabled:bg-slate-100 disabled:text-slate-500"
                   />
                 </div>
               </div>

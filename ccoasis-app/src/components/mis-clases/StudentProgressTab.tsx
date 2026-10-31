@@ -6,6 +6,7 @@ import {
   Clock,
   Calendar,
   AlertTriangle,
+  MessageSquare,
 } from 'lucide-react';
 import {
   ClassSession,
@@ -193,51 +194,72 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
               return (
                 <div
                   key={evaluation.id}
-                  className="p-4 rounded-2xl border border-[#d4d7dc] bg-[#f5f5f5]/60 hover:bg-[#f5f5f5] transition-colors flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                  className="p-4 rounded-2xl border border-[#d4d7dc] bg-[#f5f5f5]/60 hover:bg-[#f5f5f5] transition-colors flex flex-col gap-3"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-[#1a1a1a] text-sm">
-                        {evaluation.title}
-                      </span>
-                      {evaluation.due_date && (
-                        <span className="text-xs text-[#4a4f57]">
-                          · {new Date(evaluation.due_date).toLocaleDateString('es-ES')}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-[#1a1a1a] text-sm">
+                          {evaluation.title}
                         </span>
-                      )}
-                    </div>
-                    {evaluation.description && (
-                      <p className="text-xs text-[#4a4f57]">{evaluation.description}</p>
-                    )}
-                    {gradeRecord?.notes && (
-                      <p className="text-xs text-[#1a1a1a] bg-white p-2.5 rounded-xl border border-[#d4d7dc] italic mt-1">
-                        Nota del maestro: &quot;{gradeRecord.notes}&quot;
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
-                    {hasScore ? (
-                      <div className="text-right">
-                        <div className="inline-flex items-center gap-1.5 bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] px-3 py-1 rounded-xl text-sm font-extrabold">
-                          <span>{gradeRecord.score}</span>
-                          <span className="text-xs font-semibold text-[#0e7c86]">
-                            / {evaluation.max_score}
-                          </span>
-                        </div>
-                        {normalizedPct !== null && (
-                          <span className="block text-[11px] text-[#4a4f57] mt-0.5">
-                            {normalizedPct.toFixed(0)}% equivalente
+                        {evaluation.due_date && (
+                          <span className="text-xs text-[#4a4f57]">
+                            · {new Date(evaluation.due_date).toLocaleDateString('es-ES')}
                           </span>
                         )}
                       </div>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 text-slate-800 border border-slate-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        Sin calificar aún
-                      </span>
-                    )}
+                      {evaluation.description && (
+                        <p className="text-xs text-[#4a4f57]">{evaluation.description}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
+                      {hasScore ? (
+                        <div className="text-right">
+                          <div className="inline-flex items-center gap-1.5 bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86] px-3 py-1 rounded-xl text-sm font-extrabold">
+                            <span>{gradeRecord.score}</span>
+                            <span className="text-xs font-semibold text-[#0e7c86]">
+                              / {evaluation.max_score}
+                            </span>
+                          </div>
+                          {normalizedPct !== null && (
+                            <span className="block text-[11px] text-[#4a4f57] mt-0.5">
+                              {normalizedPct.toFixed(0)}% equivalente
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 text-slate-800 border border-slate-400">
+                          <Clock className="w-3.5 h-3.5" />
+                          Sin calificar aún
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Pastilla / tarjeta accesible con el comentario del profesor */}
+                  {gradeRecord?.notes && (
+                    <div className="pt-3 border-t border-[#d4d7dc]/70">
+                      <div
+                        tabIndex={0}
+                        role="region"
+                        aria-label="Comentarios del profesor sobre tu evaluación"
+                        className="p-3.5 bg-[#d9f7f8]/70 border border-[#0e7c86] rounded-2xl flex items-start gap-2.5 text-xs focus-oasis"
+                      >
+                        <div className="w-6 h-6 rounded-lg bg-[#0e7c86] text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="space-y-1 flex-1">
+                          <span className="font-extrabold text-[#0a5961] uppercase tracking-wider block text-[11px]">
+                            Comentarios / Observaciones del profesor:
+                          </span>
+                          <p className="text-[#1a1a1a] font-medium leading-relaxed italic">
+                            &quot;{gradeRecord.notes}&quot;
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

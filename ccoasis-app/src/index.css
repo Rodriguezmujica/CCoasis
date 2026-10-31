@@ -49,6 +49,11 @@ body {
   outline-offset: 2px;
 }
 
+.focus-oasis:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .on-cyan :focus-visible {
   outline-color: var(--focus-on-cyan);
 }

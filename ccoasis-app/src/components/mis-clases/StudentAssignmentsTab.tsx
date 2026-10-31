@@ -217,7 +217,12 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
               {/* Sección de calificación y retroalimentación del maestro (SOLO LECTURA) */}
               {isGraded && (
-                <div className="p-4 rounded-2xl bg-[#d9f7f8]/60 border border-[#0e7c86] space-y-2.5">
+                <div
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Evaluación y comentarios del maestro"
+                  className="p-4 rounded-2xl bg-[#d9f7f8]/60 border border-[#0e7c86] space-y-2.5 focus-oasis"
+                >
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <span className="text-xs font-extrabold text-[#0a5961] uppercase tracking-wider flex items-center gap-1.5">
                       <Award className="w-4 h-4 text-[#0e7c86]" />

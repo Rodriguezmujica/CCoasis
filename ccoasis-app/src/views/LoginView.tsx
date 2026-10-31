@@ -87,15 +87,13 @@ export const LoginView: React.FC = () => {
       <div className="flex-1 flex flex-col justify-center items-center p-4 sm:p-6">
         <div className="max-w-md w-full">
           {/* Cabecera / Identidad */}
-          <div className="text-center mb-7">
-            <div className="w-44 h-auto mx-auto mb-3">
-              <img
-                src="/logo.png"
-                alt="Centro Cristiano Oasis"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <h1 className="text-2xl font-extrabold text-ink tracking-tight">
+          <div className="text-center mb-6">
+            <img
+              src="/logo.png"
+              alt="Centro Cristiano Oasis"
+              className="w-[200px] h-auto mx-auto mb-3 object-contain"
+            />
+            <h1 className="text-[26px] leading-tight font-extrabold oasis-text-gradient">
               Centro Cristiano Oasis
             </h1>
             <p className="text-sm text-ink-muted mt-1">
@@ -105,7 +103,7 @@ export const LoginView: React.FC = () => {
 
           {/* Alerta si falta configurar .env */}
           {!isSupabaseConfigured && (
-            <div className="mb-6 p-4 bg-warning-soft border border-amber-300 rounded-2xl text-warning text-xs flex gap-3">
+            <div className="mb-6 p-4 bg-warning-soft border border-amber-300 rounded-[12px] text-warning text-xs flex gap-3">
               <AlertTriangle className="w-5 h-5 flex-shrink-0 text-amber-700" aria-hidden="true" />
               <div>
                 <p className="font-bold mb-1">Configuración pendiente</p>
@@ -117,10 +115,10 @@ export const LoginView: React.FC = () => {
             </div>
           )}
 
-          {/* Tarjeta blanca de Login con esquinas muy redondeadas */}
-          <div className="bg-surface rounded-3xl shadow-sm border border-line p-6 sm:p-8">
-            <h2 className="text-lg font-bold text-ink mb-1">Iniciar sesión</h2>
-            <p className="text-sm text-ink-muted mb-6">
+          {/* Tarjeta blanca de Login */}
+          <div className="bg-surface rounded-[12px] border border-line p-5 sm:p-7">
+            <h2 className="text-lg font-semibold text-ink">Iniciar sesión</h2>
+            <p className="text-sm text-ink-muted mt-1 mb-5">
               Ingresa con tus credenciales otorgadas por la administración.
             </p>
 

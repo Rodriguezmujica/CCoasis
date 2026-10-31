@@ -19,7 +19,6 @@ import {
   Plus,
   Clock,
   MapPin,
-  Sparkles,
   Edit2,
   Trash2,
   AlertCircle,
@@ -305,35 +304,35 @@ export const CalendarioView: React.FC = () => {
 
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
-      {/* Encabezado Principal */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
-              <CalendarIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Calendario Eclesial</h1>
-              <p className="text-sm text-slate-500">
-                Cultos, reuniones de oración, eventos y actividades de la congregación
-              </p>
-            </div>
+    <div className="p-4 md:py-6 md:px-8 space-y-4">
+      {/* Encabezado Principal: en una sola fila limpia en escritorio */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-[12px] bg-[#0e7c86] text-white flex items-center justify-center flex-shrink-0">
+            <CalendarIcon className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-[25px] leading-[1.2] font-extrabold oasis-text-gradient">
+              Calendario Eclesial
+            </h1>
+            <p className="text-sm text-[#4a4f57] truncate">
+              Cultos, reuniones de oración, eventos y actividades de la congregación
+            </p>
           </div>
         </div>
 
-        {/* Botones de Acción (Admin / Tesorero) */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        {/* Botones de Acción compactos en una sola fila sin partirse */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-shrink-0">
           {canManageHeadcount && (
             <button
               onClick={() => setIsMetricsOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-800 rounded-xl font-semibold shadow-sm hover:shadow transition-all text-sm min-h-[48px]"
+              className="min-h-[44px] px-[18px] rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-sm font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
               title="Ver resumen y métricas de asistencias del mes"
             >
-              <TrendingUp className="w-4 h-4 text-blue-600" />
+              <TrendingUp className="w-5 h-5 text-[#0e7c86] flex-shrink-0" />
               <span>Resumen de Asistencia</span>
               {monthSummary.totalEventsWithAttendance > 0 && (
-                <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                <span className="ml-0.5 px-2 py-0.5 bg-[#d9f7f8] text-[#0a5961] rounded-full text-xs font-bold">
                   {monthSummary.averageAttendance} prom.
                 </span>
               )}
@@ -343,13 +342,13 @@ export const CalendarioView: React.FC = () => {
           {isAdmin && (
             <button
               onClick={() => setIsAnnouncementsManagerOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-800 rounded-xl font-semibold shadow-sm hover:shadow transition-all text-sm min-h-[48px]"
+              className="min-h-[44px] px-[18px] rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-sm font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
               title="Administrar anuncios especiales"
             >
-              <Megaphone className="w-4 h-4 text-blue-600" />
+              <Megaphone className="w-5 h-5 text-[#0e7c86] flex-shrink-0" />
               <span>Anuncios</span>
               {activeAnnouncements.length > 0 && (
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                <span className="px-2 py-0.5 bg-[#d9f7f8] text-[#0a5961] rounded-full text-xs font-bold">
                   {activeAnnouncements.length}
                 </span>
               )}
@@ -359,9 +358,9 @@ export const CalendarioView: React.FC = () => {
           {isAdmin && (
             <button
               onClick={handleOpenCreate}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold shadow-sm hover:shadow transition-all text-base min-h-[48px]"
+              className="min-h-[44px] px-[18px] rounded-[10px] bg-[#0e7c86] hover:bg-[#0a5961] text-white text-base font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-5 h-5 flex-shrink-0" />
               <span>Nueva actividad</span>
             </button>
           )}
@@ -377,167 +376,159 @@ export const CalendarioView: React.FC = () => {
         onOpenEdit={handleOpenEditAnnouncement}
       />
 
-      {/* Banner de Próxima Actividad destacada */}
+      {/* Tarjeta de Próxima Actividad congregacional (fondo #0a5961 sólido como en la maqueta) */}
       {upcomingEvent && (
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white rounded-2xl p-5 sm:p-6 shadow-md relative overflow-hidden">
-          <div className="absolute right-[-20px] top-[-20px] opacity-10 pointer-events-none">
-            <CalendarDays className="w-48 h-48" />
+        <section
+          aria-label="Próxima actividad congregacional"
+          className="on-magenta bg-[#0a5961] text-white rounded-[12px] p-5 grid gap-2.5"
+        >
+          <span className="inline-flex items-center gap-2 text-xs font-bold bg-white/[0.18] rounded-full px-3 py-1 w-fit">
+            Próxima actividad congregacional · {getFriendlyRelativeTime(upcomingEvent.start_time)}
+          </span>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-[22px] font-bold text-white leading-snug">
+              {upcomingEvent.title}
+            </h2>
+            <span className="text-xs font-semibold bg-white/[0.18] rounded-full px-2.5 py-1">
+              {EVENT_TYPES_CONFIG[upcomingEvent.event_type]?.label || upcomingEvent.event_type}
+            </span>
           </div>
 
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-sm text-white">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Próxima actividad congregacional</span>
-                <span className="mx-1">•</span>
-                <span className="font-bold text-amber-200">
-                  {getFriendlyRelativeTime(upcomingEvent.start_time)}
-                </span>
-              </div>
+          <div className="flex flex-wrap gap-x-[18px] gap-y-1.5 text-sm text-white">
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarDays className="w-5 h-5 text-white flex-shrink-0" />
+              <span>{formatEventFriendlyDate(upcomingEvent.start_time)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="w-5 h-5 text-white flex-shrink-0" />
+              <span>
+                {formatEventTime(upcomingEvent.start_time)}
+                {upcomingEvent.end_time && ` - ${formatEventTime(upcomingEvent.end_time)}`}
+              </span>
+            </span>
+            {upcomingEvent.location && (
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="w-5 h-5 text-white flex-shrink-0" />
+                <span>{upcomingEvent.location}</span>
+              </span>
+            )}
+          </div>
 
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                  {upcomingEvent.title}
-                </h2>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-white/25 font-medium">
-                  {EVENT_TYPES_CONFIG[upcomingEvent.event_type]?.label || upcomingEvent.event_type}
-                </span>
-              </div>
+          {upcomingEvent.description && (
+            <p className="text-sm text-white/95 max-w-3xl">{upcomingEvent.description}</p>
+          )}
 
-              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-white">
-                <div className="flex items-center gap-1.5">
-                  <CalendarDays className="w-4 h-4 text-white" />
-                  <span>{formatEventFriendlyDate(upcomingEvent.start_time)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-white" />
-                  <span>
-                    {formatEventTime(upcomingEvent.start_time)}
-                    {upcomingEvent.end_time && ` - ${formatEventTime(upcomingEvent.end_time)}`}
+          {/* Fila de confirmación de asistencia (RSVP) */}
+          {(() => {
+            const sum = summariesByEvent[upcomingEvent.id];
+            const myRsvp = myRsvpsByEvent[upcomingEvent.id];
+            const isFuture = isEventFuture(upcomingEvent.start_time);
+            return (
+              <div className="flex flex-wrap items-center gap-2">
+                {sum && (sum.confirmed > 0 || sum.maybe > 0) ? (
+                  <span className="text-xs font-semibold bg-white/[0.18] rounded-full px-2.5 py-1">
+                    {sum.confirmed} {sum.confirmed === 1 ? 'confirmado' : 'confirmados'}
+                    {sum.guests > 0
+                      ? ` (${sum.guests} ${sum.guests === 1 ? 'invitado' : 'invitados'})`
+                      : ''}
                   </span>
-                </div>
-                {upcomingEvent.location && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-white" />
-                    <span>{upcomingEvent.location}</span>
-                  </div>
+                ) : (
+                  <span className="text-xs font-semibold bg-white/[0.18] rounded-full px-2.5 py-1">
+                    Sin confirmaciones aún
+                  </span>
                 )}
-              </div>
 
-              {upcomingEvent.description && (
-                <p className="text-xs sm:text-sm text-white max-w-2xl pt-1">
-                  {upcomingEvent.description}
-                </p>
-              )}
-
-              {/* Resumen público de RSVP y confirmación en banner */}
-              {(() => {
-                const sum = summariesByEvent[upcomingEvent.id];
-                const myRsvp = myRsvpsByEvent[upcomingEvent.id];
-                const isFuture = isEventFuture(upcomingEvent.start_time);
-                return (
-                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                    {sum && (sum.confirmed > 0 || sum.maybe > 0) ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-white/20 text-white backdrop-blur-sm">
-                        <CalendarCheck className="w-3.5 h-3.5 text-white" />
-                        <span>
-                          {sum.confirmed} {sum.confirmed === 1 ? 'confirmado' : 'confirmados'}
-                          {sum.guests > 0 ? ` (${sum.guests} ${sum.guests === 1 ? 'invitado' : 'invitados'})` : ''}
-                        </span>
+                {isFuture &&
+                  (myRsvp ? (
+                    <button
+                      type="button"
+                      onClick={() => setRsvpModalEvent(upcomingEvent)}
+                      className="min-h-[44px] px-[18px] rounded-[10px] bg-white text-[#0a5961] hover:bg-[#d9f7f8] text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+                      title="Modificar tu confirmación"
+                    >
+                      <Check className="w-5 h-5 text-[#0a5961]" />
+                      <span>
+                        {myRsvp.status === 'asistire'
+                          ? `Asistirás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
+                          : myRsvp.status === 'quizas'
+                          ? `Quizás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
+                          : 'No asistirás'}{' '}
+                        · Modificar
                       </span>
-                    ) : (
-                      <span className="text-xs text-white italic">Sin confirmaciones aún</span>
-                    )}
+                    </button>
+                  ) : isPersonLinked ? (
+                    <button
+                      type="button"
+                      onClick={() => setRsvpModalEvent(upcomingEvent)}
+                      className="min-h-[44px] px-[18px] rounded-[10px] bg-white text-[#0a5961] hover:bg-[#d9f7f8] text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+                    >
+                      <Check className="w-5 h-5 text-[#0a5961]" />
+                      <span>Confirmar asistencia</span>
+                    </button>
+                  ) : (
+                    <span
+                      className="text-xs font-semibold bg-white/[0.18] rounded-full px-2.5 py-1"
+                      title="Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule"
+                    >
+                      Cuenta sin vincular para confirmar
+                    </span>
+                  ))}
+              </div>
+            );
+          })()}
 
-                    {isFuture && (
-                      myRsvp ? (
-                        <button
-                          type="button"
-                          onClick={() => setRsvpModalEvent(upcomingEvent)}
-                          className="px-3 py-1 rounded-full font-bold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center gap-1.5 shadow-sm"
-                          title="Modificar tu confirmación"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          <span>
-                            {myRsvp.status === 'asistire'
-                              ? `Asistirás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
-                              : myRsvp.status === 'quizas'
-                              ? `Quizás${myRsvp.guests > 0 ? ` (+${myRsvp.guests})` : ''}`
-                              : 'No asistirás'}
-                          </span>
-                          <span className="text-[10px] underline ml-0.5">Modificar</span>
-                        </button>
-                      ) : isPersonLinked ? (
-                        <button
-                          type="button"
-                          onClick={() => setRsvpModalEvent(upcomingEvent)}
-                          className="px-3 py-1 rounded-full font-bold bg-white text-blue-900 hover:bg-blue-50 transition-colors flex items-center gap-1.5 shadow-sm"
-                        >
-                          <CalendarCheck className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Confirmar asistencia</span>
-                        </button>
-                      ) : (
-                        <span
-                          className="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white"
-                          title="Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule"
-                        >
-                          Cuenta sin vincular para confirmar
-                        </span>
-                      )
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto pt-2 md:pt-0">
-              {isAdmin && (
-                <button
-                  onClick={() => setRsvpListEvent(upcomingEvent)}
-                  className="px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold backdrop-blur-sm shadow-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
-                  title="Ver lista de personas que han confirmado asistencia"
-                >
-                  <Users className="w-4 h-4 text-white" />
-                  <span>Ver confirmados</span>
-                </button>
-              )}
-
-              {canManageHeadcount && (
-                <button
-                  onClick={() => setHeadcountEvent(upcomingEvent)}
-                  className="px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold backdrop-blur-sm shadow-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
-                  title="Conteo de Asistencia"
-                >
-                  <UserCheck className="w-4 h-4 text-emerald-300" />
-                  <span>
-                    {headcountsByEvent[upcomingEvent.id]
-                      ? `Conteo: ${headcountsByEvent[upcomingEvent.id].total_count}`
-                      : 'Registrar conteo'}
-                  </span>
-                </button>
-              )}
-
+          {/* Fila inferior de botones de acción bien alineados */}
+          <div className="flex flex-wrap items-center gap-2">
+            {isAdmin && (
               <button
-                onClick={() => setAssignmentsEvent(upcomingEvent)}
-                className="px-3.5 py-2.5 rounded-xl bg-white text-blue-900 hover:bg-blue-50 active:bg-blue-100 text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
-                title="Programa del Culto / Servidores de Turno"
+                type="button"
+                onClick={() => setRsvpListEvent(upcomingEvent)}
+                className="min-h-[44px] px-[18px] rounded-[10px] bg-transparent border border-white text-white hover:bg-white/15 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+                title="Ver lista de personas que han confirmado asistencia"
               >
-                <Users className="w-4 h-4 text-blue-600" />
-                <span>{isAdmin ? 'Gestionar Programa / Turnos' : 'Ver Servidores de Turno'}</span>
+                <Users className="w-5 h-5 text-white" />
+                <span>Ver confirmados</span>
               </button>
+            )}
 
-              {isAdmin && (
-                <button
-                  onClick={() => handleOpenEdit(upcomingEvent)}
-                  className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 text-white text-xs font-semibold backdrop-blur-sm transition-colors flex items-center gap-1.5"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span>Editar</span>
-                </button>
-              )}
-            </div>
+            {canManageHeadcount && (
+              <button
+                type="button"
+                onClick={() => setHeadcountEvent(upcomingEvent)}
+                className="min-h-[44px] px-[18px] rounded-[10px] bg-transparent border border-white text-white hover:bg-white/15 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+                title="Conteo de Asistencia"
+              >
+                <span>
+                  {headcountsByEvent[upcomingEvent.id]
+                    ? `Conteo: ${headcountsByEvent[upcomingEvent.id].total_count}`
+                    : 'Registrar conteo'}
+                </span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setAssignmentsEvent(upcomingEvent)}
+              className="min-h-[44px] px-[18px] rounded-[10px] bg-white text-[#0a5961] hover:bg-[#d9f7f8] text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+              title="Programa del Culto / Servidores de Turno"
+            >
+              <Users className="w-5 h-5 text-[#0a5961]" />
+              <span>{isAdmin ? 'Gestionar Programa / Turnos' : 'Ver Servidores de Turno'}</span>
+            </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => handleOpenEdit(upcomingEvent)}
+                className="min-h-[44px] px-[18px] rounded-[10px] bg-transparent border border-white text-white hover:bg-white/15 text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+              >
+                <Edit2 className="w-5 h-5 text-white" />
+                <span>Editar</span>
+              </button>
+            )}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Cuadrícula Mensual Interactiva (Calendar Grid View) */}
@@ -625,63 +616,56 @@ export const CalendarioView: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* Cabecera destacada de la fecha enfocada */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2.5 rounded-xl text-white shadow-xs ${
-                  isTodayActive
-                    ? 'bg-blue-600'
-                    : isFutureActive
-                    ? 'bg-indigo-600'
-                    : 'bg-slate-700'
-                }`}
-              >
-                <CalendarDays className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  {isTodayActive ? (
-                    <span className="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                      Actividades de HOY
-                    </span>
-                  ) : isFutureActive ? (
-                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                      Próxima fecha con actividad
-                    </span>
-                  ) : (
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                      Histórico / Fecha anterior
-                    </span>
-                  )}
-                  <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">
-                    {activeDayEvents.length}{' '}
-                    {activeDayEvents.length === 1 ? 'actividad' : 'actividades'}
-                  </span>
-                </div>
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 leading-tight pt-1">
-                  {isFutureActive && !isTodayActive
-                    ? `Próxima fecha: ${formatDateKeyFriendly(activeDateKey)}`
-                    : formatDateKeyFriendly(activeDateKey)}
-                </h2>
-              </div>
+        <div className="space-y-3">
+          {/* Cabecera destacada de la fecha seleccionada (idéntica a .day-head en calendario.html) */}
+          <section
+            aria-label="Fecha seleccionada"
+            className="bg-white border border-[#d4d7dc] rounded-[12px] p-4 flex items-center gap-3"
+          >
+            <div className="w-11 h-11 rounded-[10px] bg-[#0e7c86] text-white flex items-center justify-center flex-shrink-0">
+              <CalendarDays className="w-5 h-5" />
             </div>
-          </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {isTodayActive ? (
+                  <span className="text-xs font-bold uppercase tracking-[0.05em] text-[#0a5961] bg-[#d9f7f8] px-2 py-0.5 rounded-[6px]">
+                    Actividades de HOY
+                  </span>
+                ) : isFutureActive ? (
+                  <span className="text-xs font-bold uppercase tracking-[0.05em] text-[#7a2f5a] bg-[#f6e6ef] px-2 py-0.5 rounded-[6px]">
+                    Próxima fecha con actividad
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold uppercase tracking-[0.05em] text-[#1a1a1a] bg-[#ebedef] px-2 py-0.5 rounded-[6px]">
+                    Histórico / Fecha anterior
+                  </span>
+                )}
+                <span className="px-2 py-0.5 bg-[#ebedef] text-[#1a1a1a] rounded-full text-xs font-bold">
+                  {activeDayEvents.length}{' '}
+                  {activeDayEvents.length === 1 ? 'actividad' : 'actividades'}
+                </span>
+              </div>
+              <h2 className="text-xl font-bold text-[#1a1a1a] mt-1">
+                {isFutureActive && !isTodayActive
+                  ? `Próxima fecha: ${formatDateKeyFriendly(activeDateKey)}`
+                  : formatDateKeyFriendly(activeDateKey)}
+              </h2>
+            </div>
+          </section>
 
           {/* Tarjetas de eventos de la fecha activa */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3">
             {activeDayEvents.map((event) => {
                     const typeConfig = EVENT_TYPES_CONFIG[event.event_type] || EVENT_TYPES_CONFIG.otro;
                     return (
-                      <div
+                      <article
                         key={event.id}
-                        className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between gap-4"
+                        className="bg-white border border-[#d4d7dc] rounded-[12px] p-4 grid gap-3"
                       >
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           <div className="flex items-start justify-between gap-2">
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-xs font-semibold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                             >
                               <span className={`w-2 h-2 rounded-full ${typeConfig.dotColor}`}></span>
                               {typeConfig.label}
@@ -689,33 +673,33 @@ export const CalendarioView: React.FC = () => {
 
                             {/* Acciones de Admin */}
                             {isAdmin && (
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center">
                                 <button
                                   onClick={() => handleOpenEdit(event)}
-                                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  className="w-11 min-h-[44px] rounded-[10px] text-[#4a4f57] hover:bg-[#ebedef] hover:text-[#1a1a1a] inline-flex items-center justify-center transition-colors"
                                   title="Editar actividad"
                                   aria-label="Editar actividad"
                                 >
-                                  <Edit2 className="w-4 h-4" />
+                                  <Edit2 className="w-5 h-5" />
                                 </button>
                                 <button
                                   onClick={() => setDeletingEvent(event)}
-                                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                  className="w-11 min-h-[44px] rounded-[10px] text-[#4a4f57] hover:bg-[#fdecec] hover:text-[#9b1c1c] inline-flex items-center justify-center transition-colors"
                                   title="Archivar actividad"
                                   aria-label="Archivar actividad"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-5 h-5" />
                                 </button>
                               </div>
                             )}
                           </div>
 
-                          <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                          <h3 className="text-lg font-bold text-[#1a1a1a]">
                             {event.title}
                           </h3>
 
                           {event.description && (
-                            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                            <p className="text-sm text-[#4a4f57] leading-relaxed whitespace-pre-line">
                               {event.description}
                             </p>
                           )}
@@ -725,24 +709,24 @@ export const CalendarioView: React.FC = () => {
                         {(() => {
                           const evAssignments = assignmentsByEvent[event.id] || [];
                           return (
-                            <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                            <div className="pt-3 border-t border-[#d4d7dc] grid gap-2">
                               <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                  <Users className="w-3.5 h-3.5 text-blue-600" />
+                                <span className="text-xs font-bold text-[#1a1a1a] inline-flex items-center gap-1.5">
+                                  <Users className="w-4 h-4 text-[#0e7c86]" />
                                   <span>Programa del Culto / Servidores de Turno</span>
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => setAssignmentsEvent(event)}
-                                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-blue-700 inline-flex items-center gap-1.5 transition-colors min-h-[36px]"
+                                  className="text-xs font-semibold min-h-[44px] px-3 rounded-[10px] border border-[#767b83] bg-white hover:bg-[#ebedef] text-[#1a1a1a] inline-flex items-center gap-1.5 transition-colors"
                                 >
-                                  <Users className="w-3.5 h-3.5 text-blue-600" />
+                                  <Users className="w-4 h-4 text-[#0e7c86]" />
                                   <span>{isAdmin ? 'Gestionar Programa / Turnos' : 'Ver Servidores de Turno'}</span>
                                 </button>
                               </div>
 
                               {evAssignments.length === 0 ? (
-                                <p className="text-[11px] text-slate-400 italic">
+                                <p className="text-xs text-[#4a4f57]">
                                   Aún no se han asignado servidores para esta reunión.
                                 </p>
                               ) : (
@@ -949,7 +933,7 @@ export const CalendarioView: React.FC = () => {
                             </div>
                           )}
                         </div>
-                      </div>
+                      </article>
                     );
                   })}
                 </div>

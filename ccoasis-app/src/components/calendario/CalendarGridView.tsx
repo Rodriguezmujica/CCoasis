@@ -38,48 +38,48 @@ interface EventTypeCellStyle {
   label: string;
 }
 
-// Estilos de alto contraste y fondo completo para cada tipo de actividad (Accesibilidad visual para adultos mayores)
+// Estilos idénticos a la maqueta aprobada (calendario.html)
 export const EVENT_TYPE_CELL_STYLES: Record<ChurchEventType, EventTypeCellStyle> = {
   culto: {
-    bg: 'bg-blue-100',
-    border: 'border-blue-600',
-    text: 'text-blue-950',
-    dotColor: 'bg-blue-600',
+    bg: 'bg-[#d9f7f8]',
+    border: 'border-[#0e7c86]',
+    text: 'text-[#0a5961]',
+    dotColor: 'bg-[#0e7c86]',
     label: 'Culto General',
   },
   oracion: {
-    bg: 'bg-magenta-100',
-    border: 'border-magenta-600',
-    text: 'text-magenta-950',
-    dotColor: 'bg-magenta-600',
+    bg: 'bg-[#f6e6ef]',
+    border: 'border-[#ae4a84]',
+    text: 'text-[#7a2f5a]',
+    dotColor: 'bg-[#ae4a84]',
     label: 'Reunión de Oración',
   },
   jovenes: {
-    bg: 'bg-emerald-100',
-    border: 'border-emerald-600',
-    text: 'text-emerald-950',
-    dotColor: 'bg-emerald-600',
+    bg: 'bg-[#e3f5e9]',
+    border: 'border-[#2f7d4f]',
+    text: 'text-[#14532d]',
+    dotColor: 'bg-[#2f7d4f]',
     label: 'Jóvenes / Adolescentes',
   },
   especial: {
-    bg: 'bg-amber-100',
-    border: 'border-amber-600',
-    text: 'text-amber-950',
-    dotColor: 'bg-amber-700',
+    bg: 'bg-[#fdf3d6]',
+    border: 'border-[#a8741a]',
+    text: 'text-[#713f12]',
+    dotColor: 'bg-[#a8741a]',
     label: 'Evento Especial',
   },
   venta_verbena: {
-    bg: 'bg-rose-100',
-    border: 'border-rose-600',
-    text: 'text-rose-950',
-    dotColor: 'bg-rose-600',
+    bg: 'bg-[#fdecec]',
+    border: 'border-[#c0392b]',
+    text: 'text-[#9b1c1c]',
+    dotColor: 'bg-[#c0392b]',
     label: 'Actividad Pro-fondos',
   },
   otro: {
-    bg: 'bg-slate-100',
-    border: 'border-slate-500',
-    text: 'text-slate-900',
-    dotColor: 'bg-slate-600',
+    bg: 'bg-[#ebedef]',
+    border: 'border-[#5b6068]',
+    text: 'text-[#1a1a1a]',
+    dotColor: 'bg-[#5b6068]',
     label: 'Otra Actividad',
   },
 };
@@ -130,8 +130,6 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
   );
 
   // Estado de plegado/desplegado de la cuadrícula
-  // En móviles inicia colapsado para evitar scroll excesivo; en pantallas grandes inicia expandido.
-  // Recuerda la preferencia en localStorage.
   const [isExpanded, setIsExpanded] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('ccoasis_calendar_grid_expanded');
@@ -141,7 +139,7 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
     } catch {
       // Ignorar fallo de almacenamiento
     }
-    return typeof window !== 'undefined' ? window.innerWidth >= 640 : true;
+    return true;
   });
 
   const toggleExpanded = () => {
@@ -160,10 +158,7 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
   const calendarCells = useMemo<CalendarCell[]>(() => {
     const cells: CalendarCell[] = [];
 
-    // Primer día del mes seleccionado
     const firstDay = new Date(selectedYear, selectedMonth, 1);
-    // En JS getDay(): 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-    // Convertir a base Lunes = 0: (getDay() + 6) % 7
     const startOffset = (firstDay.getDay() + 6) % 7;
 
     const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
@@ -221,7 +216,6 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
   }, [selectedYear, selectedMonth, eventsByDate, todayKey, selectedDate]);
 
   const handleCellClick = (cell: CalendarCell) => {
-    // Si toca una celda de otro mes, navegar a ese mes
     if (!cell.isCurrentMonth) {
       if (cell.dayNumber > 15) {
         onPrevMonth();
@@ -237,33 +231,35 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
   const selectedDayEvents = selectedDate ? eventsByDate[selectedDate] || [] : [];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-5 space-y-4">
-      {/* Cabecera con selector de mes/año, contador y botones (Ir a hoy + Toggle Cuadrícula) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+    <section
+      aria-label="Cuadrícula mensual"
+      className="bg-white border border-[#d4d7dc] rounded-[12px] p-3 sm:p-4 grid gap-3.5"
+    >
+      {/* Cabecera compacta: < mes año [badge actividades] > a la izquierda, Ir a hoy + Ocultar cuadrícula a la derecha */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <button
+            type="button"
             onClick={onPrevMonth}
-            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors touch-manipulation"
+            className="w-11 min-h-[44px] rounded-[10px] border border-[#767b83] bg-white hover:bg-[#ebedef] text-[#4a4f57] inline-flex items-center justify-center transition-colors"
             title="Mes anterior"
             aria-label="Mes anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <div className="px-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg sm:text-xl font-bold text-slate-900 leading-tight">
-                {MONTH_NAMES_ES[selectedMonth]} {selectedYear}
-              </span>
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold">
-                {events.length} {events.length === 1 ? 'actividad' : 'actividades'}
-              </span>
-            </div>
-          </div>
+          <span className="text-xl font-bold text-[#1a1a1a] px-1 whitespace-nowrap">
+            {MONTH_NAMES_ES[selectedMonth].toLowerCase()} {selectedYear}
+          </span>
+
+          <span className="bg-[#d9f7f8] text-[#0a5961] rounded-full text-xs font-bold px-2 py-0.5 whitespace-nowrap">
+            {events.length} {events.length === 1 ? 'actividad' : 'actividades'}
+          </span>
 
           <button
+            type="button"
             onClick={onNextMonth}
-            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 active:bg-slate-100 text-slate-700 transition-colors touch-manipulation"
+            className="w-11 min-h-[44px] rounded-[10px] border border-[#767b83] bg-white hover:bg-[#ebedef] text-[#4a4f57] inline-flex items-center justify-center transition-colors"
             title="Mes siguiente"
             aria-label="Mes siguiente"
           >
@@ -271,35 +267,33 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
           </button>
         </div>
 
-        {/* Acciones: Ir a hoy + Plegar o Desplegar cuadrícula */}
-        <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+        {/* Acciones a la derecha en fila */}
+        <div className="flex items-center gap-2 flex-wrap">
           <button
+            type="button"
             onClick={onGoToday}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 rounded-xl transition-colors min-h-[40px] touch-manipulation"
+            className="min-h-[44px] px-[18px] rounded-[10px] bg-[#d9f7f8] hover:bg-[#b8eff2] text-[#0a5961] text-sm font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
             title="Ir al mes y día actual"
           >
-            <CalendarIcon className="w-4 h-4 text-blue-600" />
+            <CalendarIcon className="w-5 h-5 text-[#0a5961]" />
             <span>Ir a hoy</span>
           </button>
 
-          {/* Botón de Plegar / Desplegar la Cuadrícula */}
           <button
             type="button"
             onClick={toggleExpanded}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition-colors min-h-[40px] touch-manipulation border border-slate-200"
+            className="min-h-[44px] px-[18px] rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-sm font-semibold inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors"
             title={isExpanded ? 'Ocultar cuadrícula mensual' : 'Ver cuadrícula mensual'}
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="w-4 h-4 text-slate-600" />
-                <span className="hidden sm:inline">Ocultar cuadrícula</span>
-                <span className="sm:hidden">Ocultar</span>
+                <ChevronUp className="w-5 h-5 text-[#1a1a1a]" />
+                <span>Ocultar cuadrícula</span>
               </>
             ) : (
               <>
-                <ChevronDown className="w-4 h-4 text-slate-600" />
-                <span className="hidden sm:inline">Ver cuadrícula</span>
-                <span className="sm:hidden">Ver cuadrícula</span>
+                <ChevronDown className="w-5 h-5 text-[#1a1a1a]" />
+                <span>Ver cuadrícula</span>
               </>
             )}
           </button>
@@ -308,16 +302,20 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
 
       {/* Resumen compacto cuando la cuadrícula está colapsada */}
       {!isExpanded && selectedDate && (
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-600">
+        <div className="pt-2 border-t border-[#d4d7dc] flex items-center justify-between gap-2 text-xs text-[#4a4f57]">
           <div className="flex items-center gap-1.5 truncate">
-            <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#0e7c86] flex-shrink-0" />
             <span>
-              Fecha seleccionada: <strong className="text-slate-900 font-bold">{formatDateKeyFriendly(selectedDate)}</strong>
+              Fecha seleccionada:{' '}
+              <strong className="text-[#1a1a1a] font-bold">
+                {formatDateKeyFriendly(selectedDate)}
+              </strong>
             </span>
           </div>
           {selectedDayEvents.length > 0 && (
-            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[11px] font-bold flex-shrink-0">
-              {selectedDayEvents.length} {selectedDayEvents.length === 1 ? 'actividad' : 'actividades'}
+            <span className="px-2 py-0.5 bg-[#d9f7f8] text-[#0a5961] rounded-full text-xs font-bold flex-shrink-0">
+              {selectedDayEvents.length}{' '}
+              {selectedDayEvents.length === 1 ? 'actividad' : 'actividades'}
             </span>
           )}
         </div>
@@ -325,27 +323,29 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
 
       {/* Sección desplegable: Días de la semana, Celdas y Leyenda */}
       {isExpanded && (
-        <div className="space-y-4 pt-1 animate-fadeIn">
+        <>
           {/* Días de la semana (L, M, X, J, V, S, D) */}
-          <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center border-b border-slate-100 pb-2">
-            {WEEKDAYS.map((w, index) => {
-              const isWeekend = index === 5 || index === 6;
-              return (
-                <div
-                  key={w.full}
-                  className={`text-xs font-bold uppercase tracking-wider py-1 ${
-                    isWeekend ? 'text-blue-600' : 'text-slate-500'
-                  }`}
-                >
-                  <span className="sm:hidden">{w.short}</span>
-                  <span className="hidden sm:inline">{w.full}</span>
-                </div>
-              );
-            })}
+          <div
+            className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center border-b border-[#d4d7dc] pb-1.5"
+            aria-hidden="true"
+          >
+            {WEEKDAYS.map((w) => (
+              <div
+                key={w.full}
+                className="text-xs font-bold uppercase tracking-[0.05em] text-[#4a4f57] py-1"
+              >
+                <span className="sm:hidden">{w.short}</span>
+                <span className="hidden sm:inline">{w.full}</span>
+              </div>
+            ))}
           </div>
 
-          {/* Cuadrícula interactiva de días con accesibilidad visual mejorada */}
-          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          {/* Cuadrícula interactiva de días */}
+          <div
+            role="grid"
+            aria-label={`Días de ${MONTH_NAMES_ES[selectedMonth].toLowerCase()} ${selectedYear}`}
+            className="grid grid-cols-7 gap-1 sm:gap-1.5"
+          >
             {calendarCells.map((cell) => {
               const hasEvents = cell.events.length > 0;
               const firstEvent = hasEvents ? cell.events[0] : null;
@@ -353,112 +353,72 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
                 ? EVENT_TYPE_CELL_STYLES[firstEvent.event_type] || EVENT_TYPE_CELL_STYLES.otro
                 : null;
 
-              // Determinación de clases visuales por estado y color temático
-              let cellStyle = 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300';
-              let numberColor = 'text-slate-800 font-bold';
+              let cellStyle = 'bg-white border-[#d4d7dc] text-[#1a1a1a] font-bold hover:bg-[#f5f5f5]';
 
               if (!cell.isCurrentMonth) {
-                // Días de otros meses (atenuados)
-                cellStyle = 'bg-slate-50/50 border-transparent text-slate-300 hover:bg-slate-100/60 hover:text-slate-400';
-                numberColor = 'text-slate-300 font-normal';
+                cellStyle = 'bg-transparent border-transparent text-[#6b7078] font-normal';
               } else if (hasEvents && primaryStyle) {
-                // DÍA CON ACTIVIDAD: PINTAR TODA LA CASILLA CON EL COLOR DE LA ACTIVIDAD
-                cellStyle = `${primaryStyle.bg} ${primaryStyle.border} shadow-xs hover:brightness-95`;
-                numberColor = `${primaryStyle.text} font-black`;
+                cellStyle = `${primaryStyle.bg} ${primaryStyle.border} ${primaryStyle.text} font-bold hover:brightness-95`;
+              }
 
-                // Si está seleccionado: borde grueso/anillo sin tapar el color
-                if (cell.isSelected) {
-                  cellStyle += ' ring-4 ring-blue-600 ring-offset-2 z-10 border-blue-600 shadow-md scale-[1.02]';
-                } else if (cell.isToday) {
-                  // Si es hoy: anillo azul distintivo
-                  cellStyle += ' ring-2 ring-blue-600 border-blue-500';
-                }
-              } else {
-                // DÍA SIN ACTIVIDAD
-                if (cell.isSelected) {
-                  cellStyle = 'bg-blue-50 border-2 border-blue-600 text-blue-950 ring-4 ring-blue-600 ring-offset-1 font-black shadow-md z-10';
-                  numberColor = 'text-blue-950 font-black';
-                } else if (cell.isToday) {
-                  cellStyle = 'bg-blue-50/70 border-blue-600 text-blue-900 ring-2 ring-blue-600 font-bold';
-                  numberColor = 'text-blue-900 font-bold';
-                }
+              if (cell.isCurrentMonth && cell.isSelected) {
+                cellStyle += ' outline outline-[3px] outline-[#1a1a1a] outline-offset-[1px] z-10';
               }
 
               return (
                 <button
                   key={cell.dateKey}
                   type="button"
+                  tabIndex={cell.isCurrentMonth ? 0 : -1}
                   onClick={() => handleCellClick(cell)}
-                  className={`min-h-[50px] sm:min-h-[62px] p-1 sm:p-1.5 rounded-xl border flex flex-col items-center justify-between transition-all touch-manipulation relative group ${cellStyle}`}
-                  title={
-                    cell.isCurrentMonth
-                      ? `${cell.dayNumber} de ${MONTH_NAMES_ES[selectedMonth]}${
-                          hasEvents
-                            ? ` - ${firstEvent?.title} (${cell.events.length} ${
-                                cell.events.length === 1 ? 'actividad' : 'actividades'
-                              })`
-                            : ''
-                        }${cell.isToday ? ' - Hoy' : ''}`
-                      : `Día ${cell.dayNumber}`
-                  }
+                  className={`min-h-[52px] sm:min-h-[56px] rounded-[10px] border p-1 flex flex-col items-center justify-between text-sm sm:text-base cursor-pointer transition-colors ${cellStyle}`}
                   aria-label={`Día ${cell.dayNumber}${
-                    hasEvents ? `, ${cell.events.length} actividades` : ''
-                  }`}
+                    hasEvents && primaryStyle ? `, ${primaryStyle.label}` : ''
+                  }${cell.isToday && cell.isCurrentMonth ? ', hoy' : ''}`}
                 >
-                  {/* Cabecera del día: etiqueta HOY y número (sin superposición en móvil) */}
-                  <div className="w-full flex flex-col items-center justify-center text-center">
-                    {cell.isToday && cell.isCurrentMonth && (
-                      <span className="text-[8px] sm:text-[9px] font-black tracking-tight text-white uppercase bg-blue-600 px-1 py-0.5 rounded leading-none shadow-2xs mb-0.5">
-                        HOY
-                      </span>
-                    )}
-                    <span className={`text-xs sm:text-base leading-none ${numberColor}`}>
-                      {cell.dayNumber}
+                  {cell.isToday && cell.isCurrentMonth && (
+                    <span className="text-[10px] font-extrabold bg-[#ae4a84] text-white px-[5px] py-[1px] rounded-[4px] leading-[1.2]">
+                      HOY
                     </span>
-                  </div>
+                  )}
 
-                  {/* Indicadores complementarios si hay actividades */}
-                  <div className="w-full min-h-[10px] flex items-center justify-center gap-1 mt-0.5">
-                    {hasEvents && cell.isCurrentMonth && (
-                      <>
-                        {/* Puntos coloreados de apoyo */}
-                        {cell.events.slice(0, 3).map((ev, idx) => {
-                          const evStyle =
-                            EVENT_TYPE_CELL_STYLES[ev.event_type] ||
-                            EVENT_TYPE_CELL_STYLES.otro;
-                          return (
-                            <span
-                              key={`${ev.id}-${idx}`}
-                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${evStyle.dotColor} ring-1 ring-white/80 shadow-2xs`}
-                              title={`${evStyle.label}: ${ev.title}`}
-                            />
-                          );
-                        })}
-                        {cell.events.length > 3 && (
-                          <span className="text-[9px] font-black text-slate-900 leading-none">
-                            +{cell.events.length - 3}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
+                  <span>{cell.dayNumber}</span>
+
+                  <span className="flex gap-[3px] min-h-[8px] items-center justify-center">
+                    {hasEvents &&
+                      cell.isCurrentMonth &&
+                      cell.events.slice(0, 3).map((ev, idx) => {
+                        const evStyle =
+                          EVENT_TYPE_CELL_STYLES[ev.event_type] ||
+                          EVENT_TYPE_CELL_STYLES.otro;
+                        return (
+                          <span
+                            key={`${ev.id}-${idx}`}
+                            className={`w-2 h-2 rounded-full ${evStyle.dotColor}`}
+                            title={`${evStyle.label}: ${ev.title}`}
+                          />
+                        );
+                      })}
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Leyenda amigable de tipos de actividades con muestras de color completas */}
-          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-slate-600">
-            <span className="font-bold text-slate-800">Leyenda:</span>
+          {/* Leyenda de tipos de actividad */}
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs pt-3 border-t border-[#d4d7dc] text-[#1a1a1a] items-center">
+            <b className="font-bold">Leyenda:</b>
             {Object.entries(EVENT_TYPE_CELL_STYLES).map(([key, config]) => (
-              <div key={key} className="flex items-center gap-1.5">
-                <span className={`w-3.5 h-3.5 rounded-md ${config.bg} border ${config.border} flex-shrink-0 shadow-2xs`} />
-                <span className="font-medium text-slate-800">{config.label}</span>
-              </div>
+              <span key={key} className="inline-flex items-center gap-1.5">
+                <span
+                  className={`w-3.5 h-3.5 rounded-[4px] border ${config.bg} ${config.border} flex-shrink-0`}
+                />
+                <span>{config.label}</span>
+              </span>
             ))}
           </div>
-        </div>
+        </>
       )}
-    </div>
+    </section>
   );
 };

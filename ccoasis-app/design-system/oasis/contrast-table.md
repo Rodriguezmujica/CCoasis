@@ -4,8 +4,13 @@
 | Texto principal sobre tarjeta blanca | `#1a1a1a` | `#ffffff` | 17.40:1 | 4.5:1 | ✅ cumple |
 | Texto secundario sobre tarjeta blanca | `#4a4f57` | `#ffffff` | 8.24:1 | 4.5:1 | ✅ cumple |
 | Texto secundario sobre fondo de página | `#4a4f57` | `#f5f5f5` | 7.56:1 | 4.5:1 | ✅ cumple |
-| Texto oscuro sobre cian de marca (barra/acento) | `#1a1a1a` | `#23d5da` | 9.62:1 | 4.5:1 | ✅ cumple |
+| Texto oscuro sobre cian de marca (cabecera) | `#1a1a1a` | `#23d5da` | 9.62:1 | 4.5:1 | ✅ cumple |
 | Texto blanco sobre cian de marca (NO usar) | `#ffffff` | `#23d5da` | 1.81:1 | 4.5:1 | ❌ no cumple |
+| Texto blanco sobre barra magenta (#ae4a84) | `#ffffff` | `#ae4a84` | 5.11:1 | 4.5:1 | ✅ cumple |
+| Texto grande blanco sobre inicio degradado (#0f9aa2) | `#ffffff` | `#0f9aa2` | 3.41:1 | 3.0:1 | ✅ cumple |
+| Texto normal blanco sobre inicio degradado (#0f9aa2 - NO usar en texto <18pt) | `#ffffff` | `#0f9aa2` | 3.41:1 | 4.5:1 | ❌ no cumple |
+| Texto grande blanco sobre punto medio degradado (#5f7293) | `#ffffff` | `#5f7293` | 4.87:1 | 3.0:1 | ✅ cumple |
+| Texto grande blanco sobre fin degradado (#ae4a84) | `#ffffff` | `#ae4a84` | 5.11:1 | 3.0:1 | ✅ cumple |
 | Texto blanco en botón primario (cian oscuro) | `#ffffff` | `#0e7c86` | 4.95:1 | 4.5:1 | ✅ cumple |
 | Texto blanco sobre magenta de marca | `#ffffff` | `#ae4a84` | 5.11:1 | 4.5:1 | ✅ cumple |
 | Enlace magenta sobre blanco | `#ae4a84` | `#ffffff` | 5.11:1 | 4.5:1 | ✅ cumple |

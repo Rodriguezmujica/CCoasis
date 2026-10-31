@@ -379,7 +379,7 @@ export const CalendarGridView: React.FC<CalendarGridViewProps> = ({
                   cellStyle = 'bg-blue-50 border-2 border-blue-600 text-blue-950 ring-4 ring-blue-600 ring-offset-1 font-black shadow-md z-10';
                   numberColor = 'text-blue-950 font-black';
                 } else if (cell.isToday) {
-                  cellStyle = 'bg-blue-50/70 border-blue-400 text-blue-900 ring-2 ring-blue-500 font-bold';
+                  cellStyle = 'bg-blue-50/70 border-blue-600 text-blue-900 ring-2 ring-blue-600 font-bold';
                   numberColor = 'text-blue-900 font-bold';
                 }
               }

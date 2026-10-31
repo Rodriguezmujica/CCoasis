@@ -404,7 +404,7 @@ export const CalendarioView: React.FC = () => {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-blue-100">
+              <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-white">
                 <div className="flex items-center gap-1.5">
                   <CalendarDays className="w-4 h-4 text-white" />
                   <span>{formatEventFriendlyDate(upcomingEvent.start_time)}</span>
@@ -425,7 +425,7 @@ export const CalendarioView: React.FC = () => {
               </div>
 
               {upcomingEvent.description && (
-                <p className="text-xs sm:text-sm text-blue-100/90 max-w-2xl pt-1">
+                <p className="text-xs sm:text-sm text-white max-w-2xl pt-1">
                   {upcomingEvent.description}
                 </p>
               )}
@@ -439,14 +439,14 @@ export const CalendarioView: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                     {sum && (sum.confirmed > 0 || sum.maybe > 0) ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold bg-white/20 text-white backdrop-blur-sm">
-                        <CalendarCheck className="w-3.5 h-3.5 text-blue-200" />
+                        <CalendarCheck className="w-3.5 h-3.5 text-white" />
                         <span>
                           {sum.confirmed} {sum.confirmed === 1 ? 'confirmado' : 'confirmados'}
                           {sum.guests > 0 ? ` (${sum.guests} ${sum.guests === 1 ? 'invitado' : 'invitados'})` : ''}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-xs text-blue-200/80 italic">Sin confirmaciones aún</span>
+                      <span className="text-xs text-white italic">Sin confirmaciones aún</span>
                     )}
 
                     {isFuture && (
@@ -454,7 +454,7 @@ export const CalendarioView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setRsvpModalEvent(upcomingEvent)}
-                          className="px-3 py-1 rounded-full font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors flex items-center gap-1.5 shadow-sm"
+                          className="px-3 py-1 rounded-full font-bold bg-emerald-700 hover:bg-emerald-800 text-white transition-colors flex items-center gap-1.5 shadow-sm"
                           title="Modificar tu confirmación"
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -478,7 +478,7 @@ export const CalendarioView: React.FC = () => {
                         </button>
                       ) : (
                         <span
-                          className="px-3 py-1 rounded-full text-xs font-medium bg-white/15 text-blue-100"
+                          className="px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white"
                           title="Tu cuenta aún no está vinculada a tu ficha; pídele al administrador que la vincule"
                         >
                           Cuenta sin vincular para confirmar
@@ -497,7 +497,7 @@ export const CalendarioView: React.FC = () => {
                   className="px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold backdrop-blur-sm shadow-sm transition-colors flex items-center gap-1.5 min-h-[40px]"
                   title="Ver lista de personas que han confirmado asistencia"
                 >
-                  <Users className="w-4 h-4 text-blue-200" />
+                  <Users className="w-4 h-4 text-white" />
                   <span>Ver confirmados</span>
                 </button>
               )}

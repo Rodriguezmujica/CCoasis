@@ -113,14 +113,15 @@ export const SelfChangePasswordModal: React.FC<SelfChangePasswordModalProps> = (
             </div>
             <div>
               <h2 className="text-lg font-bold leading-tight">Cambiar mi contraseña</h2>
-              <p className="text-xs text-blue-100">Actualiza tu clave de acceso personal</p>
+              <p className="text-xs text-white/95">Actualiza tu clave de acceso personal</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-white hover:bg-white/15 transition-colors disabled:opacity-50"
             title="Cerrar"
+            aria-label="Cerrar"
           >
             <X className="w-5 h-5" />
           </button>

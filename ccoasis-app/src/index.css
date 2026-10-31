@@ -2,7 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface-muted: #ebedef;
+  --text: #1a1a1a;
+  --text-muted: #4a4f57;
+  --border: #d4d7dc;
+  --border-control: #767b83;
+  --brand-cyan: #23d5da;
+  --brand-cyan-grad: #0f9aa2;
+  --primary: #0e7c86;
+  --primary-hover: #0a5961;
+  --primary-soft: #d9f7f8;
+  --primary-ink: #0a5961;
+  --brand-magenta: #ae4a84;
+  --link-on-gray: #9a3f73;
+  --magenta-hover: #8f3b6b;
+  --magenta-soft: #f6e6ef;
+  --magenta-ink: #7a2f5a;
+  --focus: #0e7c86;
+  --focus-on-cyan: #1a1a1a;
+  --focus-on-magenta: #ffffff;
+  --danger: #9b1c1c;
+  --danger-soft: #fdecec;
+  --success: #14532d;
+  --success-soft: #e3f5e9;
+  --warning: #713f12;
+  --warning-soft: #fdf3d6;
+
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Foco visible con contraste >= 3:1 en todas las superficies */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.on-cyan :focus-visible {
+  outline-color: var(--focus-on-cyan);
+}
+
+.on-magenta :focus-visible {
+  outline-color: var(--focus-on-magenta);
+}
+
 @layer utilities {
+  /* Degradado exclusivo para títulos grandes (h1 >= 24px bold, contraste >= 3.41:1) */
+  .oasis-title-gradient {
+    color: var(--primary);
+    background-image: linear-gradient(135deg, #0f9aa2 0%, #ae4a84 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
   /* Ocultar barra de desplazamiento nativa manteniendo scroll táctil */
   .scrollbar-none {
     -ms-overflow-style: none; /* IE y Edge */
@@ -43,15 +107,14 @@
   }
 }
 
-:root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+/* Accesibilidad: respetar prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

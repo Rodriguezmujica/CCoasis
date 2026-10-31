@@ -57,6 +57,9 @@ def main():
         'icon-512.png': 512,
         'icon-maskable-512.png': 512,
     }
+    if os.path.abspath(OUT) == os.path.abspath(os.path.join(ROOT, 'public')):
+        targets['apple-touch-icon.png'] = 180
+        targets['favicon.png'] = 64
     for name, size in targets.items():
         icon = make_icon(symbol, size).convert('RGB')
         icon.save(os.path.join(OUT, name), optimize=True)

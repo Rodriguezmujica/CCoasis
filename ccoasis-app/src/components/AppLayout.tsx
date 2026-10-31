@@ -274,7 +274,7 @@ export const AppLayout: React.FC = () => {
                     }}
                     className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
                       isActive
-                        ? 'bg-blue-50/90 border-blue-300 text-blue-900 shadow-xs ring-1 ring-blue-400'
+                        ? 'bg-blue-50/90 border-blue-600 text-blue-900 shadow-xs ring-1 ring-blue-600'
                         : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300 active:bg-slate-100'
                     }`}
                   >
@@ -311,7 +311,7 @@ export const AppLayout: React.FC = () => {
                     </div>
 
                     <ChevronRight
-                      className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-500' : 'text-slate-400'}`}
+                      className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-400'}`}
                     />
                   </button>
                 );

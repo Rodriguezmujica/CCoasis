@@ -8,13 +8,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'logo.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'logo.png'],
       manifest: {
         name: 'Centro Cristiano Oasis',
         short_name: 'CC Oasis',
         description: 'Gestión Eclesial y Discipulado - Centro Cristiano Oasis',
-        theme_color: '#2563eb',
-        background_color: '#f8fafc',
+        theme_color: '#23d5da',
+        background_color: '#f5f5f5',
         display: 'standalone',
         orientation: 'portrait-primary',
         lang: 'es',
@@ -24,13 +24,19 @@ export default defineConfig({
             src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },

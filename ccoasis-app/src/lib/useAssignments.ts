@@ -198,6 +198,32 @@ export function useAssignments(cycleId: string, isCycleClosed: boolean) {
     }
   };
 
+  // Eliminar tarea (las entregas se borran por ON DELETE CASCADE)
+  const deleteAssignment = async (
+    assignmentId: string
+  ): Promise<{ ok: boolean; error?: string }> => {
+    if (isCycleClosed) {
+      return { ok: false, error: 'El ciclo está cerrado y no permite eliminar tareas.' };
+    }
+    try {
+      const { data, error: delErr } = await supabase
+        .from('assignments')
+        .delete()
+        .eq('id', assignmentId)
+        .select('id');
+      if (delErr) return { ok: false, error: parseClassroomError(delErr) };
+      if (!data || data.length === 0) {
+        return { ok: false, error: 'No se pudo eliminar la tarea (sin permisos o ya no existe).' };
+      }
+      setSubmissions([]);
+      setSelectedAssignmentId(null);
+      await fetchAssignments();
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: parseClassroomError(err) };
+    }
+  };
+
   /**
    * Guardar calificación y feedback del maestro en una entrega existente.
    * Si la entrega no existe aún (alumno sin entrega), la crea con grade y feedback.
@@ -274,6 +300,7 @@ export function useAssignments(cycleId: string, isCycleClosed: boolean) {
     fetchSubmissionsForAssignment,
     createAssignment,
     updateAssignment,
+    deleteAssignment,
     gradeSubmission,
     getSignedSubmissionUrl,
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, AlertCircle, Calendar } from 'lucide-react';
+import { X, Loader2, AlertCircle, Calendar, Trash2 } from 'lucide-react';
 import { Assignment } from '../../types/classroom';
 
 interface AssignmentModalProps {
@@ -10,6 +10,7 @@ interface AssignmentModalProps {
     instructions?: string;
     due_date?: string | null;
   }) => Promise<{ ok: boolean; error?: string }>;
+  onDelete?: () => Promise<{ ok: boolean; error?: string }>;
   onClose: () => void;
 }
 
@@ -17,6 +18,7 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   assignment,
   isCycleClosed,
   onSave,
+  onDelete,
   onClose,
 }) => {
   const isEditing = assignment !== null;
@@ -41,6 +43,23 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
   }, [assignment]);
 
   const isValid = title.trim().length > 0;
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!onDelete || isDeleting) return;
+    setErrorMsg(null);
+    setIsDeleting(true);
+    const result = await onDelete();
+    setIsDeleting(false);
+    if (result.ok) {
+      onClose();
+    } else {
+      setConfirmDelete(false);
+      setErrorMsg(result.error || 'Error al eliminar la tarea.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,11 +163,59 @@ export const AssignmentModal: React.FC<AssignmentModalProps> = ({
           )}
 
           {/* Botones */}
-          <div className="flex gap-3 pt-2 border-t border-[#e5e7eb]">
+          {confirmDelete && (
+            <div
+              role="alertdialog"
+              aria-labelledby="delete-assignment-msg"
+              className="p-4 bg-[#fdecec] border border-[#9b1c1c] rounded-2xl space-y-3"
+            >
+              <p id="delete-assignment-msg" className="text-sm font-bold text-[#9b1c1c]">
+                ¿Seguro que deseas eliminar esta tarea? Se eliminarán también las entregas asociadas.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={isDeleting}
+                  className="flex-1 min-h-[44px] rounded-xl border border-[#858a93] bg-white text-sm font-bold text-[#1a1a1a] hover:bg-[#f5f5f5]"
+                >
+                  No, conservar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 min-h-[44px] rounded-xl bg-[#9b1c1c] text-white text-sm font-extrabold hover:bg-[#7f1616] disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Eliminando...</span>
+                    </>
+                  ) : (
+                    <span>Sí, eliminar</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2 border-t border-[#e5e7eb]">
+            {isEditing && onDelete && !isCycleClosed && (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                disabled={isSaving || isDeleting || confirmDelete}
+                className="sm:mr-auto min-h-[44px] px-4 py-2.5 rounded-xl border border-[#9b1c1c] text-[#9b1c1c] text-sm font-bold hover:bg-[#fdecec] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Eliminar Tarea</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}
-              disabled={isSaving}
+              disabled={isSaving || isDeleting}
               className="flex-1 min-h-[44px] py-2.5 rounded-xl border border-[#858a93] text-sm font-bold text-[#1a1a1a] hover:bg-[#f5f5f5] transition-colors"
             >
               Cancelar

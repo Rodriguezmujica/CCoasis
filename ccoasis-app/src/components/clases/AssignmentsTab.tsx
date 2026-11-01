@@ -36,6 +36,7 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
     fetchSubmissionsForAssignment,
     createAssignment,
     updateAssignment,
+    deleteAssignment,
     gradeSubmission,
     getSignedSubmissionUrl,
   } = useAssignments(cycleId, isCycleClosed);
@@ -255,6 +256,11 @@ export const AssignmentsTab: React.FC<AssignmentsTabProps> = ({
             }
             return createAssignment(data);
           }}
+          onDelete={
+            assignmentModal.assignment
+              ? () => deleteAssignment(assignmentModal.assignment!.id)
+              : undefined
+          }
           onClose={() => setAssignmentModal({ isOpen: false, assignment: null })}
         />
       )}

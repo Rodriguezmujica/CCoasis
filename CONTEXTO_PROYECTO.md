@@ -11,7 +11,7 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - Idioma de la interfaz y de los mensajes de error: **español**.
 - Moneda: **EUR**. Zona horaria: Europe/Madrid.
 - Uso: móvil y PC. **Mobile-first**.
-- Escala: pequeña. Clases de **máximo 12 personas**.
+- Escala: pequeña. Clases con **capacidad flexible según el ciclo**.
 - Luis se comunica en español y prefiere respuestas directas, concisas y honestas.
 
 ## 2. Qué incluye la app

@@ -170,7 +170,7 @@ export const ClassroomDetailView: React.FC = () => {
           <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
             <div className="px-3.5 py-2 bg-white/12 rounded-2xl border border-white/25 text-center min-w-[82px]">
               <div className="text-sm font-extrabold text-white">
-                {enrollments.length} <span className="text-white/75 font-normal">/ 12</span>
+                {enrollments.length}
               </div>
               <div className="text-[11px] font-semibold text-white/85">Alumnos</div>
             </div>

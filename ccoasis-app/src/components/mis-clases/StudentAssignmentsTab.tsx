@@ -10,6 +10,7 @@ import {
   Award,
   Loader2,
   MessageSquare,
+  Lock,
 } from 'lucide-react';
 import { Assignment, AssignmentSubmission } from '../../types/classroom';
 import { SubmitAssignmentModal } from './SubmitAssignmentModal';
@@ -25,6 +26,7 @@ interface StudentAssignmentsTabProps {
       existingFileUrl?: string | null;
     }
   ) => Promise<{ ok: boolean; error?: string }>;
+  onRemoveSubmission: (assignmentId: string) => Promise<{ ok: boolean; error?: string }>;
   onGetSignedUrl: (bucket: 'materials' | 'assignments', filePath: string) => Promise<{
     url: string | null;
     error?: string;
@@ -35,6 +37,7 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
   assignments,
   submissions,
   onSubmitAssignment,
+  onRemoveSubmission,
   onGetSignedUrl,
 }) => {
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
@@ -249,10 +252,16 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
 
               {/* Botón de acción para entregar o modificar */}
               <div className="pt-2 flex justify-end">
+                {isGraded ? (
+                  <span className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 bg-[#d9f7f8] text-[#0a5961] border border-[#0e7c86]">
+                    <Lock className="w-4 h-4" />
+                    <span>Calificada — entrega bloqueada</span>
+                  </span>
+                ) : (
                 <button
                   type="button"
                   onClick={() => setSelectedAssignment(assignment)}
-                  className={`w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 active:scale-98 transition-all ${
+                  className={`focus-oasis w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 active:scale-98 transition-all ${
                     isSubmitted
                       ? 'bg-[#f5f5f5] hover:bg-slate-200 text-[#1a1a1a] border border-[#858a93]'
                       : 'bg-[#0e7c86] hover:bg-[#0a5961] text-white shadow-sm'
@@ -261,6 +270,7 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
                   <Upload className="w-4 h-4" />
                   <span>{isSubmitted ? 'Modificar mi entrega' : 'Entregar tarea'}</span>
                 </button>
+                )}
               </div>
             </div>
           );
@@ -277,6 +287,7 @@ export const StudentAssignmentsTab: React.FC<StudentAssignmentsTabProps> = ({
           onSubmit={async (params) => {
             return await onSubmitAssignment(selectedAssignment.id, params);
           }}
+          onRemove={async () => onRemoveSubmission(selectedAssignment.id)}
           onDownloadFile={handleDownloadSubmissionFile}
           isDownloadingFile={Boolean(downloadingFilePath)}
         />

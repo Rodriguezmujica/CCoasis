@@ -9,6 +9,8 @@ import {
   Clock,
   CheckCircle2,
   Download,
+  Lock,
+  Trash2,
 } from 'lucide-react';
 import { Assignment, AssignmentSubmission } from '../../types/classroom';
 
@@ -23,6 +25,7 @@ interface SubmitAssignmentModalProps {
     existingFileUrl?: string | null;
   }) => Promise<{ ok: boolean; error?: string }>;
   onDownloadFile: (filePath: string) => Promise<void>;
+  onRemove: () => Promise<{ ok: boolean; error?: string }>;
   isDownloadingFile: boolean;
 }
 
@@ -33,8 +36,11 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
   onClose,
   onSubmit,
   onDownloadFile,
+  onRemove,
   isDownloadingFile,
 }) => {
+  const [confirmRemove, setConfirmRemove] = useState<boolean>(false);
+  const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [comments, setComments] = useState<string>(submission?.comments || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -47,8 +53,26 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
     ? new Date(assignment.due_date) < new Date()
     : false;
 
+  // Entrega calificada o con corrección del maestro: bloqueada para el alumno
+  const isLocked = Boolean(submission && (submission.grade !== null || submission.feedback));
+  const canRemove = Boolean(submission) && !isLocked;
+
+  const handleRemove = async () => {
+    setIsRemoving(true);
+    setError(null);
+    const res = await onRemove();
+    setIsRemoving(false);
+    if (res.ok) {
+      onClose();
+    } else {
+      setConfirmRemove(false);
+      setError(res.error || 'No se pudo eliminar la entrega.');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLocked) return;
     if (!comments.trim() && !selectedFile && !submission?.file_url) {
       setError('Debes añadir un comentario o adjuntar un archivo para entregar tu tarea.');
       return;
@@ -190,8 +214,19 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
             </div>
           )}
 
+          {isLocked && (
+            <div
+              role="status"
+              className="p-3.5 rounded-2xl bg-[#d9f7f8] border border-[#0e7c86] text-[#0a5961] text-sm font-extrabold flex items-center gap-2"
+            >
+              <Lock className="w-4 h-4 flex-shrink-0" />
+              <span>Calificada — entrega bloqueada</span>
+            </div>
+          )}
+
           {/* Formulario de entrega */}
           <form id="submission-form" onSubmit={handleSubmit} className="space-y-4">
+            <fieldset disabled={isRemoving} className="space-y-4 min-w-0 border-0 p-0 m-0">
             <div>
               <label
                 htmlFor="comments"
@@ -203,6 +238,7 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
                 id="comments"
                 rows={4}
                 value={comments}
+                disabled={isLocked}
                 onChange={(e) => setComments(e.target.value)}
                 placeholder="Escribe aquí tu respuesta, dudas o notas para el maestro..."
                 className="w-full min-h-[44px] text-base rounded-xl border border-[#858a93] p-3.5 text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[#ae4a84] placeholder:text-[#4a4f57]"
@@ -239,6 +275,7 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
               )}
 
               {/* Selector de nuevo archivo */}
+              {!isLocked && (
               <div className="relative border-2 border-dashed border-[#858a93] hover:border-[#0e7c86] rounded-2xl p-4 text-center bg-[#f5f5f5]/60 hover:bg-[#d9f7f8]/30 transition-colors">
                 <input
                   type="file"
@@ -262,6 +299,7 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
                   </span>
                 </div>
               </div>
+              )}
 
               {selectedFile && (
                 <div className="mt-2 flex items-center justify-between text-xs text-emerald-950 bg-emerald-100 px-3 py-2 rounded-xl border border-emerald-600 font-bold">
@@ -276,7 +314,60 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
                 </div>
               )}
             </div>
+            </fieldset>
           </form>
+
+          {/* Anular entrega (solo si aún no está calificada) */}
+          {canRemove && (
+            <div className="pt-1 space-y-3">
+              {!confirmRemove ? (
+                <button
+                  type="button"
+                  onClick={() => setConfirmRemove(true)}
+                  disabled={isSubmitting}
+                  className="focus-oasis min-h-[44px] w-full sm:w-auto px-4 py-2.5 rounded-xl border border-[#9b1c1c] text-[#9b1c1c] text-sm font-bold hover:bg-[#fdecec] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Eliminar entrega</span>
+                </button>
+              ) : (
+                <div
+                  role="alertdialog"
+                  aria-labelledby="remove-submission-msg"
+                  className="p-4 bg-[#fdecec] border border-[#9b1c1c] rounded-2xl space-y-3"
+                >
+                  <p id="remove-submission-msg" className="text-sm font-bold text-[#9b1c1c]">
+                    ¿Deseas eliminar este archivo para subir uno nuevo?
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmRemove(false)}
+                      disabled={isRemoving}
+                      className="focus-oasis flex-1 min-h-[44px] rounded-xl border border-[#858a93] bg-white text-sm font-bold text-[#1a1a1a] hover:bg-[#f5f5f5]"
+                    >
+                      No, conservar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemove}
+                      disabled={isRemoving}
+                      className="focus-oasis flex-1 min-h-[44px] rounded-xl bg-[#9b1c1c] text-white text-sm font-extrabold hover:bg-[#7f1616] disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isRemoving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Eliminando...</span>
+                        </>
+                      ) : (
+                        <span>Sí, eliminar</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Acciones del pie de modal */}
@@ -292,8 +383,8 @@ export const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
           <button
             form="submission-form"
             type="submit"
-            disabled={isSubmitting}
-            className="min-h-[44px] px-6 py-2.5 rounded-xl text-sm font-extrabold bg-[#0e7c86] text-white hover:bg-[#0a5961] active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2"
+            disabled={isSubmitting || isLocked || isRemoving}
+            className="focus-oasis min-h-[44px] px-6 py-2.5 rounded-xl text-sm font-extrabold bg-[#0e7c86] text-white hover:bg-[#0a5961] active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

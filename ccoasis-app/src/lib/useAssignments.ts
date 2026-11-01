@@ -206,6 +206,16 @@ export function useAssignments(cycleId: string, isCycleClosed: boolean) {
       return { ok: false, error: 'El ciclo está cerrado y no permite eliminar tareas.' };
     }
     try {
+      // 1. Recoger rutas de archivos antes de que el CASCADE borre las entregas
+      const { data: subs } = await supabase
+        .from('assignment_submissions')
+        .select('file_url')
+        .eq('assignment_id', assignmentId);
+      const filePaths = (subs || [])
+        .map((s: { file_url: string | null }) => s.file_url)
+        .filter((p): p is string => Boolean(p));
+
+      // 2. Borrar la tarea (las entregas caen por ON DELETE CASCADE)
       const { data, error: delErr } = await supabase
         .from('assignments')
         .delete()
@@ -214,6 +224,12 @@ export function useAssignments(cycleId: string, isCycleClosed: boolean) {
       if (delErr) return { ok: false, error: parseClassroomError(delErr) };
       if (!data || data.length === 0) {
         return { ok: false, error: 'No se pudo eliminar la tarea (sin permisos o ya no existe).' };
+      }
+
+      // 3. Limpiar archivos físicos (si falla, la tarea ya está borrada: solo avisamos en consola)
+      if (filePaths.length > 0) {
+        const { error: rmErr } = await supabase.storage.from('assignments').remove(filePaths);
+        if (rmErr) console.warn('No se pudieron borrar algunos archivos de Storage:', rmErr);
       }
       setSubmissions([]);
       setSelectedAssignmentId(null);

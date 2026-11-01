@@ -363,6 +363,54 @@ export function useStudentClassroom(cycleId: string) {
     }
   };
 
+  /**
+   * Anular una entrega propia NO calificada: borra el registro y el archivo del bucket.
+   * Tras ello la tarea vuelve a estado "Pendiente de entrega".
+   */
+  const removeSubmission = async (
+    assignmentId: string
+  ): Promise<{ ok: boolean; error?: string }> => {
+    if (!enrollmentId || !user?.id) {
+      return { ok: false, error: 'No se encontró la inscripción activa del alumno.' };
+    }
+    const existing = submissions.find((s) => s.assignment_id === assignmentId);
+    if (!existing || existing.id.startsWith('pending_')) {
+      return { ok: false, error: 'No hay ninguna entrega que eliminar.' };
+    }
+    if (existing.grade !== null || existing.feedback) {
+      return { ok: false, error: 'Calificada — entrega bloqueada. No se puede eliminar.' };
+    }
+    try {
+      const { data, error: delErr } = await supabase
+        .from('assignment_submissions')
+        .delete()
+        .eq('id', existing.id)
+        .is('grade', null)
+        .select('id');
+      if (delErr) return { ok: false, error: parseClassroomError(delErr) };
+      if (!data || data.length === 0) {
+        return {
+          ok: false,
+          error: 'No se pudo eliminar la entrega (puede que ya haya sido calificada).',
+        };
+      }
+
+      if (existing.file_url) {
+        const { error: rmErr } = await supabase.storage
+          .from('assignments')
+          .remove([existing.file_url]);
+        if (rmErr) console.warn('No se pudo borrar el archivo de Storage:', rmErr);
+      }
+
+      if (mountedRef.current) {
+        setSubmissions((prev) => prev.filter((s) => s.id !== existing.id));
+      }
+      return { ok: true };
+    } catch (err: any) {
+      return { ok: false, error: parseClassroomError(err) };
+    }
+  };
+
   return {
     cycle,
     enrollmentId,
@@ -381,5 +429,6 @@ export function useStudentClassroom(cycleId: string) {
     refresh: fetchClassroomData,
     getSignedUrl,
     submitAssignment,
+    removeSubmission,
   };
 }

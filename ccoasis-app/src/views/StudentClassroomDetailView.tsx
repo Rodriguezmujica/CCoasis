@@ -43,6 +43,7 @@ export const StudentClassroomDetailView: React.FC = () => {
     refresh,
     getSignedUrl,
     submitAssignment,
+    removeSubmission,
   } = useStudentClassroom(cycleId || '');
 
   if (isLoading) {
@@ -275,6 +276,7 @@ export const StudentClassroomDetailView: React.FC = () => {
             assignments={assignments}
             submissions={submissions}
             onSubmitAssignment={submitAssignment}
+            onRemoveSubmission={removeSubmission}
             onGetSignedUrl={getSignedUrl}
           />
         )}

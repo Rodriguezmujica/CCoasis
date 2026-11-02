@@ -1,0 +1,124 @@
+/* Animación de entrada tras el login: solo transform y opacity. */
+.oasis-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  perspective: 1200px;
+  /* Opaco hasta el 55 % y luego se desvanece mostrando la app */
+  animation: oasis-intro-backdrop 1450ms linear both;
+  will-change: opacity;
+}
+
+.oasis-intro__book {
+  position: relative;
+  width: min(56vw, 230px);
+  aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  animation: oasis-intro-zoom 1450ms cubic-bezier(0.5, 0, 0.75, 0.4) both;
+  will-change: transform;
+}
+
+/* Páginas (cuerpo del libro) */
+.oasis-intro__pages {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px 8px 8px 2px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 22px, #e4e4e4 22px 23px) 14% 18% / 72% 64% no-repeat,
+    #ffffff;
+  box-shadow: 4px 0 0 -1px #f5f5f5, 7px 0 0 -2px #dcdcdc, 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Portada: bisagra en el lomo (borde izquierdo) */
+.oasis-intro__cover {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0% 50%;
+  transform-style: preserve-3d;
+  animation: oasis-intro-open 1000ms cubic-bezier(0.55, 0.05, 0.3, 1) 150ms both;
+  will-change: transform;
+}
+
+.oasis-intro__face {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px 8px 8px 2px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oasis-intro__face--front {
+  background: #ae4a84;
+  box-shadow: inset 6px 0 0 rgba(0, 0, 0, 0.18), inset 0 0 0 5px rgba(255, 255, 255, 0.14);
+}
+
+.oasis-intro__face--back {
+  background: #f5f5f5;
+  transform: rotateY(180deg);
+  box-shadow: inset -6px 0 0 rgba(0, 0, 0, 0.06);
+}
+
+.oasis-intro__symbol {
+  width: 46%;
+  height: auto;
+}
+
+@keyframes oasis-intro-backdrop {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes oasis-intro-open {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(-172deg); }
+}
+
+@keyframes oasis-intro-zoom {
+  0%, 45% { transform: scale(1); }
+  100% { transform: scale(5); }
+}
+
+@keyframes oasis-intro-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Cierre de sesión: el mismo recorrido en sentido inverso */
+.oasis-intro--close {
+  animation-name: oasis-intro-backdrop-close;
+}
+.oasis-intro--close .oasis-intro__book {
+  animation-direction: reverse;
+  animation-timing-function: cubic-bezier(0.25, 0.6, 0.5, 1);
+}
+.oasis-intro--close .oasis-intro__cover {
+  animation-direction: reverse;
+  animation-delay: 300ms;
+}
+
+@keyframes oasis-intro-backdrop-close {
+  0% { opacity: 0; }
+  45% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Movimiento reducido: sin libro, solo fundido de 150 ms */
+@media (prefers-reduced-motion: reduce) {
+  .oasis-intro {
+    animation: oasis-intro-fade 150ms linear both !important;
+    animation-duration: 150ms !important;
+  }
+  .oasis-intro__book {
+    display: none;
+  }
+}

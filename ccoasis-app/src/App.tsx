@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ConfirmProvider } from './context/ConfirmContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/AppLayout';
+import { LoginIntro } from './components/LoginIntro';
 import { LoginView } from './views/LoginView';
 import { HomeRedirect } from './views/HomeRedirect';
 import { SinPermisosView } from './views/SinPermisosView';
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
     <AuthProvider>
       <ToastProvider>
         <ConfirmProvider>
+          <LoginIntro />
           <BrowserRouter>
         <Routes>
           {/* Ruta pública de login */}

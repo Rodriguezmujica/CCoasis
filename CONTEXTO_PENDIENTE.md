@@ -26,7 +26,7 @@ Todos los puntos fueron verificados satisfactoriamente en vivo en el SQL Editor 
 - **2.3 Archivado de avisos (`announcements`):** [VERIFICADO] La política SELECT en `announcements` empieza por `is_admin() OR ...` (`(is_admin() OR ((deleted_at IS NULL) AND (is_active = true) AND ((expires_at IS NULL) OR (expires_at > now()))))`), permitiendo al admin archivar registros sin error de RLS. Reflejado en migración `016_fix_announcements_policy.sql`.
 - **2.4 Permisos de la vista:** [VERIFICADO] Solo `authenticated` y `service_role` tienen `SELECT` sobre `v_event_servers`; el rol `anon` tiene revocado todo acceso.
 - **2.5 Prueba decisiva como alumno:** [VERIFICADO] Ejecutada en SQL Editor con JWT de alumno: ve exactamente su propia ficha (1 ficha) en `persons`, 0 RSVPs ajenos y en `v_event_servers` únicamente los nombres y apellidos.
-- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `017` (con la salvedad documentada de que no existe la `012`; la `017` es `017_assignment_file_cleanup.sql`). Guardado `016_fix_announcements_policy.sql`.
+- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `018` (con la salvedad documentada de que no existe la `012`; la `017` es `017_assignment_file_cleanup.sql` y la `018` es `018_keepalive_ping.sql`). Guardado `016_fix_announcements_policy.sql`.
 - **2.7 Edge Functions (`create-user`, `update-user-password`):** [VERIFICADO] Inspeccionadas en código: ambas validan el JWT de la cabecera `Authorization` vía `getUser()` y comprueban explícitamente en BD el rol de admin (`callerClient.rpc('is_admin')`) antes de invocar cualquier método administrativo con `service_role`. Sin huecos de seguridad.
 - **2.8 RSVP (`church_event_rsvps`):** [VERIFICADO] Un alumno solo consulta su propia confirmación individual y el conteo consolidado (`get_event_rsvp_summary`), sin acceso a listas ni identidades ajenas.
 
@@ -74,7 +74,11 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
    - Exportación de planillas CSV compatibles con Excel (UTF-8 con BOM): Personas, Finanzas (ofrendas y gastos con categoría y método de pago), y Clases/Notas (alumnos, ciclos, porcentaje de asistencia y calificaciones).
    - Respaldo integral del sistema en formato JSON estructurado con metadatos y todas las tablas clave (`persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`).
    - Registro automático en `audit_logs` con la acción `BACKUP_DOWNLOAD` cada vez que se genera un respaldo.
-2. **Pausa por inactividad:** los proyectos gratuitos de Supabase pueden pausarse tras unos 7 días sin uso. Confirmar las condiciones actuales y definir quién lo reactiva.
+2. **Pausa por inactividad:** [COMPLETADO Y AUTOMATIZADO] Implementado sistema de latido automático ("keep-alive"):
+   - Función SQL ligera `public.keepalive_ping()` (migración `018_keepalive_ping.sql`) con permisos para `anon` y `authenticated`.
+   - GitHub Action programado (`.github/workflows/supabase-keepalive.yml`) que ejecuta un ping HTTP POST dos veces por semana (lunes y jueves a las 08:00 UTC) usando los secrets `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Si el código HTTP recibido no es 200, el job falla y GitHub envía una alerta automática por correo a Luis.
+   - Cuenta con disparador manual (`workflow_dispatch`) en la pestaña Actions de GitHub.
+   - En caso extremo de que el proyecto se pausara manualmente: entrar a https://supabase.com/dashboard y hacer clic en **"Restore project"** (tarda unos 2 minutos y conserva intactos todos los datos).
 3. **Propiedad de cuentas:** Supabase, Vercel y GitHub están a nombre de Luis. Acordar con el pastor quién las tendrá a medio plazo.
 4. **Datos sensibles (RGPD):** listas de miembros y ofrendas. Acceso solo a quien lo necesita; el pastor debe saber que es responsable de esos datos.
 5. **Caché de la PWA:** que no guarde datos de Supabase en móviles compartidos (la configuración de `workbox` no se ha tocado y debe seguir así).

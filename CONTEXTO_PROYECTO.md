@@ -56,6 +56,7 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - **Fase 3 completada y en `main`:** rediseño visual con la identidad cian `#23d5da` y magenta `#ae4a84`, y animación del libro 3D al iniciar y cerrar sesión (`LoginIntro`, solo CSS).
 - Seguridad en Supabase revisada y verificada el 31 de octubre de 2026 (ver `CONTEXTO_PENDIENTE.md`).
 - **Exportación y copias de seguridad (Auditoría):** módulo de exportación CSV (Personas, Finanzas, Clases y Calificaciones) y respaldo integral en JSON en la vista de Auditoría (`BackupExportCard`), exclusivo para rol `admin`, con registro automático en `audit_logs` (`BACKUP_DOWNLOAD`).
+- **Keep-alive automático (Supabase):** función SQL `public.keepalive_ping()` (`018_keepalive_ping.sql`) y GitHub Action programado (`.github/workflows/supabase-keepalive.yml`) que ejecuta un ping RPC dos veces por semana (lunes y jueves 08:00 UTC) para evitar que el proyecto gratuito de Supabase se pause por inactividad tras 7 días. Si el ping falla, el workflow falla y GitHub envía un email de alerta a Luis. En caso de pausa manual o fallo extremo, se restaura desde supabase.com/dashboard pulsando "Restore project".
 
 ### Pendiente (lo que sigue abierto)
 
@@ -106,6 +107,7 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 - `015_event_servers_view.sql`: Vista segura `v_event_servers` (`security_invoker = false`) y eliminación de la política insegura en `persons`.
 - `016_fix_announcements_policy.sql`: Corrección de la política SELECT de `announcements` (`is_admin() OR ...`) para permitir archivar registros con soft-delete sin error de RLS.
 - `017_assignment_file_cleanup.sql`: Limpieza de archivos huérfanos en Storage y anulación de entregas pendientes por el alumno.
+- `018_keepalive_ping.sql`: Función ligera `public.keepalive_ping()` para latido periódico vía GitHub Actions (evita pausa por inactividad tras 7 días sin exponer datos sensibles).
 
 **Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`.
 
@@ -118,7 +120,7 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 - `assignments`: ruta `<auth_user_id>/<assignment_id>/<archivo>`.
 - `receipts`: solo admin y tesorero.
 
-**Funciones auxiliares (SECURITY DEFINER):** `has_role`, `is_admin`, `get_my_person_id`, `my_teaching_cycle_ids`, `my_enrolled_cycle_ids`, `my_enrollment_ids`, `my_student_person_ids`, `link_person_to_user(p_person_id, p_email)`.
+**Funciones auxiliares (SECURITY DEFINER):** `has_role`, `is_admin`, `get_my_person_id`, `my_teaching_cycle_ids`, `my_enrolled_cycle_ids`, `my_enrollment_ids`, `my_student_person_ids`, `link_person_to_user(p_person_id, p_email)`, `keepalive_ping()`.
 
 **Reglas que impone la base de datos (la app solo debe mostrar el error):**
 - Un usuario no puede asignarse roles a sí mismo; solo `admin` escribe en `user_roles`.
@@ -191,7 +193,7 @@ Probar con ventanas de incógnito en paralelo. Comprobar siempre:
 ## 12. Antes de entregarla a la iglesia
 
 1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON y exportaciones CSV en la vista de Auditoría para rol `admin`.
-2. **Pausa por inactividad:** los proyectos gratuitos pueden pausarse tras semanas sin uso. Comprobar las condiciones actuales y quién puede reactivarlo.
+2. **Pausa por inactividad:** [AUTOMATIZADO Y RESUELTO] En Supabase gratuito el proyecto se pausa tras 7 días de inactividad. Se implementó un sistema automático de latido ("keep-alive") mediante un GitHub Action programado (cron lunes y jueves a las 08:00 UTC, `.github/workflows/supabase-keepalive.yml`) que invoca la función `public.keepalive_ping()` (`018_keepalive_ping.sql`) sin exponer datos sensibles. Si por algún motivo extremo el proyecto llegara a pausarse (o fallara el Action, notificando por correo a Luis), basta con entrar a https://supabase.com/dashboard y pulsar "Restore project" (el proyecto se restaura intacto en unos 2 minutos).
 3. **Propiedad de la cuenta de Supabase:** hoy está a nombre de Luis. Acordar con el pastor quién la tendrá a medio plazo.
 4. **Datos sensibles:** una lista de miembros y ofrendas es información delicada (en España, los datos de creencias religiosas son categoría especial en el RGPD). Dar acceso solo a quien lo necesite; el pastor debe saber que es responsable de esos datos.
 5. **Caché de la PWA:** que cachee solo archivos de la app, no datos de Supabase, para que no queden notas ni ofrendas guardadas en móviles compartidos.

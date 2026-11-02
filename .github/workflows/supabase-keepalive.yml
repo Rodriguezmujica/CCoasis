@@ -1,0 +1,48 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Se ejecuta todos los lunes y jueves a las 08:00 UTC (cada 3-4 días)
+    # para evitar que el plan gratuito de Supabase pause el proyecto tras 7 días sin uso.
+    - cron: '0 8 * * 1,4'
+  workflow_dispatch: # Permite ejecutar el ping manualmente desde la pestaña "Actions" en GitHub
+
+jobs:
+  keepalive:
+    name: Latido de Supabase (Keep-Alive)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ejecutar ping a Supabase RPC
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::Faltan secretos requeridos: asegúrate de haber configurado VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY en Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          # Eliminar posibles barras finales en la URL
+          BASE_URL="${SUPABASE_URL%/}"
+          ENDPOINT="${BASE_URL}/rest/v1/rpc/keepalive_ping"
+
+          echo "Enviando solicitud de keep-alive a: ${ENDPOINT}"
+
+          HTTP_CODE=$(curl -s -S -o response.txt -w "%{http_code}" -X POST \
+            "${ENDPOINT}" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+
+          RESPONSE_BODY=$(cat response.txt 2>/dev/null || echo "")
+
+          echo "Código HTTP recibido: ${HTTP_CODE}"
+          echo "Respuesta del servidor: ${RESPONSE_BODY}"
+
+          if [ "${HTTP_CODE}" != "200" ]; then
+            echo "::error::El keep-alive ha fallado con código HTTP ${HTTP_CODE}. Es posible que el proyecto esté pausado o las credenciales no sean válidas. Si está pausado, entra en https://supabase.com/dashboard y pulsa 'Restore project'."
+            exit 1
+          fi
+
+          echo "Latido completado con éxito. El proyecto Supabase continúa activo."

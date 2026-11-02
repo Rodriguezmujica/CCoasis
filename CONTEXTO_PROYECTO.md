@@ -2,7 +2,7 @@
 
 > Lee este archivo completo antes de tocar nada. Es la fuente de verdad sobre qué se ha hecho, qué se decidió y qué falta. Si algo de aquí contradice una suposición tuya, manda este archivo. Si algo te parece mal, dilo antes de cambiarlo.
 
-Última actualización: 31 de octubre de 2026.
+Última actualización: 2 de noviembre de 2026.
 
 ## 1. Qué es y para quién
 
@@ -19,7 +19,8 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 1. **Personas:** fichas de miembros y visitas.
 2. **Clases / discipulado:** cursos, ciclos, inscripciones, sesiones, asistencia, evaluaciones y notas, tareas con entregas, materiales. Funciona como un pequeño instituto.
 3. **Finanzas:** ofrendas (con o sin persona), gastos con comprobante.
-4. **Administración:** usuarios y roles.
+4. **Administración:** usuarios, roles y auditoría.
+5. **Calendario y vida de la iglesia:** eventos, turnos de servidores, conteo de asistencia, confirmaciones (RSVP), anuncios y notificaciones.
 
 ## 3. Stack
 
@@ -36,10 +37,10 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - **Una sola app** con roles, no dos apps.
 - **Varios roles por usuario** (tabla `user_roles`). Roles: `admin`, `tesorero`, `maestro`, `alumno`. El pastor tendrá `admin`.
 - **La seguridad real está en la base de datos (RLS).** Esconder pestañas en la interfaz es solo comodidad, no protección.
-- **Sin registro público.** Los usuarios los crea un administrador (hoy a mano en Supabase; luego desde la app con una Edge Function).
+- **Sin registro público.** Los usuarios los crea un administrador desde la app (pantalla Usuarios, mediante Edge Function).
 - **Soft-delete** (`deleted_at`) en personas y cursos y ciclos. En la app no se hace DELETE de personas ni de ciclos.
 - No todos los miembros necesitan cuenta: pueden existir como ficha en `persons` sin `user_id`.
-- Fase 1 recortada a propósito: **no hay** `audit_logs`, `fiscal_periods` ni umbral de aprobación de gastos. Se dejan para una fase 2.
+- Fase 1 se recortó a propósito sin `audit_logs`, `fiscal_periods` ni umbral de aprobación de gastos. `audit_logs` y el aviso de gastos mayores de 300 EUR ya se añadieron en la fase 2; `fiscal_periods` sigue sin existir.
 
 ## 5. Estado actual
 
@@ -50,9 +51,19 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - Usuario administrador creado y con rol `admin` en `user_roles`.
 - Registro público de usuarios desactivado en Supabase (Authentication).
 - App con login (correo y contraseña), cierre de sesión, menú por rol y rutas protegidas. **Probada por Luis con un admin y un alumno de prueba: funciona.** Se corrigió un bug de primer login (ver sección 8).
-- Los módulos aún son pantallas "En construcción".
+- **Fase 1 completada:** Personas, Clases y Mis clases, Usuarios (con Edge Functions `create-user` y `update-user-password`) y Finanzas.
+- **Fase 2 completada:** Calendario, turnos de servidores, conteo de asistencia, anuncios, notificaciones internas, auditoría (`audit_logs`), confirmaciones de asistencia (RSVP) y aviso de egresos superiores a 300 EUR.
+- **Fase 3 completada y en `main`:** rediseño visual con la identidad cian `#23d5da` y magenta `#ae4a84`, y animación del libro 3D al iniciar y cerrar sesión (`LoginIntro`, solo CSS).
+- Seguridad en Supabase revisada y verificada el 31 de octubre de 2026 (ver `CONTEXTO_PENDIENTE.md`).
+- **Exportación y copias de seguridad (Auditoría):** módulo de exportación CSV (Personas, Finanzas, Clases y Calificaciones) y respaldo integral en JSON en la vista de Auditoría (`BackupExportCard`), exclusivo para rol `admin`, con registro automático en `audit_logs` (`BACKUP_DOWNLOAD`).
 
-### Pendiente, en este orden
+### Pendiente (lo que sigue abierto)
+
+1. Revisión visual final con un usuario admin y otro alumno, en móvil (390 px) y escritorio.
+2. Antes de entregar la app: ver la sección 12 (pausa por inactividad, propiedad de cuentas, RGPD, prueba por rol).
+3. Futuro: notificaciones Web Push, informes en PDF. Ideas en `IDEAS_FUTURAS.md`.
+
+### Histórico: orden original de construcción (ya completado)
 
 1. **Ejecutar `002_link_person_user.sql`** en el SQL Editor de Supabase (puede que ya esté hecho; comprobar que existe la función `public.link_person_to_user`). Es la función que vincula una persona con un usuario por correo, solo para admin.
 2. **Módulo Personas** (solo admin).
@@ -66,16 +77,16 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 
 | Rol | Ve |
 |---|---|
-| `admin` | Personas, Clases, Finanzas, Usuarios |
-| `tesorero` | Finanzas |
-| `maestro` | Mis clases |
-| `alumno` | Mis clases |
+| `admin` | Calendario, Personas, Clases, Finanzas, Usuarios, Auditoría |
+| `tesorero` | Calendario, Finanzas |
+| `maestro` | Calendario, Mis clases |
+| `alumno` | Calendario, Mis clases |
 
 Un usuario con varios roles ve la unión de menús.
 
 ## 7. Base de datos (resumen)
 
-Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.** Cualquier cambio va en un archivo nuevo (`017_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
+Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.** Cualquier cambio va en un archivo nuevo (`018_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
 
 **Secuencia real de migraciones en el repositorio (`supabase/migrations/`):**
 - `001_initial_schema.sql`: Esquema base (personas, cursos, ciclos, finanzas, funciones SECURITY DEFINER, RLS base).
@@ -94,6 +105,7 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 - `014_finance_payment_methods.sql`: Métodos de pago y cuenta/fondo en `offerings` y `expenses`.
 - `015_event_servers_view.sql`: Vista segura `v_event_servers` (`security_invoker = false`) y eliminación de la política insegura en `persons`.
 - `016_fix_announcements_policy.sql`: Corrección de la política SELECT de `announcements` (`is_admin() OR ...`) para permitir archivar registros con soft-delete sin error de RLS.
+- `017_assignment_file_cleanup.sql`: Limpieza de archivos huérfanos en Storage y anulación de entregas pendientes por el alumno.
 
 **Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`.
 
@@ -152,7 +164,7 @@ Respeta las reglas de la sección 9 del CONTEXTO. Al terminar, dime cómo
 probarlo y qué pruebas hacer con un usuario de cada rol.
 ```
 
-### Alcance de cada módulo pendiente
+### Alcance de cada módulo (histórico: todos ya implementados)
 
 - **Personas (admin):** lista con búsqueda y filtro por estado; crear y editar ficha; soft-delete; vincular cuenta con `supabase.rpc('link_person_to_user', { p_person_id, p_email })`; roles como casillas (insertar o eliminar en `user_roles`), avisando antes de quitarse a uno mismo el rol admin.
 - **Clases, admin y maestro:** admin gestiona cursos y ciclos (crear, asignar maestro, cerrar). Maestro: inscribir, sesiones, asistencia con botones grandes, evaluaciones y notas, tareas, materiales (archivo o enlace), ver entregas y calificarlas, resumen con `v_cycle_grades_summary`. Ciclo cerrado = solo lectura.
@@ -178,7 +190,7 @@ Probar con ventanas de incógnito en paralelo. Comprobar siempre:
 
 ## 12. Antes de entregarla a la iglesia
 
-1. **Copias de seguridad:** el plan gratuito de Supabase no las incluía al crear el proyecto. Añadir un botón "Exportar" y revisar los planes actuales.
+1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON y exportaciones CSV en la vista de Auditoría para rol `admin`.
 2. **Pausa por inactividad:** los proyectos gratuitos pueden pausarse tras semanas sin uso. Comprobar las condiciones actuales y quién puede reactivarlo.
 3. **Propiedad de la cuenta de Supabase:** hoy está a nombre de Luis. Acordar con el pastor quién la tendrá a medio plazo.
 4. **Datos sensibles:** una lista de miembros y ofrendas es información delicada (en España, los datos de creencias religiosas son categoría especial en el RGPD). Dar acceso solo a quien lo necesite; el pastor debe saber que es responsable de esos datos.

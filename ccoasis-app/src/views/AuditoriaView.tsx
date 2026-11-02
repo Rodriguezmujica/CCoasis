@@ -10,12 +10,14 @@ import {
   Eye,
   X,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useAuditLogs } from '../lib/useAuditLogs';
 import {
   AUDIT_ACTION_LABELS,
   AUDIT_TABLE_LABELS,
   AuditLog,
 } from '../types/audit';
+import { BackupExportCard } from '../components/auditoria/BackupExportCard';
 
 // Formato de fecha y hora local amigable
 function formatAuditTimestamp(isoString: string): string {
@@ -70,6 +72,11 @@ function getActionBadgeStyle(action: string) {
         label: 'Cambio de Clave',
         className: 'bg-amber-100 text-amber-950 border-amber-600',
       };
+    case 'BACKUP_DOWNLOAD':
+      return {
+        label: 'Copia de Seguridad',
+        className: 'bg-[#d9f7f8] text-[#0a5961] border-[#0e7c86]',
+      };
     default:
       return {
         label: AUDIT_ACTION_LABELS[action] || action,
@@ -79,6 +86,9 @@ function getActionBadgeStyle(action: string) {
 }
 
 export const AuditoriaView: React.FC = () => {
+  const { roles } = useAuth();
+  const isAdmin = roles.includes('admin');
+
   const {
     logs,
     isLoading,
@@ -134,6 +144,11 @@ export const AuditoriaView: React.FC = () => {
         </div>
       </div>
 
+      {/* Sección destacada de Copia de Seguridad y Exportación (exclusivo rol admin) */}
+      {isAdmin && (
+        <BackupExportCard onBackupLogged={refresh} />
+      )}
+
       {/* Barra de Filtros y Búsqueda */}
       <div className="bg-white rounded-3xl border border-[#d4d7dc] p-4 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
         {/* Buscador */}
@@ -166,6 +181,7 @@ export const AuditoriaView: React.FC = () => {
             <option value="DELETE">Eliminaciones / Archivos</option>
             <option value="ROLE_CHANGE">Cambios de Rol</option>
             <option value="UPDATE_PASSWORD">Cambios de Contraseña</option>
+            <option value="BACKUP_DOWNLOAD">Copias de Seguridad</option>
           </select>
         </div>
 
@@ -184,6 +200,7 @@ export const AuditoriaView: React.FC = () => {
             <option value="expenses">Finanzas (Gastos)</option>
             <option value="offerings">Finanzas (Ofrendas)</option>
             <option value="church_events">Calendario / Eventos</option>
+            <option value="system">Sistema / Resguardos</option>
           </select>
         </div>
       </div>

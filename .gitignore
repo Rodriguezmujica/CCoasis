@@ -35,3 +35,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Backups and exports
+ccoasis_backup_*.json
+*.backup.json

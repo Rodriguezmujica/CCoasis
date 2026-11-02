@@ -2,11 +2,11 @@
 
 > Traspaso para otra IA. Léelo junto con `CONTEXTO_PROYECTO.md` y `SPEC.md`. Este archivo solo cubre lo que **falta** y las comprobaciones pendientes. Si algo contradice a la realidad del repositorio o de la base de datos, **verifica y avisa**; no supongas.
 
-Última actualización: 31 de octubre de 2026.
+Última actualización: 2 de noviembre de 2026.
 
 ## 0. Estado en una frase
 
-La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **100% COMPLETADO** en la rama `rediseno-visual` (pendiente solo de revisión final de Luis/pastores antes de fusionar a `main`).
+La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También está en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`). Queda solo la revisión visual final con un usuario admin y otro alumno.
 
 ## 1. Reglas que no se rompen
 
@@ -26,7 +26,7 @@ Todos los puntos fueron verificados satisfactoriamente en vivo en el SQL Editor 
 - **2.3 Archivado de avisos (`announcements`):** [VERIFICADO] La política SELECT en `announcements` empieza por `is_admin() OR ...` (`(is_admin() OR ((deleted_at IS NULL) AND (is_active = true) AND ((expires_at IS NULL) OR (expires_at > now()))))`), permitiendo al admin archivar registros sin error de RLS. Reflejado en migración `016_fix_announcements_policy.sql`.
 - **2.4 Permisos de la vista:** [VERIFICADO] Solo `authenticated` y `service_role` tienen `SELECT` sobre `v_event_servers`; el rol `anon` tiene revocado todo acceso.
 - **2.5 Prueba decisiva como alumno:** [VERIFICADO] Ejecutada en SQL Editor con JWT de alumno: ve exactamente su propia ficha (1 ficha) en `persons`, 0 RSVPs ajenos y en `v_event_servers` únicamente los nombres y apellidos.
-- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `016` (con la salvedad documentada de que no existe la `012`). Guardado `016_fix_announcements_policy.sql`.
+- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `017` (con la salvedad documentada de que no existe la `012`; la `017` es `017_assignment_file_cleanup.sql`). Guardado `016_fix_announcements_policy.sql`.
 - **2.7 Edge Functions (`create-user`, `update-user-password`):** [VERIFICADO] Inspeccionadas en código: ambas validan el JWT de la cabecera `Authorization` vía `getUser()` y comprueban explícitamente en BD el rol de admin (`callerClient.rpc('is_admin')`) antes de invocar cualquier método administrativo con `service_role`. Sin huecos de seguridad.
 - **2.8 RSVP (`church_event_rsvps`):** [VERIFICADO] Un alumno solo consulta su propia confirmación individual y el conteo consolidado (`get_event_rsvp_summary`), sin acceso a listas ni identidades ajenas.
 
@@ -58,13 +58,22 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
   - **Fase 3d.3 (`c457712`)**: Módulo Finanzas (`FinanzasView.tsx`, `src/components/finanzas/*`).
   - **Fase 3d.4 (`e4b35df`)**: Módulos Usuarios y Auditoría (`UsuariosView.tsx`, `AuditoriaView.tsx`, `src/types/users.ts`, `src/components/usuarios/*`).
 
-### Pendiente antes de fusionar a `main`
+### Animación de entrada y salida (Fase 3b ampliada) · en `main`
+- `src/components/LoginIntro.tsx` + `LoginIntro.css`, montado en `App.tsx` fuera de las rutas. Un libro cerrado (portada magenta `#ae4a84`, símbolo cian, páginas blancas) se abre en 3D al aparecer una sesión (login nuevo o app abierta con sesión guardada) y se cierra al cerrar sesión.
+- Solo `transform` y `opacity`, sin librerías. Dura 1,45 s; un temporizador de 1,5 s retira la capa (no usa `animationend`). Un clic, toque o tecla la salta. Con `prefers-reduced-motion`: solo fundido de 150 ms.
+- Solo observa la sesión (`useAuth`): no cambia la autenticación, las rutas ni la carga de roles, y no se activa si el login falla.
+- Commits: `34e2312`, `465e97f`, fusión `dbad6d3`.
+
+### Pendiente (rediseño y animación ya están en `main`)
 1. **Revisión visual final en navegador (`localhost:5173` o preview de Vercel):** validar con un usuario **admin** y otro **alumno** que todas las vistas se ven y funcionan según lo esperado.
-2. **No fusionar con `main` ni desplegar a producción** hasta que Luis lo apruebe (y, si puede, los pastores).
+2. Ya no aplica la restricción de no fusionar: todo está en `main`. Si algo no convence, se corrige con un commit nuevo.
 
 ## 4. Antes de entregar la app a la iglesia
 
-1. **Copias de seguridad:** el plan gratuito de Supabase no las incluía al crear el proyecto. Añadir un botón "Exportar" para admin (CSV/JSON de personas, clases y finanzas) y revisar los planes actuales.
+1. **Copias de seguridad:** [COMPLETADO] Implementado módulo completo de exportación y respaldo en la vista de Auditoría (`BackupExportCard.tsx`, `useDataExport.ts`, exclusivo para el rol `admin`). Permite:
+   - Exportación de planillas CSV compatibles con Excel (UTF-8 con BOM): Personas, Finanzas (ofrendas y gastos con categoría y método de pago), y Clases/Notas (alumnos, ciclos, porcentaje de asistencia y calificaciones).
+   - Respaldo integral del sistema en formato JSON estructurado con metadatos y todas las tablas clave (`persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`).
+   - Registro automático en `audit_logs` con la acción `BACKUP_DOWNLOAD` cada vez que se genera un respaldo.
 2. **Pausa por inactividad:** los proyectos gratuitos de Supabase pueden pausarse tras unos 7 días sin uso. Confirmar las condiciones actuales y definir quién lo reactiva.
 3. **Propiedad de cuentas:** Supabase, Vercel y GitHub están a nombre de Luis. Acordar con el pastor quién las tendrá a medio plazo.
 4. **Datos sensibles (RGPD):** listas de miembros y ofrendas. Acceso solo a quien lo necesita; el pastor debe saber que es responsable de esos datos.
@@ -84,7 +93,12 @@ GROUP BY table_name ORDER BY 1;
 
 - Añadir regla: **no usar `deleted_at IS NULL` en la política SELECT del admin** en tablas con archivado (rompe el soft-delete).
 - Anotar la excepción de `v_event_servers` a la regla "todas las vistas `security_invoker`".
-- Listar las migraciones reales (ver 2.6) y la fase del rediseño.
+- ~~Listar las migraciones reales y la fase del rediseño~~ (hecho el 2 de noviembre de 2026 en `CONTEXTO_PROYECTO.md`, incluida la `017`).
+- El resto de esta sección sigue pendiente de contrastar con la base real.
+
+## 5b. Ideas futuras
+
+Ver `IDEAS_FUTURAS.md` (solo ideas, nada implementado): push y recordatorios, pantalla de inicio por rol, página pública con calendario de solo lectura, noticias, Instagram, exportar datos.
 
 ## 6. Datos útiles
 

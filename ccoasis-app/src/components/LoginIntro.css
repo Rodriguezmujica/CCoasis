@@ -92,6 +92,26 @@
   to { opacity: 0; }
 }
 
+/* Cierre de sesión: el mismo recorrido en sentido inverso */
+.oasis-intro--close {
+  animation-name: oasis-intro-backdrop-close;
+}
+.oasis-intro--close .oasis-intro__book {
+  animation-direction: reverse;
+  animation-timing-function: cubic-bezier(0.25, 0.6, 0.5, 1);
+}
+.oasis-intro--close .oasis-intro__cover {
+  animation-direction: reverse;
+  animation-delay: 300ms;
+}
+
+@keyframes oasis-intro-backdrop-close {
+  0% { opacity: 0; }
+  45% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Movimiento reducido: sin libro, solo fundido de 150 ms */
 @media (prefers-reduced-motion: reduce) {
   .oasis-intro {

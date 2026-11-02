@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { LOGIN_SUCCESS_EVENT } from '../components/LoginIntro';
 import { Lock, Mail, AlertCircle, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 
 export const LoginView: React.FC = () => {
@@ -68,6 +69,9 @@ export const LoginView: React.FC = () => {
         setIsSubmitting(false);
         return;
       }
+
+      // Aviso para la animación de entrada (capa superpuesta; no afecta a la navegación).
+      window.dispatchEvent(new Event(LOGIN_SUCCESS_EVENT));
 
       // TRAS EL LOGIN: NO navegamos manualmente.
       // onAuthStateChange actualiza session, el efecto carga roles,

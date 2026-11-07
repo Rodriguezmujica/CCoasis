@@ -4,8 +4,8 @@
 > Antes de construir cualquier cosa conviene planificarla con `/plan`.
 
 ## 1. Primero: que no se pierda nada
-- **Exportar y copia de seguridad.** Botón de admin que descargue personas, clases y finanzas en CSV o Excel. El plan gratuito de Supabase no incluye copias. (Ya está en `CONTEXTO_PENDIENTE.md`.)
-- **Pausa por inactividad.** Un proyecto gratuito de Supabase puede pausarse tras unos días sin uso. Definir quién lo reactiva.
+- **Exportar y copia de seguridad.** [HECHO] Botón de admin que descarga personas, clases y finanzas en CSV, junto con respaldo completo en JSON en la vista de Auditoría.
+- **Pausa por inactividad (keep-alive automático).** [HECHO] Sistema de latido automático mediante GitHub Actions y función SQL `keepalive_ping()` para evitar que Supabase se pause por inactividad tras 7 días.
 - **Prueba final con un usuario por rol** (admin, tesorero, maestro, alumno): cada uno ve solo lo suyo.
 
 ## 2. Que la gente la use cada semana

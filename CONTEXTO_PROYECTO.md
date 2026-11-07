@@ -61,7 +61,7 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 ### Pendiente (lo que sigue abierto)
 
 1. Revisión visual final con un usuario admin y otro alumno, en móvil (390 px) y escritorio.
-2. Antes de entregar la app: ver la sección 12 (pausa por inactividad, propiedad de cuentas, RGPD, prueba por rol).
+2. Antes de entregar la app: ver la sección 12 (propiedad de cuentas, RGPD, prueba por rol).
 3. Futuro: notificaciones Web Push, informes en PDF. Ideas en `IDEAS_FUTURAS.md`.
 
 ### Histórico: orden original de construcción (ya completado)

@@ -97,7 +97,7 @@ GROUP BY table_name ORDER BY 1;
 
 - Añadir regla: **no usar `deleted_at IS NULL` en la política SELECT del admin** en tablas con archivado (rompe el soft-delete).
 - Anotar la excepción de `v_event_servers` a la regla "todas las vistas `security_invoker`".
-- ~~Listar las migraciones reales y la fase del rediseño~~ (hecho el 2 de noviembre de 2026 en `CONTEXTO_PROYECTO.md`, incluida la `017`).
+- ~~Listar las migraciones reales y la fase del rediseño~~ (hecho en `CONTEXTO_PROYECTO.md` y `README.md`, completada la lista de migraciones hasta la `018`).
 - El resto de esta sección sigue pendiente de contrastar con la base real.
 
 ## 5b. Ideas futuras

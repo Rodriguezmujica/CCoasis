@@ -165,8 +165,11 @@ El sistema admite la asignacion de multiples roles a una misma cuenta de usuario
    - `my_enrolled_cycle_ids()`
    - `my_enrollment_ids()`
    - `my_student_person_ids()`
+   - `keepalive_ping()`
 
-2. **Vistas con `security_invoker = true`:** Las vistas analiticas (como `v_cycle_grades_summary`) estan declaradas explicitamente con `WITH (security_invoker = true)`, obligando a que las consultas sobre la vista respeten las politicas RLS de la sesion del usuario que realiza la llamada y no los privilegios del creador de la vista.
+2. **Vistas con `security_invoker = true` y excepciones de seguridad:**
+   - Las vistas analiticas (como `v_cycle_grades_summary`) estan declaradas explicitamente con `WITH (security_invoker = true)`, obligando a que las consultas sobre la vista respeten las politicas RLS de la sesion del usuario que realiza la llamada y no los privilegios del creador de la vista.
+   - Como excepcion deliberada y segura, la vista `v_event_servers` se declara con `security_invoker = false` para permitir a usuarios autenticados consultar unicamente nombres y apellidos de los servidores asignados en el calendario sin exponer datos personales sensibles de la tabla `persons` (telefono, direccion, notas).
 
 3. **Restriccion del rol anonimo:** El rol publico `anon` tiene denegado el acceso al esquema de negocio. Unicamente el rol `authenticated` dispone de permisos de seleccion, insercion y modificacion limitados por politicas RLS.
 
@@ -190,6 +193,11 @@ La definicion del esquema se estructura en migraciones SQL secuenciales e idempo
 - `010_notifications.sql`: Motor relacional de notificaciones internas in-app.
 - `011_audit_logs.sql`: Registro inmutable de eventos de auditoria y trazabilidad.
 - `013_event_rsvps.sql`: Sistema de confirmacion de asistencia a eventos especiales.
+- `014_finance_payment_methods.sql`: Metodos de pago y cuenta o fondo en ofrendas y gastos (`offerings` y `expenses`).
+- `015_event_servers_view.sql`: Vista segura `v_event_servers` (`security_invoker = false`) y eliminacion de politica con exposicion en `persons`.
+- `016_fix_announcements_policy.sql`: Correccion de la politica SELECT de `announcements` para permitir archivado logico (`soft-delete`) por administradores.
+- `017_assignment_file_cleanup.sql`: Limpieza de archivos huerfanos en Storage y cancelacion de entregas pendientes por el alumno.
+- `018_keepalive_ping.sql`: Funcion SQL ligera `keepalive_ping()` para latido periodico y prevencion de pausa por inactividad.
 
 ### Politicas de Almacenamiento (Supabase Storage)
 
@@ -402,10 +410,16 @@ Al compilar y desplegar:
 - [x] Confirmacion de asistencia a eventos especiales (RSVP).
 - [x] Umbral de validacion y advertencia para egresos superiores a 300,00 EUR.
 
+### Fase 3: Identidad Visual Oasis, Respaldo y Continuidad Operativa [Completado]
+- [x] Herramienta de copias de seguridad descargables (CSV y respaldo integral JSON) en el panel de auditoria.
+- [x] Sistema automatico de keep-alive via GitHub Actions y funcion SQL `keepalive_ping()` para prevencion de pausa por inactividad.
+- [x] Rubrica tactil y calificacion de entregas de tareas en el modulo de clases.
+- [x] Animacion 3D de inicio y cierre de sesion con libro interactivo (solo CSS).
+- [x] Rediseno visual completo bajo la identidad Oasis (paleta cian `#23d5da` y magenta `#ae4a84`, tokens semanticos y cumplimiento WCAG AA).
+
 ### Proximas Mejoras Planificadas
 - [-] Notificaciones Web Push en segundo plano para avisos de servicio dominical.
 - [-] Exportacion automatica de informes contables y balances en formato PDF.
-- [-] Herramienta de copias de seguridad periodicas descargables para el administrador.
 
 ---
 

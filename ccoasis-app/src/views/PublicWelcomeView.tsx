@@ -4,6 +4,7 @@ import { usePublicWelcomeData } from '../lib/usePublicWelcomeData';
 import { PublicHeader } from '../components/publica/PublicHeader';
 import { PublicHeroSection } from '../components/publica/PublicHeroSection';
 import { PublicUpcomingEventsSection } from '../components/publica/PublicUpcomingEventsSection';
+import { VidaEnOasisSection } from '../components/publica/VidaEnOasisSection';
 import { PublicSchedulesAndFirstTimeSection } from '../components/publica/PublicSchedulesAndFirstTimeSection';
 import { PublicContactAndPwaSection } from '../components/publica/PublicContactAndPwaSection';
 
@@ -40,13 +41,14 @@ export const PublicWelcomeView: React.FC = () => {
           eventsState={eventsState}
         />
 
-        {/* D) Punto de montaje reservado para "Vida en Oasis" (se rellenará en la Fase P4) */}
-        <div
-          id="vida-en-oasis"
-          data-section="vida-en-oasis"
-          data-news-count={news.length}
-          data-news-loading={String(newsState.loading)}
-          aria-hidden="true"
+        {/* D) Sección "Vida en Oasis" (momentos y recuerdos de la comunidad) */}
+        <VidaEnOasisSection
+          news={news}
+          loading={newsState.loading}
+          error={newsState.error}
+          onRetry={() => void newsState.retry()}
+          instagramUrl={settings.instagram_url}
+          variant="public"
         />
 
         {/* E) Sección "Horarios y ¿Primera vez?" */}

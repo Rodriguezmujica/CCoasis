@@ -102,3 +102,35 @@ export function isSafeEmailAddress(email: string): boolean {
   if (/[\u0000-\u001F\u007F\s<>"'`()]/.test(trimmed)) return false;
   return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(trimmed);
 }
+
+/**
+ * Formatea una fecha `YYYY-MM-DD` o ISO de `public_news.event_date` en español
+ * (ej. "8 de noviembre de 2026") sin desfases de zona horaria.
+ */
+export function formatPublicNewsDate(dateString: string): string {
+  try {
+    if (!dateString || typeof dateString !== 'string') {
+      return 'Fecha por confirmar';
+    }
+    const trimmed = dateString.trim();
+    if (!trimmed) return 'Fecha por confirmar';
+
+    const isoCandidate = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+      ? `${trimmed}T12:00:00Z`
+      : trimmed;
+
+    const date = new Date(isoCandidate);
+    if (Number.isNaN(date.getTime())) {
+      return 'Fecha por confirmar';
+    }
+
+    return new Intl.DateTimeFormat('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: MADRID_TZ,
+    }).format(date);
+  } catch {
+    return 'Fecha por confirmar';
+  }
+}

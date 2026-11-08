@@ -288,3 +288,97 @@ export function usePublicWelcomeData() {
     refetchAll,
   };
 }
+
+/**
+ * Hook ligero exclusivo para mostrar la sección "Vida en Oasis" dentro de `/inicio`.
+ *
+ * - Solo consulta `v_public_news` (limit 6) y `instagram_url` de `v_public_site_settings` (id = 1).
+ * - Evita consultar `v_public_events` por duplicado cuando el usuario ya está en `/inicio`.
+ */
+export function usePublicNewsSectionData() {
+  const [news, setNews] = useState<PublicNewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState<boolean>(true);
+  const [newsError, setNewsError] = useState<string | null>(null);
+  const [instagramUrl, setInstagramUrl] = useState<string>('');
+
+  const mountedRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchNewsAndInstagram = useCallback(async () => {
+    setNewsLoading(true);
+    setNewsError(null);
+
+    try {
+      const [newsResult, settingsResult] = await Promise.all([
+        supabase
+          .from('v_public_news')
+          .select('id, title, category, event_date, summary, image_path, created_at')
+          .order('event_date', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(6),
+        supabase
+          .from('v_public_site_settings')
+          .select('id, instagram_url')
+          .eq('id', 1)
+          .maybeSingle(),
+      ]);
+
+      if (newsResult.error) throw newsResult.error;
+
+      if (mountedRef.current) {
+        const enrichedNews: PublicNewsItem[] = (
+          (newsResult.data as PublicNewsItem[]) || []
+        ).map((item) => ({
+          ...item,
+          title: sanitizePlainText(item.title),
+          summary: sanitizePlainText(item.summary),
+          image_url: getPublicMediaUrl(item.image_path),
+        }));
+        setNews(enrichedNews);
+
+        const rawIg = (settingsResult.data as { instagram_url?: string } | null)?.instagram_url || '';
+        const trimmedIg = rawIg.trim();
+        setInstagramUrl(isSafePublicUrl(trimmedIg) ? trimmedIg : '');
+      }
+    } catch (err: any) {
+      console.error('Error al cargar Vida en Oasis en /inicio:', err);
+      if (mountedRef.current) {
+        setNewsError(
+          parsePublicQueryError(
+            err,
+            'No se pudieron cargar los recuerdos de Vida en Oasis.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setNewsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchNewsAndInstagram();
+  }, [fetchNewsAndInstagram]);
+
+  const newsState: PublicSectionState = useMemo(
+    () => ({
+      loading: newsLoading,
+      error: newsError,
+      retry: fetchNewsAndInstagram,
+    }),
+    [newsLoading, newsError, fetchNewsAndInstagram]
+  );
+
+  return {
+    news,
+    instagramUrl,
+    newsState,
+  };
+}

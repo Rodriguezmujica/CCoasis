@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ROLE_LABELS } from '../types/persons';
-import { CalendarDays, Shield } from 'lucide-react';
+import { CalendarDays, Shield, Camera, Globe } from 'lucide-react';
 import {
   InicioUrgentAnnouncements,
   InicioNextEventCard,
@@ -12,7 +13,9 @@ import {
   InicioTreasurySection,
   InicioNormalAnnouncements,
 } from '../components/inicio';
+import { VidaEnOasisSection } from '../components/publica/VidaEnOasisSection';
 import { useInicioDashboard } from '../lib/useInicioDashboard';
+import { usePublicNewsSectionData } from '../lib/usePublicWelcomeData';
 
 type RoleSectionId = 'all' | 'admin' | 'maestro' | 'alumno' | 'tesoreria';
 
@@ -73,6 +76,13 @@ export const InicioView: React.FC = () => {
     adminExpiringAnnouncements: adminExpiringAnnouncementsState,
     adminNextEventRSVPs: adminNextEventRSVPsState,
   } = useInicioDashboard({ isAlumno, isMaestro, isAdmin });
+
+  // Hook ligero para "Vida en Oasis" al final del dashboard (solo v_public_news y v_public_site_settings)
+  const {
+    news: publicNews,
+    instagramUrl: publicInstagramUrl,
+    newsState: publicNewsState,
+  } = usePublicNewsSectionData();
 
   const displayName = personName || user?.email || 'Bienvenido';
   const isLinked = isPersonLinked === true;
@@ -199,6 +209,48 @@ export const InicioView: React.FC = () => {
 
       {/* 6. Avisos normales de la congregación (orden móvil: más abajo, máx 3) */}
       <InicioNormalAnnouncements />
+
+      {/* 7. Bloque final de comunidad: "Vida en Oasis" + enlace directo a la página pública */}
+      <section aria-labelledby="seccion-vida-en-oasis-title" className="space-y-4 pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-[#d4d7dc]">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-[8px] bg-[#ae4a84] text-white flex items-center justify-center flex-shrink-0 shadow-2xs"
+              aria-hidden="true"
+            >
+              <Camera className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h2
+                id="seccion-vida-en-oasis-title"
+                className="text-lg sm:text-xl font-extrabold text-[#1a1a1a] tracking-tight"
+              >
+                Vida en Oasis
+              </h2>
+              <p className="text-xs text-[#4a4f57]">
+                Momentos, bautizos y recuerdos de nuestra vida en comunidad
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to="/bienvenida"
+            className="min-h-[44px] px-4 py-2 rounded-full bg-white hover:bg-[#d9f7f8] border border-[#0e7c86] text-[#0a5961] text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 transition-colors shadow-2xs"
+          >
+            <Globe className="w-4 h-4 text-[#0e7c86] flex-shrink-0" aria-hidden="true" />
+            <span>Ver página pública de bienvenida</span>
+          </Link>
+        </div>
+
+        <VidaEnOasisSection
+          variant="dashboard"
+          news={publicNews}
+          loading={publicNewsState.loading}
+          error={publicNewsState.error}
+          onRetry={() => void publicNewsState.retry()}
+          instagramUrl={publicInstagramUrl}
+        />
+      </section>
     </div>
   );
 };

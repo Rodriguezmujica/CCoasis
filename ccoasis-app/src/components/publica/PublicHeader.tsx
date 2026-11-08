@@ -10,6 +10,7 @@ interface PublicHeaderProps {
 const QUICK_LINKS = [
   { href: '#proximo-culto', label: 'Próximo culto' },
   { href: '#eventos', label: 'Eventos' },
+  { href: '#vida-en-oasis', label: 'Vida en Oasis' },
   { href: '#horarios', label: 'Horarios' },
   { href: '#contacto', label: 'Contacto' },
   { href: '#instalar-app', label: 'Instalar App' },

@@ -101,6 +101,55 @@ function normalizeGalleryPaths(paths?: string[], fallbackPath?: string): string[
 }
 
 /**
+ * Extrae la ruta interna de `public-media` desde una ruta relativa o una URL pública del propio bucket.
+ * Devuelve '' si es una URL externa o una ruta no válida.
+ */
+function toPublicMediaInternalPath(raw: string): string {
+  const value = (raw || '').trim();
+  if (!value) return '';
+
+  if (/^https?:\/\//i.test(value)) {
+    const marker = '/storage/v1/object/public/public-media/';
+    const idx = value.indexOf(marker);
+    if (idx === -1) return '';
+    const tail = value.slice(idx + marker.length).split(/[?#]/)[0];
+    try {
+      return toPublicMediaInternalPath(decodeURIComponent(tail));
+    } catch {
+      return '';
+    }
+  }
+
+  // Cualquier otro esquema (javascript:, data:, etc.) o recorrido de directorios se descarta
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value) || value.includes('..')) return '';
+  return value.replace(/^\/+/, '');
+}
+
+/**
+ * Borra físicamente archivos del bucket `public-media` (best-effort: nunca lanza).
+ * Ignora URLs externas que no pertenezcan a `public-media`.
+ */
+export async function deletePublicMediaFiles(
+  paths: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const cleanPaths = Array.from(
+    new Set((paths || []).map(toPublicMediaInternalPath).filter((p) => p !== ''))
+  );
+  if (cleanPaths.length === 0) return { ok: true };
+
+  try {
+    const { error: removeErr } = await supabase.storage
+      .from('public-media')
+      .remove(cleanPaths);
+    if (removeErr) throw removeErr;
+    return { ok: true };
+  } catch (err: any) {
+    console.error('Error al borrar archivos de public-media:', err);
+    return { ok: false, error: err?.message || 'No se pudieron borrar los archivos.' };
+  }
+}
+
+/**
  * Construye un nombre de archivo seguro `<timestamp>-<nombre-seguro>` para `public-media`.
  */
 function buildSafePublicMediaPath(originalName: string, extension?: string): string {
@@ -634,12 +683,35 @@ export function usePublicPageAdmin(enabled: boolean = true) {
       setActionLoading(true);
       setError(null);
       try {
+        // Rutas previas del recuerdo (para borrar las fotos que el admin quite de la galería)
+        let previousPaths: string[] = [];
+        if (updatePayload.image_paths !== undefined) {
+          const { data: prevRow } = await supabase
+            .from('public_news')
+            .select('image_path, image_paths')
+            .eq('id', id)
+            .maybeSingle();
+          const prev = prevRow as { image_path?: string; image_paths?: string[] } | null;
+          previousPaths = prev
+            ? [...(prev.image_paths || []), prev.image_path || '']
+            : (() => {
+                const cached = newsItems.find((n) => n.id === id);
+                return cached ? [...(cached.image_paths || []), cached.image_path] : [];
+              })();
+        }
+
         const { error: updateErr } = await supabase
           .from('public_news')
           .update(updatePayload)
           .eq('id', id);
 
         if (updateErr) throw updateErr;
+
+        if (updatePayload.image_paths !== undefined) {
+          const keep = new Set<string>(updatePayload.image_paths as string[]);
+          const removed = previousPaths.filter((p) => p && !keep.has(p));
+          await deletePublicMediaFiles(removed);
+        }
 
         void logAuditEvent('UPDATE', 'public_news', id, {
           updated_fields: Object.keys(updatePayload),
@@ -663,7 +735,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
         }
       }
     },
-    [fetchAdminNews]
+    [fetchAdminNews, newsItems]
   );
 
   // 7. Publicar u ocultar un recuerdo en public_news
@@ -725,6 +797,14 @@ export function usePublicPageAdmin(enabled: boolean = true) {
 
         if (archiveErr) throw archiveErr;
 
+        // Borrado físico de las fotos del recuerdo para liberar espacio en Storage
+        if (itemToArchive) {
+          await deletePublicMediaFiles([
+            ...(itemToArchive.image_paths || []),
+            itemToArchive.image_path,
+          ]);
+        }
+
         void logAuditEvent('ARCHIVE', 'public_news', id, {
           title: itemToArchive?.title,
           category: itemToArchive?.category,
@@ -766,6 +846,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
     updateSiteSettings,
     uploadPublicMediaImage,
     uploadPublicMediaImages,
+    discardUploadedMedia: deletePublicMediaFiles,
     createPublicNews,
     updatePublicNews,
     togglePublishPublicNews,

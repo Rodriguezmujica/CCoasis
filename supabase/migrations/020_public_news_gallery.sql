@@ -44,3 +44,15 @@ COMMENT ON VIEW public.v_public_news IS
 
 REVOKE ALL ON public.v_public_news FROM PUBLIC;
 GRANT SELECT ON public.v_public_news TO anon, authenticated, service_role;
+
+-- -----------------------------------------------------------------------------
+-- Limpieza de Storage: el listado de archivos de 'public-media' pasa a ser solo
+-- para administradores. Al ser el bucket public = true, las URLs publicas
+-- (getPublicUrl) siguen cargando para anon sin exponer el listado completo.
+-- -----------------------------------------------------------------------------
+DROP POLICY IF EXISTS "storage_public_media_select" ON storage.objects;
+CREATE POLICY "storage_public_media_select"
+  ON storage.objects
+  FOR SELECT
+  TO authenticated
+  USING (bucket_id = 'public-media' AND public.is_admin());

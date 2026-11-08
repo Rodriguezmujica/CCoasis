@@ -162,6 +162,7 @@ export const PaginaPublicaAdminView: React.FC = () => {
           saving={admin.actionLoading}
           uploading={admin.uploadingImage}
           onUploadMany={admin.uploadPublicMediaImages}
+          onDiscardUploads={admin.discardUploadedMedia}
           onSubmit={handleSubmit}
           onClose={closeModal}
         />

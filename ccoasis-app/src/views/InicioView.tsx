@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ROLE_LABELS } from '../types/persons';
-import { CalendarDays, Sparkles, UserCheck, Shield } from 'lucide-react';
+import { CalendarDays, Shield } from 'lucide-react';
+import {
+  InicioUrgentAnnouncements,
+  InicioNextEventCard,
+  InicioNormalAnnouncements,
+} from '../components/inicio';
 
 export const InicioView: React.FC = () => {
   const { user, roles } = useAuth();
@@ -63,7 +68,7 @@ export const InicioView: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
-      {/* Cabecera de bienvenida con degradado Oasis */}
+      {/* 1. Cabecera de bienvenida con degradado Oasis */}
       <header className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#4a4f57] bg-white border border-[#d4d7dc] px-3 py-1.5 rounded-full shadow-xs">
@@ -96,32 +101,14 @@ export const InicioView: React.FC = () => {
         </p>
       </header>
 
-      {/* Tarjeta de preparación de la pantalla de inicio */}
-      <section
-        aria-label="Estado de la pantalla de inicio"
-        className="bg-white rounded-[12px] border border-[#d4d7dc] p-6 sm:p-8 shadow-sm flex flex-col items-center text-center space-y-4"
-      >
-        <div
-          className="w-14 h-14 rounded-2xl bg-[#d9f7f8] text-[#0e7c86] border border-[#0e7c86] flex items-center justify-center flex-shrink-0 shadow-xs"
-          aria-hidden="true"
-        >
-          <Sparkles className="w-7 h-7" />
-        </div>
+      {/* 2. Avisos urgentes o importantes (orden móvil: arriba del todo, máx 3) */}
+      <InicioUrgentAnnouncements />
 
-        <div className="space-y-2 max-w-md">
-          <h2 className="text-xl font-bold text-[#1a1a1a]">
-            Estamos preparando tu inicio
-          </h2>
-          <p className="text-sm text-[#4a4f57] leading-relaxed">
-            Muy pronto verás aquí un resumen personalizado con tus avisos importantes, el próximo culto con confirmación de asistencia, tus turnos asignados y el acceso a tus clases o tareas según tus roles en la congregación.
-          </p>
-        </div>
+      {/* 3. Próximo evento con confirmación de asistencia */}
+      <InicioNextEventCard />
 
-        <div className="pt-2 flex items-center gap-2 text-xs text-[#4a4f57]">
-          <UserCheck className="w-4 h-4 text-[#0e7c86]" aria-hidden="true" />
-          <span>Fase 1 completada · Estructura base activa</span>
-        </div>
-      </section>
+      {/* 4. Avisos normales de la congregación (orden móvil: abajo, máx 3) */}
+      <InicioNormalAnnouncements />
     </div>
   );
 };

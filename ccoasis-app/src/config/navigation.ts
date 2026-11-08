@@ -8,6 +8,7 @@ import {
   BookOpen,
   Calendar,
   ShieldAlert,
+  Globe,
   LucideIcon 
 } from 'lucide-react';
 
@@ -85,6 +86,14 @@ export const NAV_ITEMS: NavItemConfig[] = [
     icon: BookOpen,
     description: 'Portal de aprendizaje, sesiones, asistencias y entregas',
   },
+  {
+    id: 'pagina-publica',
+    label: 'Página Pública',
+    path: '/pagina-publica',
+    allowedRoles: ['admin'],
+    icon: Globe,
+    description: 'Contenido de la página pública: portada, horarios, contacto y Vida en Oasis',
+  },
 ];
 
 /**
@@ -101,6 +110,7 @@ export const MOBILE_NAV_PRIORITY: string[] = [
   'personas',
   'usuarios',
   'auditoria',
+  'pagina-publica',
 ];
 
 export interface MobileNavGroups {

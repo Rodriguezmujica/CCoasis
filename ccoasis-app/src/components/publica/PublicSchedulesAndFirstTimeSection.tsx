@@ -1,5 +1,13 @@
-import React from 'react';
-import { Clock, MapPin, MessageCircle, HeartHandshake, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Clock,
+  MapPin,
+  Map,
+  Navigation,
+  MessageCircle,
+  HeartHandshake,
+  RefreshCw,
+} from 'lucide-react';
 import { PublicSiteSettings } from '../../types/publicPage';
 import { PublicSectionState } from '../../lib/usePublicWelcomeData';
 import { isSafePublicUrl } from '../../lib/publicPageSecurity';
@@ -22,6 +30,12 @@ export const PublicSchedulesAndFirstTimeSection: React.FC<
   const addressText = settings.address?.trim() || '';
   const hasSafeMapsUrl =
     Boolean(settings.maps_url?.trim()) && isSafePublicUrl(settings.maps_url);
+  const [showEmbeddedMap, setShowEmbeddedMap] = useState(false);
+  const mapsLinkUrl = hasSafeMapsUrl
+    ? settings.maps_url.trim()
+    : addressText
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`
+      : '';
   const hasSafeWhatsappUrl =
     Boolean(settings.whatsapp_url?.trim()) && isSafePublicUrl(settings.whatsapp_url);
 
@@ -48,7 +62,7 @@ export const PublicSchedulesAndFirstTimeSection: React.FC<
                   <Clock className="w-5 h-5" aria-hidden="true" />
                 </span>
                 <h3 className="text-lg font-extrabold text-[#1a1a1a]">
-                  Nuestros horarios
+                  Nuestros horarios y ubicación
                 </h3>
               </div>
 
@@ -108,18 +122,64 @@ export const PublicSchedulesAndFirstTimeSection: React.FC<
               </span>
             </div>
 
-            {hasSafeMapsUrl && (
+            {mapsLinkUrl && (
               <a
-                href={settings.maps_url}
+                href={mapsLinkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] px-4 py-2 rounded-full bg-[#d9f7f8] hover:bg-[#0e7c86] text-[#0a5961] hover:text-white border border-[#0e7c86] text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 transition-colors flex-shrink-0"
+                className="min-h-[44px] px-4 py-2 rounded-full bg-[#0e7c86] hover:bg-[#0a5961] text-white text-sm font-bold inline-flex items-center justify-center gap-1.5 transition-colors flex-shrink-0"
               >
-                <MapPin className="w-4 h-4" aria-hidden="true" />
-                <span>Cómo llegar</span>
+                <Navigation className="w-4 h-4" aria-hidden="true" />
+                <span>Abrir en Google Maps / Cómo llegar</span>
               </a>
             )}
           </div>
+
+          {/* Mapa interactivo con activación por clic (sin cookies de terceros al entrar) */}
+          {addressText && (
+            <div className="pt-3.5 border-t border-[#d4d7dc]">
+              {showEmbeddedMap ? (
+                <div className="space-y-3">
+                  <iframe
+                    title="Ubicación de Centro Cristiano Oasis"
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(addressText)}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full h-64 rounded-xl border border-[#d4d7dc]"
+                  />
+                  {mapsLinkUrl && (
+                    <a
+                      href={mapsLinkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full min-h-[44px] px-4 py-2 rounded-full border border-[#0e7c86] bg-white hover:bg-[#d9f7f8] text-[#0a5961] text-sm font-bold inline-flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Navigation className="w-4 h-4" aria-hidden="true" />
+                      <span>Abrir ruta en la app de Google Maps</span>
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-[#d4d7dc] bg-[#f5f5f5] p-4 flex flex-col items-center text-center gap-3">
+                  <span className="w-11 h-11 rounded-full bg-[#d9f7f8] text-[#0a5961] inline-flex items-center justify-center">
+                    <Map className="w-6 h-6" aria-hidden="true" />
+                  </span>
+                  <p className="text-sm font-bold text-[#1a1a1a]">{addressText}</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowEmbeddedMap(true)}
+                    className="w-full sm:w-auto min-h-[44px] px-5 py-2 rounded-full bg-[#ae4a84] hover:bg-[#8f3b6b] text-white text-sm font-bold inline-flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Map className="w-4 h-4" aria-hidden="true" />
+                    <span>Mostrar mapa interactivo aquí</span>
+                  </button>
+                  <p className="text-xs text-[#4a4f57]">
+                    Al mostrar el mapa se carga contenido de Google Maps (puede usar cookies de Google).
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* 2) Tarjeta destacada "¿Nos visitas por primera vez?" (borde #0e7c86 accesible >= 4.95:1 sobre blanco) */}

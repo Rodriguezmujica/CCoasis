@@ -10,6 +10,7 @@ import { LoginView } from './views/LoginView';
 import { HomeRedirect } from './views/HomeRedirect';
 import { PublicWelcomeView } from './views/PublicWelcomeView';
 import { SinPermisosView } from './views/SinPermisosView';
+import { PaginaPublicaAdminView } from './views/PaginaPublicaAdminView';
 import {
   InicioView,
   PersonasView,
@@ -110,6 +111,16 @@ export const App: React.FC = () => {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AuditoriaView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* admin: Página pública y Vida en Oasis */}
+            <Route
+              path="/pagina-publica"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PaginaPublicaAdminView />
                 </ProtectedRoute>
               }
             />

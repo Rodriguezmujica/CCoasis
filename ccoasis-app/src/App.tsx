@@ -10,6 +10,7 @@ import { LoginView } from './views/LoginView';
 import { HomeRedirect } from './views/HomeRedirect';
 import { SinPermisosView } from './views/SinPermisosView';
 import {
+  InicioView,
   PersonasView,
   ClasesView,
   ClassroomDetailView,
@@ -46,6 +47,16 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           >
+            {/* Todos los roles autenticados: Inicio */}
+            <Route
+              path="/inicio"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'tesorero', 'maestro', 'alumno']}>
+                  <InicioView />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Todos los roles autenticados: Calendario */}
             <Route
               path="/calendario"

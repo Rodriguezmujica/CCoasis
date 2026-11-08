@@ -1,3 +1,6 @@
+// Inicio – pantalla de inicio por rol
+export { InicioView } from './InicioView';
+
 // Personas – módulo implementado
 export { PersonasView } from './PersonasView';
 

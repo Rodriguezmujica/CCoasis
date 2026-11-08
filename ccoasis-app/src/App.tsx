@@ -8,6 +8,7 @@ import { AppLayout } from './components/AppLayout';
 import { LoginIntro } from './components/LoginIntro';
 import { LoginView } from './views/LoginView';
 import { HomeRedirect } from './views/HomeRedirect';
+import { PublicWelcomeView } from './views/PublicWelcomeView';
 import { SinPermisosView } from './views/SinPermisosView';
 import {
   InicioView,
@@ -35,6 +36,9 @@ export const App: React.FC = () => {
 
           {/* Ruta explícita para usuarios sin roles o sin permisos (nunca redirige a "/") */}
           <Route path="/sin-permisos" element={<SinPermisosView />} />
+
+          {/* Ruta pública de bienvenida (accesible tanto sin sesión como con sesión) */}
+          <Route path="/bienvenida" element={<PublicWelcomeView />} />
 
           {/* Redirección raíz según sesión y roles (HomeRedirect) */}
           <Route path="/" element={<HomeRedirect />} />

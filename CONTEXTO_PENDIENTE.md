@@ -6,7 +6,7 @@
 
 ## 0. Estado en una frase
 
-La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También están en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`) y la **Pantalla de Inicio por Rol (`/inicio`)** (Fases 1 a 6 completadas, probadas por Luis y fusionadas en `main`). Queda solo la revisión visual final general antes de la entrega y, más adelante si los pastores la aprueban, la página pública de bienvenida.
+La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También están en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`), las **copias de seguridad (CSV/JSON)** en Auditoría, el **keep-alive automático (`018`)** mediante GitHub Actions y la **Pantalla de Inicio por Rol (`/inicio` con filtro de chips multi-rol y estados vacíos compactos)** (Fases 1 a 6 completadas, probadas por Luis y fusionadas en `main`). Queda solo la revisión visual final general antes de la entrega y, más adelante si los pastores la aprueban, la página pública de bienvenida.
 
 ## 1. Reglas que no se rompen
 
@@ -90,24 +90,19 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
 6. **Authentication, URL Configuration** en Supabase: `Site URL` = la URL de producción de Vercel (`https://c-coasis.vercel.app`). El correo integrado de Supabase es muy limitado: si se usan invitaciones por correo, configurar un servicio propio.
 7. **Prueba final con un usuario por rol** (admin, tesorero, maestro, alumno): cada uno ve solo lo suyo, y escribiendo a mano una URL ajena (`/finanzas`) sale "permiso denegado".
 
-## 5. Documentación a corregir en `CONTEXTO_PROYECTO.md`
+## 5. Documentación a corregir en `CONTEXTO_PROYECTO.md` (100% COMPLETADA · 8 de noviembre de 2026)
 
-- La sección de esquema (5.2) **no coincide** con la migración 001 original: el documento decía `teacher_person_id`, `min_attendance_percentage`, `passing_score`, `grades.person_id`, `attendance.status`; la 001 usa `teacher_id`, `min_attendance_pct`, `passing_grade`, `grades.enrollment_id`, `attendance.mark`. Regenerarla desde la base real:
-
-```sql
-SELECT table_name, string_agg(column_name, ', ' ORDER BY ordinal_position)
-FROM information_schema.columns WHERE table_schema='public'
-GROUP BY table_name ORDER BY 1;
-```
-
-- Añadir regla: **no usar `deleted_at IS NULL` en la política SELECT del admin** en tablas con archivado (rompe el soft-delete).
-- Anotar la excepción de `v_event_servers` a la regla "todas las vistas `security_invoker`".
-- ~~Listar las migraciones reales y la fase del rediseño~~ (hecho en `CONTEXTO_PROYECTO.md` y `README.md`, completada la lista de migraciones hasta la `018`).
-- El resto de esta sección sigue pendiente de contrastar con la base real.
+- **Esquema real de columnas principales:** `[HECHO]` Documentados en la sección 7 de `CONTEXTO_PROYECTO.md` los nombres exactos verificados contra las migraciones `001`–`018` (`courses.passing_grade`, `courses.min_attendance_pct`, `cycles.teacher_id`, `grades.enrollment_id` y `evaluation_id`, `attendance.mark`, `church_event_attendance.adults_count`/`children_count`/`visitors_count`/`total_count`).
+- **Regla de soft-delete en políticas SELECT:** `[HECHO]` Reflejada en la sección 8 de `CONTEXTO_PROYECTO.md` (no usar `deleted_at IS NULL` sin anteponer `is_admin() OR ...` en la política SELECT de tablas con archivado).
+- **Excepción deliberada de `v_event_servers`:** `[HECHO]` Documentada en las secciones 7 y 8 de `CONTEXTO_PROYECTO.md` (`security_invoker = false` para permitir leer nombre y apellido de servidores asignados sin exponer datos privados de `persons`).
+- **Listado de migraciones (`001` a `018`) y notas de mantenimiento:** `[HECHO]` Reflejados en `CONTEXTO_PROYECTO.md` (secciones 7, 9 y 12) y `README.md`.
 
 ## 5b. Ideas futuras
 
-Ver `IDEAS_FUTURAS.md` y `PLAN_INICIO_Y_PUBLICA.md`: la pantalla de inicio por rol (`/inicio`) ya está implementada y en producción; quedan como ideas futuras la página pública de bienvenida con calendario de solo lectura (sujeta a la aprobación y datos de los pastores), notificaciones push y recordatorios, noticias e Instagram.
+Ver `IDEAS_FUTURAS.md` y `PLAN_INICIO_Y_PUBLICA.md`:
+- **Ya implementados y en `main`:** `Exportar datos y copias de seguridad (CSV/JSON)`, `Keep-alive automático (018)` y `Pantalla de inicio por rol (/inicio)`.
+- **Descartados por decisión de Luis (no proponer):** `Peticiones de oración`, `Seguimiento de visitas` y `Cumpleaños`.
+- **En evaluación / futuro:** el único bloque grande en evaluación es la **Página pública de bienvenida (`/`)** (documentada en la sección 8 de `PLAN_INICIO_Y_PUBLICA.md`, sujeta a confirmación y datos de los pastores), junto con futuras **notificaciones Web Push** e **informes en PDF**.
 
 ## 6. Datos útiles
 

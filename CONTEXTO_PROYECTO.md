@@ -113,6 +113,30 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 
 **Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`.
 
+### Esquema real de columnas principales (verificado contra migraciones 001–018)
+
+Nombres exactos de las columnas que antes generaban confusión (no usar alias antiguos o supuestos):
+- `courses`: `id`, `title`, `description`, `passing_grade`, `min_attendance_pct`, `created_at`, `updated_at`, `deleted_at` (**nunca** `passing_score` ni `min_attendance_percentage`).
+- `cycles`: `id`, `course_id`, `teacher_id`, `name`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`, `deleted_at` (**nunca** `teacher_person_id`).
+- `grades`: `id`, `evaluation_id`, `enrollment_id`, `score`, `notes`, `created_at`, `updated_at` — vinculada por `enrollment_id` y `evaluation_id` (**nunca** `person_id`).
+- `attendance`: `id`, `session_id`, `person_id`, `mark` (enum `attendance_mark` con valores `'presente'`, `'ausente'`, `'justificado'`), `notes`, `created_at`, `updated_at` (**nunca** `status`).
+- `church_event_attendance`: conteo general con `id`, `event_id`, `adults_count`, `children_count`, `visitors_count` y `total_count` generado (`GENERATED ALWAYS AS (adults_count + children_count + visitors_count) STORED`), `notes`, `recorded_by`, `created_at`, `updated_at`.
+- Resto de tablas clave:
+  - `persons`: `id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `birth_date`, `baptism_date`, `address`, `status` (`'activo'`, `'inactivo'`, `'visita'`, `'transferido'`, `'fallecido'`), `notes`, `created_at`, `updated_at`, `deleted_at`.
+  - `enrollments`: `id`, `cycle_id`, `person_id`, `status` (`'inscrito'`, `'completado'`, `'retirado'`), `created_at`, `updated_at`.
+  - `sessions`: `id`, `cycle_id`, `session_date`, `topic`, `description`, `created_at`, `updated_at`.
+  - `evaluations`: `id`, `cycle_id`, `title`, `description`, `max_score`, `due_date`, `created_at`, `updated_at`.
+  - `assignments`: `id`, `cycle_id`, `session_id`, `title`, `instructions`, `due_date`, `created_at`, `updated_at`.
+  - `assignment_submissions`: `id`, `assignment_id`, `enrollment_id`, `file_url`, `comments`, `feedback`, `submitted_at`, `grade`.
+  - `class_materials`: `id`, `cycle_id`, `session_id`, `title`, `description`, `file_url`, `external_url`, `created_at`.
+  - `offerings`: `id`, `person_id`, `category_id`, `amount`, `currency`, `offering_date`, `payment_method`, `fund_account`, `notes`, `created_at`, `updated_at`.
+  - `expenses`: `id`, `category_id`, `amount`, `currency`, `expense_date`, `payment_method`, `fund_account`, `receipt_url`, `description`, `created_at`, `updated_at`.
+  - `church_events`: `id`, `title`, `description`, `event_type`, `start_time`, `end_time`, `location`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
+  - `church_event_assignments`: `id`, `event_id`, `person_id`, `role_type`, `notes`, `created_at`.
+  - `church_event_rsvps`: `id`, `event_id`, `person_id`, `status` (`'asistire'`, `'quizas'`, `'no_asistire'`), `guests`, `created_at`, `updated_at`.
+  - `announcements`: `id`, `title`, `message`, `priority` (`'normal'`, `'importante'`, `'urgente'`), `is_active`, `expires_at`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
+  - `audit_logs`: `id`, `user_id`, `user_email`, `action`, `target_table`, `target_id`, `details`, `created_at`.
+
 **Vistas:**
 - `v_cycle_grades_summary` (`security_invoker = true`): promedio normalizado a 0-100, porcentaje de asistencia y `passed`. Respeta RLS y no es accesible para anon. Solo cuenta `presente` como asistencia.
 - `v_event_servers` (`security_invoker = false`): **excepción deliberada a la regla de vistas**. Permite a los usuarios autenticados consultar únicamente `id`, `first_name` y `last_name` de los servidores asignados a turnos en el calendario sin exponer datos personales sensibles de la tabla `persons` (teléfono, dirección, notas). La advertencia "Security Definer View" en el Security Advisor de Supabase para esta vista es esperada y debe ignorarse.
@@ -157,6 +181,7 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 7. Si un cambio exige modificar la base de datos, escribe un archivo nuevo en `supabase/migrations/`, idempotente, y explícale a Luis cómo ejecutarlo en el SQL Editor. Prueba que no rompe las políticas existentes.
 8. Si no estás seguro de algo, **pregunta**. No supongas.
 9. Luis no es experto en esta parte técnica: explica los pasos de forma concreta (dónde hacer clic, qué pegar) y avísale de cualquier riesgo.
+10. **Módulos descartados por decisión de Luis (NO proponer ni construir):** quedan descartados definitivamente **peticiones de oración**, **seguimiento de visitas** y **cumpleaños/aniversarios**. Ninguna IA debe sugerirlos ni añadirlos en futuras sesiones.
 
 ## 10. Plantilla para abrir un chat nuevo
 
@@ -194,8 +219,8 @@ Probar con ventanas de incógnito en paralelo. Comprobar siempre:
 
 ## 12. Antes de entregarla a la iglesia
 
-1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON y exportaciones CSV en la vista de Auditoría para rol `admin`.
-2. **Pausa por inactividad:** [AUTOMATIZADO Y RESUELTO] En Supabase gratuito el proyecto se pausa tras 7 días de inactividad. Se implementó un sistema automático de latido ("keep-alive") mediante un GitHub Action programado (cron lunes y jueves a las 08:00 UTC, `.github/workflows/supabase-keepalive.yml`) que invoca la función `public.keepalive_ping()` (`018_keepalive_ping.sql`) sin exponer datos sensibles. Si por algún motivo extremo el proyecto llegara a pausarse (o fallara el Action, notificando por correo a Luis), basta con entrar a https://supabase.com/dashboard y pulsar "Restore project" (el proyecto se restaura intacto en unos 2 minutos).
+1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON y exportaciones CSV en la vista de Auditoría para rol `admin`. **Nota técnica de mantenimiento:** si en el futuro alguna tabla supera las **1.000 filas** (límite habitual por defecto de PostgREST), convendrá paginar las consultas del respaldo JSON, incluir `user_roles` o cualquier tabla nueva, y contrastar las filas exportadas con un `count`. Además, dado que el JSON de aplicación no incluye archivos de Storage ni credenciales de `auth.users`, conviene realizar un `supabase db dump` periódico.
+2. **Pausa por inactividad:** [AUTOMATIZADO Y RESUELTO] En Supabase gratuito el proyecto se pausa tras 7 días de inactividad. Se implementó un sistema automático de latido ("keep-alive") mediante un GitHub Action programado (cron lunes y jueves a las 08:00 UTC, `.github/workflows/supabase-keepalive.yml`) que invoca la función `public.keepalive_ping()` (`018_keepalive_ping.sql`) sin exponer datos sensibles. Si por algún motivo extremo el proyecto llegara a pausarse (o fallara el Action, notificando por correo a Luis), basta con entrar a https://supabase.com/dashboard y pulsar "Restore project" (el proyecto se restaura intacto en unos 2 minutos). **Vigilancia mensual de GitHub Actions:** GitHub desactiva automáticamente los workflows programados (`schedule`) en repositorios públicos tras **60 días sin actividad (commits)**; mantener el repositorio privado o revisar cada mes la pestaña **Actions** en GitHub para verificar que el cron sigue activo.
 3. **Propiedad de la cuenta de Supabase:** hoy está a nombre de Luis. Acordar con el pastor quién la tendrá a medio plazo.
 4. **Datos sensibles:** una lista de miembros y ofrendas es información delicada (en España, los datos de creencias religiosas son categoría especial en el RGPD). Dar acceso solo a quien lo necesite; el pastor debe saber que es responsable de esos datos.
 5. **Caché de la PWA:** que cachee solo archivos de la app, no datos de Supabase, para que no queden notas ni ofrendas guardadas en móviles compartidos.

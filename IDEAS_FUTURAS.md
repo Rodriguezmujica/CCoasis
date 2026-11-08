@@ -12,7 +12,7 @@
 - **Notificaciones push en el móvil** (la app ya es PWA): eventos, anuncios y tareas.
 - **Recordatorios automáticos:** el día antes de un culto o evento, para quien confirmó asistencia y para quien tiene turno.
 - **Pantalla de inicio por rol (`/inicio`).** [HECHO] Fases 1 a 6 completadas y en producción (ver sección 3).
-- **Peticiones de oración:** se envían y las ven los pastores o un equipo designado.
+- **Peticiones de oración:** [DESCARTADO POR DECISIÓN DEL PROYECTO] se envían y las ven los pastores o un equipo designado.
 - **Devocional o versículo del día.**
 
 ## 3. Pantalla de inicio
@@ -60,15 +60,15 @@ Cuidados: aviso de cookies si se incrusta contenido, no copiar fotos de menores 
 ## 5. Más adelante
 - **Ofrendas y diezmos en línea:** solo con proveedor de pagos externo; nunca guardar datos de tarjeta.
 - **Ministerios y grupos pequeños:** células, jóvenes, alabanza, con calendario y lista propios.
-- **Seguimiento de visitas:** quién vino, quién necesita contacto y cuándo.
+- **Seguimiento de visitas:** [DESCARTADO POR DECISIÓN DEL PROYECTO] quién vino, quién necesita contacto y cuándo.
 - **Informes en PDF** para la directiva: asistencia, finanzas y crecimiento.
-- **Cumpleaños y aniversarios.**
+- **Cumpleaños y aniversarios:** [DESCARTADO POR DECISIÓN DEL PROYECTO]
 
 ## 6. Orden sugerido
 1. Exportar y copias de seguridad. [HECHO]
 2. Notificaciones y recordatorios.
 3. Pantalla de inicio por rol (`/inicio`). [HECHO]
-4. Peticiones de oración.
+4. Peticiones de oración. [DESCARTADO POR DECISIÓN DEL PROYECTO]
 5. Página pública con calendario de solo lectura, noticias y enlace a Instagram (pendiente de aprobación y datos de los pastores).
 
 ## 7. Advertencia sobre lo público

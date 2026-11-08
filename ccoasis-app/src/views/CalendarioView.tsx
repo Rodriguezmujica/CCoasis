@@ -34,6 +34,7 @@ import {
   HelpCircle,
   XCircle,
   Check,
+  Globe,
 } from 'lucide-react';
 import { useBatchEventAssignments } from '../lib/useEventAssignments';
 import { EventAssignmentsModal, getRoleIcon } from '../components/calendario/EventAssignmentsModal';
@@ -161,6 +162,7 @@ export const CalendarioView: React.FC = () => {
     end_date: '',
     end_time_val: '',
     location: '',
+    is_public: false,
   });
 
   // Prefijo del mes seleccionado ('YYYY-MM')
@@ -245,6 +247,7 @@ export const CalendarioView: React.FC = () => {
       end_date: '',
       end_time_val: '',
       location: 'Local Central - Salón Principal',
+      is_public: false,
     });
     setIsFormOpen(true);
   };
@@ -271,6 +274,7 @@ export const CalendarioView: React.FC = () => {
       end_date: endDate,
       end_time_val: endTime,
       location: ev.location || '',
+      is_public: Boolean(ev.is_public),
     });
     setIsFormOpen(true);
   };
@@ -393,6 +397,15 @@ export const CalendarioView: React.FC = () => {
             <span className="text-xs font-semibold bg-white/[0.18] rounded-full px-2.5 py-1">
               {EVENT_TYPES_CONFIG[upcomingEvent.event_type]?.label || upcomingEvent.event_type}
             </span>
+            {upcomingEvent.is_public === true && (
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#23d5da] text-[#1a1a1a] rounded-full px-2.5 py-1"
+                title="Evento visible en la página pública de bienvenida"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
+                <span>Público</span>
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-x-[18px] gap-y-1.5 text-sm text-white">
@@ -664,12 +677,24 @@ export const CalendarioView: React.FC = () => {
                       >
                         <div className="space-y-2">
                           <div className="flex items-start justify-between gap-2">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-xs font-semibold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
-                            >
-                              <span className={`w-2 h-2 rounded-full ${typeConfig.dotColor}`}></span>
-                              {typeConfig.label}
-                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-xs font-semibold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                              >
+                                <span className={`w-2 h-2 rounded-full ${typeConfig.dotColor}`}></span>
+                                {typeConfig.label}
+                              </span>
+
+                              {event.is_public === true && (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2.5 py-[3px] rounded-full text-xs font-bold bg-[#23d5da] text-[#1a1a1a] border border-[#0e7c86]"
+                                  title="Evento visible en la página pública de bienvenida"
+                                >
+                                  <Globe className="w-3.5 h-3.5 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
+                                  <span>Público</span>
+                                </span>
+                              )}
+                            </div>
 
                             {/* Acciones de Admin */}
                             {isAdmin && (
@@ -1078,6 +1103,37 @@ export const CalendarioView: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium resize-none"
                 />
+              </div>
+
+              {/* Casilla de Evento Público (exclusivo Admin) */}
+              <div
+                className={`rounded-xl border p-3.5 transition-colors ${
+                  formData.is_public
+                    ? 'bg-[#d9f7f8]/60 border-[#0e7c86]'
+                    : 'bg-[#f5f5f5] border-[#d4d7dc]'
+                }`}
+              >
+                <label
+                  htmlFor="event_is_public"
+                  className="min-h-[44px] flex items-center gap-3 cursor-pointer select-none"
+                >
+                  <input
+                    id="event_is_public"
+                    type="checkbox"
+                    checked={Boolean(formData.is_public)}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_public: e.target.checked })
+                    }
+                    className="w-5 h-5 rounded border-[#767b83] text-[#0e7c86] focus:ring-2 focus:ring-[#0e7c86] flex-shrink-0 cursor-pointer accent-[#0e7c86]"
+                  />
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1a1a1a]">
+                    <Globe className="w-4 h-4 text-[#0e7c86] flex-shrink-0" aria-hidden="true" />
+                    <span>Evento público (visible en la página de bienvenida)</span>
+                  </span>
+                </label>
+                <p className="mt-1 pl-8 text-xs text-[#4a4f57] leading-relaxed">
+                  Se mostrará a cualquier persona sin iniciar sesión: solo título, fecha, hora y lugar. Nunca se muestran descripciones internas, turnos, conteos ni confirmaciones.
+                </p>
               </div>
 
               {/* Botones de acción del Modal */}

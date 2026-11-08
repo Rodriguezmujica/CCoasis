@@ -175,8 +175,9 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
       }
 
       const { data: { user } } = await supabase.auth.getUser();
+      const isPublic = Boolean(formData.is_public);
 
-      const { error: insertError } = await supabase
+      const { data: createdRow, error: insertError } = await supabase
         .from('church_events')
         .insert({
           title: formData.title.trim(),
@@ -185,10 +186,21 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
           start_time: startDateTime.toISOString(),
           end_time: endDateTime ? endDateTime.toISOString() : null,
           location: formData.location?.trim() || null,
+          is_public: isPublic,
           created_by: user?.id || null,
-        });
+        })
+        .select('id')
+        .maybeSingle();
 
       if (insertError) throw insertError;
+
+      logAuditEvent('CREATE', 'church_events', createdRow?.id || null, {
+        title: formData.title.trim(),
+        event_type: formData.event_type,
+        start_time: startDateTime.toISOString(),
+        is_public: isPublic,
+      });
+
       await fetchEvents();
       return true;
     } catch (err: any) {
@@ -221,6 +233,8 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
         }
       }
 
+      const isPublic = Boolean(formData.is_public);
+
       const { error: updateError } = await supabase
         .from('church_events')
         .update({
@@ -230,10 +244,19 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
           start_time: startDateTime.toISOString(),
           end_time: endDateTime ? endDateTime.toISOString() : null,
           location: formData.location?.trim() || null,
+          is_public: isPublic,
         })
         .eq('id', id);
 
       if (updateError) throw updateError;
+
+      logAuditEvent('UPDATE', 'church_events', id, {
+        title: formData.title.trim(),
+        event_type: formData.event_type,
+        start_time: startDateTime.toISOString(),
+        is_public: isPublic,
+      });
+
       await fetchEvents();
       return true;
     } catch (err: any) {
@@ -263,6 +286,7 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
           title: eventToDelete?.title,
           event_type: eventToDelete?.event_type,
           start_time: eventToDelete?.start_time,
+          is_public: Boolean(eventToDelete?.is_public),
           mode: 'soft-delete',
         });
         await fetchEvents();
@@ -285,6 +309,7 @@ export function useEvents(selectedYear: number, selectedMonth: number) {
         title: eventToDelete?.title,
         event_type: eventToDelete?.event_type,
         start_time: eventToDelete?.start_time,
+        is_public: Boolean(eventToDelete?.is_public),
         mode: 'hard-delete',
       });
 

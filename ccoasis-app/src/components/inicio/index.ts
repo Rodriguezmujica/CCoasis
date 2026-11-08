@@ -5,3 +5,5 @@ export * from './DashboardErrorState';
 export * from './InicioUrgentAnnouncements';
 export * from './InicioNormalAnnouncements';
 export * from './InicioNextEventCard';
+export * from './InicioMyShiftsCard';
+export * from './InicioStudentSection';

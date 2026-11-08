@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
 import { ROLE_LABELS } from '../types/persons';
 import { CalendarDays, Shield } from 'lucide-react';
 import {
   InicioUrgentAnnouncements,
   InicioNextEventCard,
+  InicioMyShiftsCard,
+  InicioStudentSection,
   InicioNormalAnnouncements,
 } from '../components/inicio';
+import { useInicioDashboard } from '../lib/useInicioDashboard';
 
 export const InicioView: React.FC = () => {
   const { user, roles } = useAuth();
-  const [displayName, setDisplayName] = useState<string>(user?.email || 'Bienvenido');
-  const [isLinked, setIsLinked] = useState<boolean>(false);
-  const [isLoadingPerson, setIsLoadingPerson] = useState<boolean>(true);
+  const isAlumno = roles.includes('alumno');
 
   // Fecha de hoy en formato amigable en español (ej: "Domingo, 8 de noviembre de 2026")
   const rawDate = new Intl.DateTimeFormat('es-ES', {
@@ -24,47 +24,19 @@ export const InicioView: React.FC = () => {
   }).format(new Date());
   const todayFormatted = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    let isMounted = true;
+  // Hook ligero del dashboard: consultas independientes con .limit()
+  const {
+    personName,
+    isPersonLinked,
+    isLoadingPerson,
+    shifts: shiftsState,
+    nextClass: nextClassState,
+    pendingAssignments: pendingAssignmentsState,
+    recentGrades: recentGradesState,
+  } = useInicioDashboard({ isAlumno });
 
-    const loadPersonName = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('persons')
-          .select('first_name, last_name')
-          .eq('user_id', user.id)
-          .is('deleted_at', null)
-          .maybeSingle();
-
-        if (!isMounted) return;
-
-        if (!error && data && data.first_name) {
-          const fullName = `${data.first_name} ${data.last_name || ''}`.trim();
-          setDisplayName(fullName);
-          setIsLinked(true);
-        } else {
-          setDisplayName(user.email || 'Bienvenido');
-          setIsLinked(false);
-        }
-      } catch (err) {
-        console.warn('Nota al consultar ficha de persona para inicio:', err);
-        if (isMounted) {
-          setDisplayName(user.email || 'Bienvenido');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingPerson(false);
-        }
-      }
-    };
-
-    loadPersonName();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id, user?.email]);
+  const displayName = personName || user?.email || 'Bienvenido';
+  const isLinked = isPersonLinked === true;
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-6">
@@ -107,7 +79,26 @@ export const InicioView: React.FC = () => {
       {/* 3. Próximo evento con confirmación de asistencia */}
       <InicioNextEventCard />
 
-      {/* 4. Avisos normales de la congregación (orden móvil: abajo, máx 3) */}
+      {/* 4. Mis turnos (para cualquier rol con ficha vinculada, máx 3) */}
+      <InicioMyShiftsCard
+        shifts={shiftsState.shifts}
+        isLoading={shiftsState.isLoading}
+        error={shiftsState.error}
+        isPersonLinked={isPersonLinked}
+        onRetry={shiftsState.refetch}
+      />
+
+      {/* 5. Tarjetas de su rol: sección Alumno (solo si tiene rol 'alumno', apilada) */}
+      {isAlumno && (
+        <InicioStudentSection
+          isPersonLinked={isPersonLinked}
+          nextClassState={nextClassState}
+          pendingAssignmentsState={pendingAssignmentsState}
+          recentGradesState={recentGradesState}
+        />
+      )}
+
+      {/* 6. Avisos normales de la congregación (orden móvil: más abajo, máx 3) */}
       <InicioNormalAnnouncements />
     </div>
   );

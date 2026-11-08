@@ -14,6 +14,7 @@ export interface ChurchEvent {
   start_time: string; // ISO 8601 string timestamptz
   end_time: string | null; // ISO 8601 string timestamptz
   location: string | null;
+  is_public?: boolean;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -29,6 +30,7 @@ export interface ChurchEventFormData {
   end_date?: string; // 'YYYY-MM-DD'
   end_time_val?: string; // 'HH:mm'
   location?: string;
+  is_public?: boolean;
 }
 
 export interface EventTypeMetadata {

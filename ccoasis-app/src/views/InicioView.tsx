@@ -6,6 +6,7 @@ import {
   InicioUrgentAnnouncements,
   InicioNextEventCard,
   InicioMyShiftsCard,
+  InicioTeacherSection,
   InicioStudentSection,
   InicioNormalAnnouncements,
 } from '../components/inicio';
@@ -13,6 +14,7 @@ import { useInicioDashboard } from '../lib/useInicioDashboard';
 
 export const InicioView: React.FC = () => {
   const { user, roles } = useAuth();
+  const isMaestro = roles.includes('maestro');
   const isAlumno = roles.includes('alumno');
 
   // Fecha de hoy en formato amigable en español (ej: "Domingo, 8 de noviembre de 2026")
@@ -33,7 +35,10 @@ export const InicioView: React.FC = () => {
     nextClass: nextClassState,
     pendingAssignments: pendingAssignmentsState,
     recentGrades: recentGradesState,
-  } = useInicioDashboard({ isAlumno });
+    teacherNextClass: teacherNextClassState,
+    teacherPendingAttendance: teacherPendingAttendanceState,
+    teacherPendingSubmissions: teacherPendingSubmissionsState,
+  } = useInicioDashboard({ isAlumno, isMaestro });
 
   const displayName = personName || user?.email || 'Bienvenido';
   const isLinked = isPersonLinked === true;
@@ -88,7 +93,16 @@ export const InicioView: React.FC = () => {
         onRetry={shiftsState.refetch}
       />
 
-      {/* 5. Tarjetas de su rol: sección Alumno (solo si tiene rol 'alumno', apilada) */}
+      {/* 5. Tarjetas de su rol (apiladas con su título de sección por rol, sin pestañas y sin duplicados) */}
+      {isMaestro && (
+        <InicioTeacherSection
+          isPersonLinked={isPersonLinked}
+          teacherNextClassState={teacherNextClassState}
+          teacherPendingAttendanceState={teacherPendingAttendanceState}
+          teacherPendingSubmissionsState={teacherPendingSubmissionsState}
+        />
+      )}
+
       {isAlumno && (
         <InicioStudentSection
           isPersonLinked={isPersonLinked}

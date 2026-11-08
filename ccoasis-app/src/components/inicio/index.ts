@@ -7,3 +7,4 @@ export * from './InicioNormalAnnouncements';
 export * from './InicioNextEventCard';
 export * from './InicioMyShiftsCard';
 export * from './InicioStudentSection';
+export * from './InicioTeacherSection';

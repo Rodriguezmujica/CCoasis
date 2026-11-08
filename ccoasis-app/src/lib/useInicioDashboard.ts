@@ -53,6 +53,39 @@ export interface StudentGradeItem {
   courseTitle: string;
 }
 
+export interface TeacherNextClassItem {
+  id: string;
+  sessionDate: string;
+  topic: string;
+  description: string | null;
+  cycleId: string;
+  cycleName: string;
+  courseTitle: string;
+}
+
+export interface TeacherPendingAttendanceItem {
+  id: string;
+  sessionDate: string;
+  topic: string;
+  description: string | null;
+  cycleId: string;
+  cycleName: string;
+  courseTitle: string;
+}
+
+export interface TeacherPendingSubmissionItem {
+  id: string;
+  assignmentId: string;
+  assignmentTitle: string;
+  submittedAt: string;
+  fileUrl: string | null;
+  comments: string | null;
+  studentName: string;
+  cycleId: string;
+  cycleName: string;
+  courseTitle: string;
+}
+
 // ============================================================================
 // Utilidades de formato de fechas en español (Europe/Madrid)
 // ============================================================================
@@ -720,15 +753,410 @@ export function useStudentRecentGrades(
 }
 
 // ============================================================================
+// Hook: Próxima clase del maestro (sessions de ciclos activos que imparte)
+// ============================================================================
+
+export function useTeacherNextClass(
+  personId: string | null,
+  isPersonLinked: boolean | null,
+  isMaestro: boolean
+) {
+  const [nextClass, setNextClass] = useState<TeacherNextClassItem | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchTeacherNextClass = useCallback(async () => {
+    if (!isMaestro || isPersonLinked === false) {
+      setNextClass(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!personId) {
+      if (isPersonLinked === null) return;
+      setNextClass(null);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const todayStr = getTodayDateString();
+
+      const { data, error: queryErr } = await supabase
+        .from('sessions')
+        .select(`
+          id,
+          session_date,
+          topic,
+          description,
+          cycle:cycles!inner (
+            id,
+            name,
+            status,
+            deleted_at,
+            teacher_id,
+            course:courses!inner (
+              id,
+              title,
+              deleted_at
+            )
+          )
+        `)
+        .eq('cycle.teacher_id', personId)
+        .is('cycle.deleted_at', null)
+        .is('cycle.course.deleted_at', null)
+        .neq('cycle.status', 'cerrado')
+        .neq('cycle.status', 'archivado')
+        .gte('session_date', todayStr)
+        .order('session_date', { ascending: true })
+        .limit(1);
+
+      if (!mountedRef.current) return;
+
+      if (queryErr) throw queryErr;
+
+      if (data && data.length > 0) {
+        const row = data[0] as any;
+        const cy = Array.isArray(row.cycle) ? row.cycle[0] : row.cycle;
+        const co = cy ? (Array.isArray(cy.course) ? cy.course[0] : cy.course) : null;
+
+        setNextClass({
+          id: row.id,
+          sessionDate: row.session_date,
+          topic: row.topic,
+          description: row.description,
+          cycleId: cy?.id || '',
+          cycleName: cy?.name || '',
+          courseTitle: co?.title || 'Curso',
+        });
+      } else {
+        setNextClass(null);
+      }
+    } catch (err: any) {
+      console.error('Error al cargar próxima clase del maestro:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudo cargar tu próxima clase programada. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [personId, isPersonLinked, isMaestro]);
+
+  useEffect(() => {
+    fetchTeacherNextClass();
+  }, [fetchTeacherNextClass]);
+
+  return {
+    nextClass,
+    isLoading,
+    error,
+    refetch: fetchTeacherNextClass,
+  };
+}
+
+// ============================================================================
+// Hook: Asistencia por pasar (sesiones pasadas de ciclos activos sin attendance)
+// ============================================================================
+
+export function useTeacherPendingAttendance(
+  personId: string | null,
+  isPersonLinked: boolean | null,
+  isMaestro: boolean
+) {
+  const [pendingSessions, setPendingSessions] = useState<TeacherPendingAttendanceItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchPendingAttendance = useCallback(async () => {
+    if (!isMaestro || isPersonLinked === false) {
+      setPendingSessions([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!personId) {
+      if (isPersonLinked === null) return;
+      setPendingSessions([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const todayStr = getTodayDateString();
+
+      // Consultar sesiones pasadas o de hoy de ciclos activos que imparte
+      const { data, error: queryErr } = await supabase
+        .from('sessions')
+        .select(`
+          id,
+          session_date,
+          topic,
+          description,
+          cycle:cycles!inner (
+            id,
+            name,
+            status,
+            deleted_at,
+            teacher_id,
+            course:courses!inner (
+              id,
+              title,
+              deleted_at
+            )
+          ),
+          attendance (
+            id
+          )
+        `)
+        .eq('cycle.teacher_id', personId)
+        .is('cycle.deleted_at', null)
+        .is('cycle.course.deleted_at', null)
+        .neq('cycle.status', 'cerrado')
+        .neq('cycle.status', 'archivado')
+        .lte('session_date', todayStr)
+        .order('session_date', { ascending: false });
+
+      if (!mountedRef.current) return;
+
+      if (queryErr) throw queryErr;
+
+      // Filtrar sesiones sin ningún registro de asistencia, tomar máximo 3
+      const filtered: TeacherPendingAttendanceItem[] = (data || [])
+        .filter((row: any) => {
+          const records = Array.isArray(row.attendance) ? row.attendance : [];
+          return records.length === 0;
+        })
+        .slice(0, 3)
+        .map((row: any) => {
+          const cy = Array.isArray(row.cycle) ? row.cycle[0] : row.cycle;
+          const co = cy ? (Array.isArray(cy.course) ? cy.course[0] : cy.course) : null;
+          return {
+            id: row.id,
+            sessionDate: row.session_date,
+            topic: row.topic,
+            description: row.description,
+            cycleId: cy?.id || '',
+            cycleName: cy?.name || '',
+            courseTitle: co?.title || 'Curso',
+          };
+        });
+
+      setPendingSessions(filtered);
+    } catch (err: any) {
+      console.error('Error al cargar asistencias pendientes del maestro:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudieron cargar las asistencias pendientes. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [personId, isPersonLinked, isMaestro]);
+
+  useEffect(() => {
+    fetchPendingAttendance();
+  }, [fetchPendingAttendance]);
+
+  return {
+    pendingSessions,
+    isLoading,
+    error,
+    refetch: fetchPendingAttendance,
+  };
+}
+
+// ============================================================================
+// Hook: Entregas por revisar (submissions de ciclos que imparte con grade IS NULL y file_url IS NOT NULL)
+// ============================================================================
+
+export function useTeacherPendingSubmissions(
+  personId: string | null,
+  isPersonLinked: boolean | null,
+  isMaestro: boolean
+) {
+  const [submissions, setSubmissions] = useState<TeacherPendingSubmissionItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchPendingSubmissions = useCallback(async () => {
+    if (!isMaestro || isPersonLinked === false) {
+      setSubmissions([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    if (!personId) {
+      if (isPersonLinked === null) return;
+      setSubmissions([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: queryErr } = await supabase
+        .from('assignment_submissions')
+        .select(`
+          id,
+          file_url,
+          submitted_at,
+          grade,
+          comments,
+          assignment:assignments!inner (
+            id,
+            title,
+            cycle:cycles!inner (
+              id,
+              name,
+              status,
+              deleted_at,
+              teacher_id,
+              course:courses!inner (
+                id,
+                title,
+                deleted_at
+              )
+            )
+          ),
+          enrollment:enrollments (
+            id,
+            person:persons (
+              id,
+              first_name,
+              last_name
+            )
+          )
+        `)
+        .eq('assignment.cycle.teacher_id', personId)
+        .is('assignment.cycle.deleted_at', null)
+        .is('assignment.cycle.course.deleted_at', null)
+        .neq('assignment.cycle.status', 'cerrado')
+        .neq('assignment.cycle.status', 'archivado')
+        .is('grade', null)
+        .not('file_url', 'is', null)
+        .order('submitted_at', { ascending: false })
+        .limit(3);
+
+      if (!mountedRef.current) return;
+
+      if (queryErr) throw queryErr;
+
+      const formatted: TeacherPendingSubmissionItem[] = (data || []).map((row: any) => {
+        const asg = Array.isArray(row.assignment) ? row.assignment[0] : row.assignment;
+        const cy = asg ? (Array.isArray(asg.cycle) ? asg.cycle[0] : asg.cycle) : null;
+        const co = cy ? (Array.isArray(cy.course) ? cy.course[0] : cy.course) : null;
+        const enr = Array.isArray(row.enrollment) ? row.enrollment[0] : row.enrollment;
+        const per = enr ? (Array.isArray(enr.person) ? enr.person[0] : enr.person) : null;
+
+        const studentName = per
+          ? `${per.first_name} ${per.last_name || ''}`.trim()
+          : 'Alumno';
+
+        return {
+          id: row.id,
+          assignmentId: asg?.id || '',
+          assignmentTitle: asg?.title || 'Tarea',
+          submittedAt: row.submitted_at,
+          fileUrl: row.file_url,
+          comments: row.comments,
+          studentName,
+          cycleId: cy?.id || '',
+          cycleName: cy?.name || '',
+          courseTitle: co?.title || 'Curso',
+        };
+      });
+
+      setSubmissions(formatted);
+    } catch (err: any) {
+      console.error('Error al cargar entregas pendientes del maestro:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudieron cargar las entregas por revisar. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [personId, isPersonLinked, isMaestro]);
+
+  useEffect(() => {
+    fetchPendingSubmissions();
+  }, [fetchPendingSubmissions]);
+
+  return {
+    submissions,
+    isLoading,
+    error,
+    refetch: fetchPendingSubmissions,
+  };
+}
+
+// ============================================================================
 // Hook unificado para uso en InicioView
 // ============================================================================
 
-export function useInicioDashboard(options?: { isAlumno?: boolean }) {
+export function useInicioDashboard(options?: { isAlumno?: boolean; isMaestro?: boolean }) {
   const isAlumno = Boolean(options?.isAlumno);
+  const isMaestro = Boolean(options?.isMaestro);
   const { personId, personName, isPersonLinked, isLoadingPerson, refetchPerson } =
     useLinkedPerson();
 
   const shiftsState = useMyShifts(personId, isPersonLinked);
+  
+  // Alumno
   const nextClassState = useStudentNextClass(personId, isPersonLinked, isAlumno);
   const pendingAssignmentsState = useStudentPendingAssignments(
     personId,
@@ -736,6 +1164,19 @@ export function useInicioDashboard(options?: { isAlumno?: boolean }) {
     isAlumno
   );
   const recentGradesState = useStudentRecentGrades(personId, isPersonLinked, isAlumno);
+
+  // Maestro
+  const teacherNextClassState = useTeacherNextClass(personId, isPersonLinked, isMaestro);
+  const teacherPendingAttendanceState = useTeacherPendingAttendance(
+    personId,
+    isPersonLinked,
+    isMaestro
+  );
+  const teacherPendingSubmissionsState = useTeacherPendingSubmissions(
+    personId,
+    isPersonLinked,
+    isMaestro
+  );
 
   return {
     personId,
@@ -747,5 +1188,8 @@ export function useInicioDashboard(options?: { isAlumno?: boolean }) {
     nextClass: nextClassState,
     pendingAssignments: pendingAssignmentsState,
     recentGrades: recentGradesState,
+    teacherNextClass: teacherNextClassState,
+    teacherPendingAttendance: teacherPendingAttendanceState,
+    teacherPendingSubmissions: teacherPendingSubmissionsState,
   };
 }

@@ -97,8 +97,8 @@ export const AppLayout: React.FC = () => {
           {/* a) Parte superior cian (#23d5da) con el logo /logo.png grande dentro de tarjeta blanca redondeada */}
           <div className="on-cyan bg-[#23d5da] text-[#1a1a1a] px-4 py-3.5 flex flex-col items-start gap-1.5">
             <Link
-              to="/calendario"
-              aria-label="Ir al inicio - Calendario"
+              to="/inicio"
+              aria-label="Ir al inicio"
               className="inline-block rounded-[10px]"
             >
               <img
@@ -204,8 +204,8 @@ export const AppLayout: React.FC = () => {
           <header className="on-cyan bg-[#23d5da] text-[#1a1a1a] px-4 py-2.5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <Link
-                to="/calendario"
-                aria-label="Ir al inicio - Calendario"
+                to="/inicio"
+                aria-label="Ir al inicio"
                 className="inline-flex rounded-[8px] flex-shrink-0"
               >
                 <img

@@ -233,8 +233,9 @@ export const InicioStudentSection: React.FC<InicioStudentSectionProps> = ({
           />
         ) : assignments.length === 0 ? (
           <DashboardEmptyState
+            compact
             icon={<CheckCircle2 className="w-5 h-5 text-[#0e7c86]" />}
-            title="¡Al día con tus tareas!"
+            title="Sin tareas pendientes"
             description="No tienes tareas pendientes por entregar en tus ciclos formativos activos."
             action={{ label: 'Ver mis clases', to: '/mis-clases' }}
           />

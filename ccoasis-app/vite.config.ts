@@ -18,7 +18,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait-primary',
         lang: 'es',
-        start_url: '/',
+        start_url: '/inicio',
         icons: [
           {
             src: '/icon-192.png',

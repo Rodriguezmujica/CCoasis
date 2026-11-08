@@ -234,8 +234,9 @@ export const InicioTeacherSection: React.FC<InicioTeacherSectionProps> = ({
           />
         ) : pendingSessions.length === 0 ? (
           <DashboardEmptyState
+            compact
             icon={<CheckCircle2 className="w-5 h-5 text-[#0e7c86]" />}
-            title="¡Asistencia al día!"
+            title="Asistencia al día"
             description="No tienes sesiones pasadas pendientes de pasar lista en tus ciclos activos."
             action={{ label: 'Ver ciclos formativos', to: '/clases' }}
           />
@@ -329,8 +330,9 @@ export const InicioTeacherSection: React.FC<InicioTeacherSectionProps> = ({
           />
         ) : submissions.length === 0 ? (
           <DashboardEmptyState
+            compact
             icon={<CheckCircle2 className="w-5 h-5 text-[#0e7c86]" />}
-            title="¡Sin entregas pendientes!"
+            title="Sin entregas pendientes"
             description="No tienes tareas enviadas por alumnos pendientes de revisión en este momento."
             action={{ label: 'Ver ciclos formativos', to: '/clases' }}
           />

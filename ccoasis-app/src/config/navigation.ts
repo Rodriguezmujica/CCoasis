@@ -1,5 +1,6 @@
 import { AppRole } from '../types/auth';
 import { 
+  Home,
   Users, 
   GraduationCap, 
   Wallet, 
@@ -20,6 +21,14 @@ export interface NavItemConfig {
 }
 
 export const NAV_ITEMS: NavItemConfig[] = [
+  {
+    id: 'inicio',
+    label: 'Inicio',
+    path: '/inicio',
+    allowedRoles: ['admin', 'tesorero', 'maestro', 'alumno'],
+    icon: Home,
+    description: 'Resumen personal de avisos, próximos eventos, turnos y pendientes de tu rol',
+  },
   {
     id: 'calendario',
     label: 'Calendario',
@@ -84,6 +93,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
  * fijos en la barra inferior y los demás se agrupan dentro del menú "Más".
  */
 export const MOBILE_NAV_PRIORITY: string[] = [
+  'inicio',
   'calendario',
   'mis-clases',
   'clases',

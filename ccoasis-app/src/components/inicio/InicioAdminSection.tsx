@@ -134,8 +134,9 @@ export const InicioAdminSection: React.FC<InicioAdminSectionProps> = ({
           />
         ) : unassignedEvents.length === 0 ? (
           <DashboardEmptyState
+            compact
             icon={<CheckCircle2 className="w-5 h-5 text-[#0e7c86]" />}
-            title="¡Todos los eventos con turnos!"
+            title="Todos los eventos con turnos"
             description="No hay actividades futuras pendientes de asignar servidores en el calendario."
             action={{ label: 'Ir al calendario', to: '/calendario' }}
           />

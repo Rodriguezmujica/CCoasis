@@ -39,3 +39,10 @@ Thumbs.db
 # Backups and exports
 ccoasis_backup_*.json
 *.backup.json
+
+# Capturas, comprimidos y medios temporales sueltos
+/*.png
+/*.jpg
+/*.jpeg
+/*.zip
+/Media/

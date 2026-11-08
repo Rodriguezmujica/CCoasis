@@ -92,6 +92,11 @@ La aplicacion sigue un patron arquitectonico desacoplado compuesto por un client
   - **Administracion:** Pendientes operativos de la semana (eventos futuros sin turnos asignados, anuncios proximos a expirar y conteo de confirmaciones del proximo culto).
 - **Filtro interactivo multi-rol:** Selector por chips para usuarios con multiples perfiles asignados y estados vacios compactos con manejo aislado de errores por tarjeta.
 
+### 8. Pagina Publica de Bienvenida y "Vida en Oasis" (`/`, `/bienvenida`, `/pagina-publica`)
+- **Pagina publica (`/` y `/bienvenida`):** visible sin iniciar sesion; eslogan, proximo culto, eventos publicos de solo lectura (`v_public_events`), horarios, como llegar, contacto, redes e instrucciones de instalacion de la PWA. Un usuario con sesion es redirigido a `/inicio`.
+- **"Vida en Oasis":** tarjetas de recuerdos (Bautizos, Comunidad, Discipulado) en la portada y en `/inicio`; cada recuerdo admite hasta 5 fotos con carrusel accesible (botones, teclado y miniaturas).
+- **Panel de administracion (`/pagina-publica`, solo `admin`):** edita textos, horarios y enlaces, y gestiona recuerdos (crear, editar, publicar u ocultar, archivar) con casilla obligatoria de privacidad. Las fotos se comprimen en el navegador (HTML5 Canvas, 1600 px, WebP) y se borran de Storage al archivar, al quitarlas al editar o al cancelar.
+
 ### 1. Directorio de Personas y Perfiles
 - Ficha unificada para miembros, alumnos, maestros y visitantes.
 - Estados de pertenencia: Activo, Inactivo, Visita, Transferido, Fallecido.
@@ -168,6 +173,7 @@ El sistema admite la asignacion de multiples roles a una misma cuenta de usuario
 | Anuncios (Publicar y archivar) | Total | Lectura | Lectura | Lectura |
 | Usuarios y Credenciales | Total | Denegado | Denegado | Denegado |
 | Auditoria del Sistema | Total | Denegado | Denegado | Denegado |
+| Pagina Publica (`/pagina-publica`, administracion de contenido) | Total | Denegado | Denegado | Denegado |
 
 ### Resolucion de Recursividad y Vistas Seguras
 
@@ -184,8 +190,9 @@ El sistema admite la asignacion de multiples roles a una misma cuenta de usuario
 2. **Vistas con `security_invoker = true` y excepciones de seguridad:**
    - Las vistas analiticas (como `v_cycle_grades_summary`) estan declaradas explicitamente con `WITH (security_invoker = true)`, obligando a que las consultas sobre la vista respeten las politicas RLS de la sesion del usuario que realiza la llamada y no los privilegios del creador de la vista.
    - Como excepcion deliberada y segura, la vista `v_event_servers` se declara con `security_invoker = false` para permitir a usuarios autenticados consultar unicamente nombres y apellidos de los servidores asignados en el calendario sin exponer datos personales sensibles de la tabla `persons` (telefono, direccion, notas).
+   - Tambien por excepcion deliberada, las vistas publicas `v_public_events`, `v_public_site_settings` y `v_public_news` se declaran con `security_invoker = false` y `GRANT SELECT` a `anon`: exponen solo columnas publicas (sin `created_by`, `updated_by`, `deleted_at`, descripciones, turnos ni confirmaciones). Las tablas base `public_site_settings` y `public_news` solo las lee y modifica `admin` (RLS).
 
-3. **Restriccion del rol anonimo:** El rol publico `anon` tiene denegado el acceso al esquema de negocio. Unicamente el rol `authenticated` dispone de permisos de seleccion, insercion y modificacion limitados por politicas RLS.
+3. **Restriccion del rol anonimo:** El rol publico `anon` tiene denegado el acceso al esquema de negocio, salvo la lectura de las tres vistas publicas descritas arriba (`v_public_events`, `v_public_site_settings`, `v_public_news`). Unicamente el rol `authenticated` dispone de permisos de seleccion, insercion y modificacion limitados por politicas RLS.
 
 ---
 
@@ -212,16 +219,19 @@ La definicion del esquema se estructura en migraciones SQL secuenciales e idempo
 - `016_fix_announcements_policy.sql`: Correccion de la politica SELECT de `announcements` para permitir archivado logico (`soft-delete`) por administradores.
 - `017_assignment_file_cleanup.sql`: Limpieza de archivos huerfanos en Storage y cancelacion de entregas pendientes por el alumno.
 - `018_keepalive_ping.sql`: Funcion SQL ligera `keepalive_ping()` para latido periodico y prevencion de pausa por inactividad.
+- `019_public_welcome_page.sql`: Pagina publica: `church_events.is_public`, tablas `public_site_settings` y `public_news`, vistas publicas (`security_invoker = false`) y bucket `public-media`.
+- `020_public_news_gallery.sql`: Galeria de hasta 5 fotos (`public_news.image_paths`), vista `v_public_news` actualizada y listado del bucket `public-media` restringido a administradores.
 
 ### Politicas de Almacenamiento (Supabase Storage)
 
-El almacenamiento binario se organiza en tres buckets privados independientes con politicas de acceso granular:
+El almacenamiento binario se organiza en tres buckets privados independientes y un bucket publico (`public-media`) con politicas de acceso granular:
 
 - `materials`: Almacena bibliografia y archivos de clase organizados bajo la ruta `<cycle_id>/<archivo>`. Lectura permitida a docentes y alumnos matriculados; subida y eliminacion restringida a administradores y al docente titular.
 - `assignments`: Almacena documentos de tareas entregadas por los alumnos bajo la ruta `<auth_user_id>/<assignment_id>/<archivo>`. Lectura restringida al propio alumno, al maestro del ciclo y al administrador.
 - `receipts`: Almacena justificantes de pago, tickets y facturas de egresos. Lectura y carga restringida exclusivamente a roles `admin` y `tesorero`.
+- `public-media` (publico, 5 MB, JPEG/PNG/WebP): fotos de "Vida en Oasis". Las URLs publicas cargan para visitantes anonimos, pero el listado del bucket, la subida y el borrado son solo para `admin`. Las imagenes se comprimen en el cliente (WebP) y se eliminan al archivar un recuerdo, al quitarlas al editar o al cancelar el formulario.
 
-La exposicion de archivos en el cliente se realiza exclusivamente a traves de URLs temporales prefirmadas generadas bajo demanda.
+La exposicion de archivos de los buckets privados en el cliente se realiza exclusivamente a traves de URLs temporales prefirmadas generadas bajo demanda.
 
 ---
 
@@ -270,6 +280,7 @@ centro_cristiano-osasis/
 │   │   │   ├── mis-clases/          # Vista interactiva del alumno y entregas
 │   │   │   ├── notifications/       # Campana y panel de notificaciones
 │   │   │   ├── personas/            # Directorio y vinculacion de expedientes
+│   │   │   ├── publica/             # Secciones de bienvenida, carrusel "Vida en Oasis" y admin
 │   │   │   └── usuarios/            # Gestion de usuarios y asignacion de roles
 │   │   ├── config/                  # Configuracion de navegacion por perfil
 │   │   ├── context/                 # AuthContext y NotificationsContext
@@ -432,6 +443,8 @@ Al compilar y desplegar:
 - [x] Animacion 3D de inicio y cierre de sesion con libro interactivo (solo CSS).
 - [x] Rediseno visual completo bajo la identidad Oasis (paleta cian `#23d5da` y magenta `#ae4a84`, tokens semanticos y cumplimiento WCAG AA).
 - [x] Dashboard de Inicio por Rol (`/inicio`): avisos por prioridad, confirmacion de proximo evento, mis turnos y tarjetas por rol (Alumno, Maestro, Tesoreria y Administracion) con filtro de chips multi-rol y estados vacios compactos.
+- [x] Pagina Publica de Bienvenida (`/`, `/bienvenida`), "Vida en Oasis" (carrusel de hasta 5 fotos con compresion en cliente y limpieza de Storage) y panel de administracion `/pagina-publica` (Fases P1 a P7, migraciones `019` y `020`), en `main` desde el 9 de noviembre de 2026.
+- [x] El respaldo integral JSON incluye `public_site_settings` y `public_news`.
 
 ### Proximas Mejoras Planificadas
 - [-] Notificaciones Web Push en segundo plano para avisos de servicio dominical.

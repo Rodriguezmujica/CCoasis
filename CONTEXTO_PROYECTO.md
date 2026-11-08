@@ -2,7 +2,7 @@
 
 > Lee este archivo completo antes de tocar nada. Es la fuente de verdad sobre qué se ha hecho, qué se decidió y qué falta. Si algo de aquí contradice una suposición tuya, manda este archivo. Si algo te parece mal, dilo antes de cambiarlo.
 
-Última actualización: 8 de noviembre de 2026.
+Última actualización: 9 de noviembre de 2026.
 
 ## 1. Qué es y para quién
 
@@ -16,12 +16,13 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 
 ## 2. Qué incluye la app
 
-1. **Inicio (`/inicio`):** dashboard personalizado por rol (avisos clasificados por prioridad, confirmación de próximo evento, mis turnos asignados y tarjetas específicas por rol con filtro de chips multi-rol y estados vacíos compactos).
-2. **Personas:** fichas de miembros y visitas.
-3. **Clases / discipulado:** cursos, ciclos, inscripciones, sesiones, asistencia, evaluaciones y notas, tareas con entregas, materiales. Funciona como un pequeño instituto.
-4. **Finanzas:** ofrendas (con o sin persona), gastos con comprobante.
-5. **Administración:** usuarios, roles y auditoría.
-6. **Calendario y vida de la iglesia:** eventos, turnos de servidores, conteo de asistencia, confirmaciones (RSVP), anuncios y notificaciones.
+1. **Página Pública de Bienvenida (`/`, `/bienvenida`) y "Vida en Oasis":** portada pública para visitantes sin sesión (eslogan, próximo culto, calendario público de solo lectura, horarios, cómo llegar, contacto/WhatsApp, redes sociales e instrucciones para instalar la PWA), sección comunitaria **"Vida en Oasis"** (tarjetas de recuerdos con categoría `Bautizos` / `Comunidad` / `Discipulado`, carrusel accesible de hasta 5 fotos y crónica completa, visible tanto en la portada pública como en `/inicio`) y panel de administración **`/pagina-publica`** exclusivo para `admin`.
+2. **Inicio (`/inicio`):** dashboard personalizado por rol (avisos clasificados por prioridad, confirmación de próximo evento, mis turnos asignados, tarjetas específicas por rol con filtro de chips multi-rol y estados vacíos compactos, y sección "Vida en Oasis").
+3. **Personas:** fichas de miembros y visitas.
+4. **Clases / discipulado:** cursos, ciclos, inscripciones, sesiones, asistencia, evaluaciones y notas, tareas con entregas, materiales. Funciona como un pequeño instituto.
+5. **Finanzas:** ofrendas (con o sin persona), gastos con comprobante.
+6. **Administración:** usuarios, roles, auditoría y gestión de la página pública (`/pagina-publica`).
+7. **Calendario y vida de la iglesia:** eventos (internos o públicos con `is_public`), turnos de servidores, conteo de asistencia, confirmaciones (RSVP), anuncios y notificaciones.
 
 ## 3. Stack
 
@@ -56,9 +57,10 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - **Fase 2 completada:** Calendario, turnos de servidores, conteo de asistencia, anuncios, notificaciones internas, auditoría (`audit_logs`), confirmaciones de asistencia (RSVP) y aviso de egresos superiores a 300 EUR.
 - **Fase 3 completada y en `main`:** rediseño visual con la identidad cian `#23d5da` y magenta `#ae4a84`, y animación del libro 3D al iniciar y cerrar sesión (`LoginIntro`, solo CSS).
 - Seguridad en Supabase revisada y verificada el 31 de octubre de 2026 (ver `CONTEXTO_PENDIENTE.md`).
-- **Exportación y copias de seguridad (Auditoría):** módulo de exportación CSV (Personas, Finanzas, Clases y Calificaciones) y respaldo integral en JSON en la vista de Auditoría (`BackupExportCard`), exclusivo para rol `admin`, con registro automático en `audit_logs` (`BACKUP_DOWNLOAD`).
+- **Exportación y copias de seguridad (Auditoría):** módulo de exportación CSV (Personas, Finanzas, Clases y Calificaciones) y respaldo integral en JSON en la vista de Auditoría (`BackupExportCard`), exclusivo para rol `admin`, con registro automático en `audit_logs` (`BACKUP_DOWNLOAD`). Incluye también `public_site_settings` y `public_news`.
 - **Keep-alive automático (Supabase):** función SQL `public.keepalive_ping()` (`018_keepalive_ping.sql`) y GitHub Action programado (`.github/workflows/supabase-keepalive.yml`) que ejecuta un ping RPC dos veces por semana (lunes y jueves 08:00 UTC) para evitar que el proyecto gratuito de Supabase se pause por inactividad tras 7 días. Si el ping falla, el workflow falla y GitHub envía un email de alerta a Luis. En caso de pausa manual o fallo extremo, se restaura desde supabase.com/dashboard pulsando "Restore project".
-- **Pantalla de Inicio por Rol (`/inicio`):** 100% completada y en producción (`main`). Dashboard personalizado por rol con avisos separados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (RSVP), mis turnos de servicio y tarjetas por rol (Alumno, Maestro, Tesorería, Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos. Es el destino predeterminado al iniciar sesión y en el manifiesto de la PWA (`start_url: "/inicio"`).
+- **Pantalla de Inicio por Rol (`/inicio`):** 100% completada y en producción (`main`). Dashboard personalizado por rol con avisos separados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (RSVP), mis turnos de servicio, tarjetas por rol (Alumno, Maestro, Tesorería, Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos, y la sección comunitaria "Vida en Oasis". Es el destino predeterminado al iniciar sesión y en el manifiesto de la PWA (`start_url: "/inicio"`).
+- **Página Pública de Bienvenida (`/`, `/bienvenida`), "Vida en Oasis" y Panel de Administración (`/pagina-publica`):** 100% completadas, probadas por Luis y en `main` (Fases P1 a P7, migraciones `019_public_welcome_page.sql` y `020_public_news_gallery.sql`). Los visitantes sin sesión ven en `/` (y cualquier usuario en `/bienvenida`) la portada institucional, el próximo culto, los eventos públicos de solo lectura (`v_public_events`), "Vida en Oasis" con álbumes de hasta 5 fotos en carrusel accesible, horarios, mapa, WhatsApp, redes e instrucciones de instalación PWA. El administrador gestiona textos, enlaces, visibilidad pública de eventos (`is_public`) y recuerdos de "Vida en Oasis" desde `/pagina-publica`, con verificación obligatoria de privacidad (RGPD/menores), compresión automática de imágenes en cliente (HTML5 Canvas a WebP ≤ 1600 px) y limpieza automática de archivos en el bucket `public-media` al archivar, editar o cancelar.
 
 ### Pendiente (lo que sigue abierto)
 
@@ -80,16 +82,16 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 
 | Rol | Ve |
 |---|---|
-| `admin` | Inicio, Calendario, Personas, Clases, Finanzas, Usuarios, Auditoría |
+| `admin` | Inicio, Calendario, Personas, Clases, Finanzas, Usuarios, Auditoría, Página Pública |
 | `tesorero` | Inicio, Calendario, Finanzas |
 | `maestro` | Inicio, Calendario, Mis clases |
 | `alumno` | Inicio, Calendario, Mis clases |
 
-Un usuario con varios roles ve la unión de menús.
+Un usuario con varios roles ve la unión de menús. Cualquier visitante sin sesión puede acceder a `/` y `/bienvenida`.
 
 ## 7. Base de datos (resumen)
 
-Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.** Cualquier cambio va en un archivo nuevo (`018_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
+Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.** Cualquier cambio va en un archivo nuevo (`021_...sql`, etc.), idempotente (`IF NOT EXISTS`, `DROP POLICY IF EXISTS` antes de `CREATE POLICY`), y se ejecuta en el SQL Editor de Supabase.
 
 **Secuencia real de migraciones en el repositorio (`supabase/migrations/`):**
 - `001_initial_schema.sql`: Esquema base (personas, cursos, ciclos, finanzas, funciones SECURITY DEFINER, RLS base).
@@ -110,10 +112,12 @@ Fuente de verdad: `supabase/migrations/`. **No edites migraciones ya ejecutadas.
 - `016_fix_announcements_policy.sql`: Corrección de la política SELECT de `announcements` (`is_admin() OR ...`) para permitir archivar registros con soft-delete sin error de RLS.
 - `017_assignment_file_cleanup.sql`: Limpieza de archivos huérfanos en Storage y anulación de entregas pendientes por el alumno.
 - `018_keepalive_ping.sql`: Función ligera `public.keepalive_ping()` para latido periódico vía GitHub Actions (evita pausa por inactividad tras 7 días sin exponer datos sensibles).
+- `019_public_welcome_page.sql`: Página pública de bienvenida y "Vida en Oasis": columna `church_events.is_public`, tablas `public_site_settings` y `public_news` (RLS solo `admin`), vistas públicas `v_public_events`, `v_public_site_settings` y `v_public_news` (`security_invoker = false`), bucket público `public-media` y permisos `GRANT SELECT` a `anon` únicamente sobre las 3 vistas públicas.
+- `020_public_news_gallery.sql`: Galería de hasta 5 fotos por recuerdo (`public_news.image_paths text[]`), actualización de `v_public_news` incluyendo `image_paths`, y restricción del listado (`SELECT` en `storage.objects`) del bucket `public-media` exclusivamente a administradores (`public.is_admin()`).
 
-**Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`.
+**Tablas principales:** `user_roles`, `persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`, `public_site_settings`, `public_news`.
 
-### Esquema real de columnas principales (verificado contra migraciones 001–018)
+### Esquema real de columnas principales (verificado contra migraciones 001–020)
 
 Nombres exactos de las columnas que antes generaban confusión (no usar alias antiguos o supuestos):
 - `courses`: `id`, `title`, `description`, `passing_grade`, `min_attendance_pct`, `created_at`, `updated_at`, `deleted_at` (**nunca** `passing_score` ni `min_attendance_percentage`).
@@ -131,20 +135,26 @@ Nombres exactos de las columnas que antes generaban confusión (no usar alias an
   - `class_materials`: `id`, `cycle_id`, `session_id`, `title`, `description`, `file_url`, `external_url`, `created_at`.
   - `offerings`: `id`, `person_id`, `category_id`, `amount`, `currency`, `offering_date`, `payment_method`, `fund_account`, `notes`, `created_at`, `updated_at`.
   - `expenses`: `id`, `category_id`, `amount`, `currency`, `expense_date`, `payment_method`, `fund_account`, `receipt_url`, `description`, `created_at`, `updated_at`.
-  - `church_events`: `id`, `title`, `description`, `event_type`, `start_time`, `end_time`, `location`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
+  - `church_events`: `id`, `title`, `description`, `event_type`, `start_time`, `end_time`, `location`, `is_public`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
   - `church_event_assignments`: `id`, `event_id`, `person_id`, `role_type`, `notes`, `created_at`.
   - `church_event_rsvps`: `id`, `event_id`, `person_id`, `status` (`'asistire'`, `'quizas'`, `'no_asistire'`), `guests`, `created_at`, `updated_at`.
   - `announcements`: `id`, `title`, `message`, `priority` (`'normal'`, `'importante'`, `'urgente'`), `is_active`, `expires_at`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
   - `audit_logs`: `id`, `user_id`, `user_email`, `action`, `target_table`, `target_id`, `details`, `created_at`.
+  - `public_site_settings`: `id` (`CHECK (id = 1)`), `slogan`, `hero_title`, `welcome_text`, `service_schedule`, `address`, `maps_url`, `whatsapp_url`, `contact_email`, `instagram_url`, `youtube_url`, `live_stream_url`, `updated_by`, `updated_at`.
+  - `public_news`: `id`, `title`, `category` (`'Bautizos'`, `'Comunidad'`, `'Discipulado'`), `event_date`, `summary`, `image_path`, `image_paths` (`text[]`, hasta 5 fotos; `image_path` sincronizado con `image_paths[1]`), `is_published`, `privacy_verified`, `created_by`, `created_at`, `updated_at`, `deleted_at`.
 
 **Vistas:**
 - `v_cycle_grades_summary` (`security_invoker = true`): promedio normalizado a 0-100, porcentaje de asistencia y `passed`. Respeta RLS y no es accesible para anon. Solo cuenta `presente` como asistencia.
 - `v_event_servers` (`security_invoker = false`): **excepción deliberada a la regla de vistas**. Permite a los usuarios autenticados consultar únicamente `id`, `first_name` y `last_name` de los servidores asignados a turnos en el calendario sin exponer datos personales sensibles de la tabla `persons` (teléfono, dirección, notas). La advertencia "Security Definer View" en el Security Advisor de Supabase para esta vista es esperada y debe ignorarse.
+- `v_public_events`, `v_public_site_settings` y `v_public_news` (`security_invoker = false`): **excepciones deliberadas para la página pública**. Exponen a `anon` y `authenticated` únicamente las columnas públicas estrictamente necesarias (eventos marcados con `is_public = true` en los próximos 60 días sin descripción ni turnos; configuración de portada sin `updated_by`; hasta 6 recuerdos publicados, no archivados y con `privacy_verified = true`, incluyendo `image_paths`), manteniendo las tablas base cerradas para `anon`.
 
-**Storage (buckets privados):**
-- `materials`: ruta `<cycle_id>/<archivo>`.
-- `assignments`: ruta `<auth_user_id>/<assignment_id>/<archivo>`.
-- `receipts`: solo admin y tesorero.
+**Storage:**
+- Buckets privados (URLs firmadas):
+  - `materials`: ruta `<cycle_id>/<archivo>`.
+  - `assignments`: ruta `<auth_user_id>/<assignment_id>/<archivo>`.
+  - `receipts`: solo admin y tesorero.
+- Bucket público:
+  - `public-media` (`public = true`, límite 5 MB, `image/jpeg`, `image/png`, `image/webp`): fotografías de "Vida en Oasis". Las imágenes se comprimen automáticamente en el navegador antes de subir (HTML5 Canvas, lado mayor ≤ 1600 px, `image/webp` a calidad 0.82 o `image/jpeg` a 0.85) y se borran físicamente del bucket al archivar un recuerdo, al quitar fotos durante la edición o al cancelar el formulario sin guardar. Las URLs públicas (`getPublicUrl`) son accesibles para visitantes, pero las políticas RLS de `storage.objects` (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) están restringidas exclusivamente a `admin`.
 
 **Funciones auxiliares (SECURITY DEFINER):** `has_role`, `is_admin`, `get_my_person_id`, `my_teaching_cycle_ids`, `my_enrolled_cycle_ids`, `my_enrollment_ids`, `my_student_person_ids`, `link_person_to_user(p_person_id, p_email)`, `keepalive_ping()`.
 
@@ -158,13 +168,13 @@ Nombres exactos de las columnas que antes generaban confusión (no usar alias an
 - No se puede borrar un ciclo con inscripciones ni una persona inscrita (`ON DELETE RESTRICT`); se archiva o se marca `deleted_at`.
 - `updated_at` se actualiza solo.
 
-**Permisos de la API:** solo el rol `authenticated` tiene acceso a las tablas (bloque GRANT al final de `001`). El rol anónimo no recibe nada. Si se crea una tabla nueva, hay que añadir sus `GRANT` y activar RLS con sus políticas.
+**Permisos de la API:** solo el rol `authenticated` tiene acceso a las tablas base (bloque GRANT al final de `001` y `019`). El rol anónimo (`anon`) no tiene acceso a ninguna tabla base: únicamente tiene `SELECT` sobre las tres vistas públicas (`v_public_events`, `v_public_site_settings`, `v_public_news`) y `EXECUTE` sobre `keepalive_ping()`. Si se crea una tabla nueva, hay que añadir sus `GRANT` y activar RLS con sus políticas.
 
 ## 8. Lecciones aprendidas (no repetir)
 
 - **Bug de primer login:** consultar `user_roles` dentro de `onAuthStateChange` devolvía vacío y mandaba a `/sin-permisos`. Solución: guardar solo la sesión en ese callback y cargar los roles en un `useEffect` aparte que dependa de `session.user.id`. Mostrar "Cargando..." sin navegar hasta tener sesión y roles. `/sin-permisos` nunca debe redirigir a `/` (provocó un bucle infinito).
 - **Recursión de RLS:** políticas que se consultan entre sí (cycles y enrollments) dan "infinite recursion". Se resolvió con las funciones auxiliares SECURITY DEFINER. Usa siempre esas funciones en políticas nuevas.
-- **Vistas y RLS:** una vista normal salta RLS. Por norma general, crea las vistas con `WITH (security_invoker = true)` y revoca el acceso a anon. La excepción deliberada es `public.v_event_servers` (`security_invoker = false`), creada para permitir que cualquier usuario autenticado consulte el nombre de los servidores asignados en el calendario sin vulnerar la privacidad de la tabla `persons` (su alerta "Security Definer View" en el Security Advisor de Supabase es esperada y deliberada).
+- **Vistas y RLS:** una vista normal salta RLS. Por norma general, crea las vistas con `WITH (security_invoker = true)` y revoca el acceso a anon. Las únicas excepciones deliberadas con `security_invoker = false` son `public.v_event_servers` (para que cualquier usuario autenticado consulte solo nombre y apellido de los servidores asignados sin exponer `persons`) y las tres vistas públicas `v_public_events`, `v_public_site_settings` y `v_public_news` (para mostrar la página de bienvenida sin abrir las tablas base a `anon`). Sus alertas "Security Definer View" en el Security Advisor de Supabase son esperadas y deliberadas.
 - **Políticas SELECT y soft-delete (`deleted_at`):** en tablas con archivado mediante `deleted_at`, la política SELECT del administrador no debe exigir `deleted_at IS NULL` de forma obligatoria. Si se exige, al hacer un `UPDATE ... SET deleted_at = now()` que retorna la fila (típico en `.select()`), la fila modificada deja de pasar la condición SELECT y Postgres arroja `new row violates row-level security policy`. La condición SELECT debe empezar siempre por `is_admin() OR ((deleted_at IS NULL) AND ...)`.
 - **Funciones SQL y orden de creación:** una función `LANGUAGE sql` se valida al crearla, así que las tablas que usa deben existir antes.
 - **GRANTs:** con "Automatically expose new tables" desmarcado, una tabla sin GRANT da `permission denied` aunque la RLS esté bien.
@@ -219,7 +229,7 @@ Probar con ventanas de incógnito en paralelo. Comprobar siempre:
 
 ## 12. Antes de entregarla a la iglesia
 
-1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON y exportaciones CSV en la vista de Auditoría para rol `admin`. **Nota técnica de mantenimiento:** si en el futuro alguna tabla supera las **1.000 filas** (límite habitual por defecto de PostgREST), convendrá paginar las consultas del respaldo JSON, incluir `user_roles` o cualquier tabla nueva, y contrastar las filas exportadas con un `count`. Además, dado que el JSON de aplicación no incluye archivos de Storage ni credenciales de `auth.users`, conviene realizar un `supabase db dump` periódico.
+1. **Copias de seguridad:** [COMPLETADO] Implementado módulo de respaldo completo JSON (incluyendo `public_site_settings` y `public_news`) y exportaciones CSV en la vista de Auditoría para rol `admin`. **Nota técnica de mantenimiento:** si en el futuro alguna tabla supera las **1.000 filas** (límite habitual por defecto de PostgREST), convendrá paginar las consultas del respaldo JSON y contrastar las filas exportadas con un `count`. Además, dado que el JSON de aplicación no incluye archivos de Storage ni credenciales de `auth.users`, conviene realizar un `supabase db dump` periódico.
 2. **Pausa por inactividad:** [AUTOMATIZADO Y RESUELTO] En Supabase gratuito el proyecto se pausa tras 7 días de inactividad. Se implementó un sistema automático de latido ("keep-alive") mediante un GitHub Action programado (cron lunes y jueves a las 08:00 UTC, `.github/workflows/supabase-keepalive.yml`) que invoca la función `public.keepalive_ping()` (`018_keepalive_ping.sql`) sin exponer datos sensibles. Si por algún motivo extremo el proyecto llegara a pausarse (o fallara el Action, notificando por correo a Luis), basta con entrar a https://supabase.com/dashboard y pulsar "Restore project" (el proyecto se restaura intacto en unos 2 minutos). **Vigilancia mensual de GitHub Actions:** GitHub desactiva automáticamente los workflows programados (`schedule`) en repositorios públicos tras **60 días sin actividad (commits)**; mantener el repositorio privado o revisar cada mes la pestaña **Actions** en GitHub para verificar que el cron sigue activo.
 3. **Propiedad de la cuenta de Supabase:** hoy está a nombre de Luis. Acordar con el pastor quién la tendrá a medio plazo.
 4. **Datos sensibles:** una lista de miembros y ofrendas es información delicada (en España, los datos de creencias religiosas son categoría especial en el RGPD). Dar acceso solo a quien lo necesite; el pastor debe saber que es responsable de esos datos.

@@ -2,7 +2,7 @@
 
 > Documento de traspaso. Léelo junto con `CONTEXTO_PROYECTO.md`, `CONTEXTO_PENDIENTE.md`, `IDEAS_FUTURAS.md` y `design-system/oasis/MASTER.md`. Si algo de aquí contradice al repositorio real, **verifica y avisa; no supongas**.
 
-Última actualización: 8 de noviembre de 2026.
+Última actualización: 9 de noviembre de 2026.
 
 ---
 
@@ -36,18 +36,18 @@ Si Antigravity dice "listo", verifícalo tú: lo que escribe sobre sí mismo es 
   - **Fases 1 a 6 `[HECHO]` y probadas por Luis** (`8f2e6d0`, `52403bc`, `3b3d950`, `9952ffc`, `2243f29`, `a24fefd`).
   - `/inicio` es ahora el primer ítem de navegación y el destino predeterminado al iniciar sesión para los cuatro roles (`admin`, `tesorero`, `maestro`, `alumno`), con `start_url: "/inicio"` en el manifiesto PWA.
   - Incluye saludo personalizado, avisos separados por prioridad, próximo evento con confirmación de asistencia (`InicioNextEventCard` + RSVP), mis turnos y tarjetas por rol con filtro de chips multi-rol y estados vacíos compactos.
-- **Queda pendiente únicamente la sección 8** (Página pública de bienvenida para visitantes, sujeta a la aprobación y datos de los pastores).
+- **Página Pública de Bienvenida (`/`, `/bienvenida`), "Vida en Oasis" y Panel de Administración (`/pagina-publica`) 100% COMPLETADAS y FUSIONADAS en `main`:**
+  - **Fases P1 a P7 `[HECHO]` y probadas por Luis** (migraciones `019_public_welcome_page.sql` y `020_public_news_gallery.sql`; ver sección 8).
 
 ### Cómo funciona la app hoy (informe de solo lectura, verificado por Luis)
-- `HomeRedirect` (`/`): mientras `isLoading` muestra "Cargando..." y no navega; sin sesión va a `/login`; con sesión va a `getDefaultPathForRoles(roles)`.
+- `/` (`PublicOrRedirect` / `BienvenidaView`): si no hay sesión, pinta al instante la página pública de bienvenida sin esperar a `user_roles`; si hay sesión activa, delega en `HomeRedirect` hacia `getDefaultPathForRoles(roles)` (`/inicio`). `/bienvenida` muestra siempre la página pública (útil para previsualizar con sesión).
 - `getDefaultPathForRoles` devuelve la ruta del primer ítem de `NAV_ITEMS` accesible: ahora es `/inicio` para todos los roles con permisos. Sin roles: `/sin-permisos`.
 - `ProtectedRoute`: cargando, spinner; sin sesión, `/login` guardando `state.from`; sin roles o sin el rol exigido, `/sin-permisos`.
 - `/sin-permisos` **nunca redirige a `/`**. No se debe cambiar.
 - `LoginView`: si ya hay sesión, vuelve a `location.state.from` o a `/`; tras un login correcto no navega de forma imperativa, deja que el estado reactivo lo haga.
 - Ruta comodín `*` redirige a `/`.
-- Menú definido en `src/config/navigation.ts` (`NAV_ITEMS`, `MOBILE_NAV_PRIORITY`, `getAvailableNavItems`, `getMobileNavItems`, `canAccessPath`, `getDefaultPathForRoles`) y consumido en `AppLayout.tsx`. Los logos de `AppLayout.tsx` (escritorio y móvil) enlazan a `/inicio`.
-- Hooks y componentes que existen: `useAnnouncements` (con `activeAnnouncements`), `useEvents` (con `upcomingEvent`), `useEventRSVPs` (`myRsvpsByEvent`, `upsertRSVP`), `useEventAssignments`, `useStudentClasses`, `useStudentClassroom`, `useFinances` (con `summary`), `useInicioDashboard`; `AnnouncementsBanner`, `FinancialSummaryCards`, `EventRSVPModal`, `EventAssignmentsModal`, `AnnouncementModal`, `InicioNextEventCard`, `DashboardCard`, `DashboardSkeleton`, `DashboardEmptyState`.
-- **No hizo falta SQL nuevo ni migraciones para `/inicio`:** las políticas RLS y funciones auxiliares ya cubren los datos. Solo consultas del cliente de Supabase.
+- Menú definido en `src/config/navigation.ts` (`NAV_ITEMS`, `MOBILE_NAV_PRIORITY`, `getAvailableNavItems`, `getMobileNavItems`, `canAccessPath`, `getDefaultPathForRoles`) y consumido en `AppLayout.tsx`. Los logos de `AppLayout.tsx` (escritorio y móvil) enlazan a `/inicio`. El rol `admin` cuenta con el ítem "Página Pública" (`/pagina-publica`).
+- Hooks y componentes que existen: `useAnnouncements` (con `activeAnnouncements`), `useEvents` (con `upcomingEvent`), `useEventRSVPs` (`myRsvpsByEvent`, `upsertRSVP`), `useEventAssignments`, `useStudentClasses`, `useStudentClassroom`, `useFinances` (con `summary`), `useInicioDashboard`, `usePublicWelcomeData`, `usePublicNewsSectionData`, `usePublicPageAdmin`; `AnnouncementsBanner`, `FinancialSummaryCards`, `EventRSVPModal`, `EventAssignmentsModal`, `AnnouncementModal`, `InicioNextEventCard`, `DashboardCard`, `DashboardSkeleton`, `DashboardEmptyState`, `VidaEnOasisSection`, `VidaEnOasisModal`.
 
 ---
 
@@ -84,7 +84,7 @@ REGLAS
 2. **Varios roles:** tarjetas **apiladas**, con un título de sección por rol (Administración, Maestro, Alumno, Tesorería). Sin pestañas. Sin duplicados.
 3. **Máximo 3 elementos por tarjeta**, con botón "Ver todo".
 4. **La redirección tras el login se queda en `/calendario` hasta la última fase (la 6).**
-5. Dos páginas distintas: `/inicio` (con sesión y rol) y una página pública de bienvenida en `/` (visitantes), esta última más adelante y solo si los pastores la aprueban.
+5. Dos páginas distintas: `/inicio` (con sesión y rol) y una página pública de bienvenida en `/` y `/bienvenida` (visitantes), ambas ya implementadas y aprobadas.
 
 ---
 
@@ -163,14 +163,23 @@ Para cada uno comprobar:
 
 ## 7. Cómo revertir
 
-- Todo vive en la rama `inicio-por-rol`: si no convence, no se fusiona y `main` queda intacto.
+- Todo vive en la rama correspondiente (`inicio-por-rol` o `pagina-publica`): si no convence, no se fusiona y `main` queda intacto.
 - Tras fusionar, si falla en producción: en Vercel, volver a un despliegue anterior, y después `git revert` del commit de fusión.
 
 ---
 
-## 8. Página pública de bienvenida (DESPUÉS, solo si los pastores la aprueban)
+## 8. Página pública de bienvenida y "Vida en Oasis" `[HECHO]` (9 de noviembre de 2026, en `main`)
 
-### Decisión pendiente
+**Estado:** aprobada por los pastores, 100% COMPLETADA, probada por Luis y fusionada en `main`. Resumen de fases:
+- **P1–P2:** migración `019_public_welcome_page.sql` (`church_events.is_public`, `public_site_settings`, `public_news`, vistas `v_public_events` / `v_public_site_settings` / `v_public_news` con `security_invoker = false`, bucket `public-media`) y pruebas como `anon`.
+- **P3–P4:** página pública en `/` y `/bienvenida` (portada, próximo culto, eventos públicos de solo lectura, horarios, contacto y "Instala la app"), sin tocar `AuthContext`.
+- **P5:** sección "Vida en Oasis" (tarjetas 16:9, categorías `Bautizos`/`Comunidad`/`Discipulado`, modal con la crónica) en la portada y en `/inicio`.
+- **P6:** panel de administración `/pagina-publica` (solo `admin`): textos y contacto, casilla "Evento público" y gestión de recuerdos con casilla obligatoria de privacidad.
+- **P7:** hasta 5 fotos por recuerdo con carrusel accesible, compresión en el navegador (Canvas, WebP) y limpieza automática en Storage; migración `020_public_news_gallery.sql` (`image_paths` y listado de `public-media` solo para admin).
+
+El respaldo JSON de Auditoría incluye `public_site_settings` y `public_news`. A continuación se conserva el diseño original como referencia histórica.
+
+### Decisión (resuelta)
 Preguntar a los pastores: "¿Quieren que cualquier persona vea horarios y eventos sin iniciar sesión?". Reunir además: dirección, horarios fijos, WhatsApp, correo, redes y texto de bienvenida. Fotos de menores, solo con permiso de los padres.
 
 ### Diseño
@@ -200,7 +209,7 @@ Casilla "Evento público" (por defecto desactivada) en el formulario de eventos,
 
 ## 9. No olvidar (viene de `CONTEXTO_PENDIENTE.md`)
 
-- Respaldo JSON: añadir `user_roles` y todas las tablas que falten, paginar consultas (límite habitual de 1.000 filas) y comparar filas con un `count`. No incluye Storage ni usuarios de Auth: hacer también `supabase db dump` de vez en cuando.
+- Respaldo JSON: incluye `user_roles`, `public_site_settings` y `public_news`; si alguna tabla supera las 1.000 filas, paginar consultas y comparar filas con un `count`. No incluye Storage ni usuarios de Auth: hacer también `supabase db dump` de vez en cuando.
 - Keep-alive: GitHub desactiva workflows programados de repositorios públicos tras 60 días sin actividad. Preferible repositorio privado y revisar la pestaña Actions cada mes.
 - Hablar con el pastor sobre la propiedad de las cuentas (Supabase, Vercel, GitHub) y la responsabilidad sobre los datos.
 - Prueba final con cuatro roles antes de dar la app por entregada.

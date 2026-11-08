@@ -479,6 +479,8 @@ export function useDataExport(onBackupLogged?: () => void) {
         'church_event_attendance',
         'church_event_rsvps',
         'announcements',
+        'public_site_settings',
+        'public_news',
       ];
 
       const tablesData: Record<string, any[]> = {};

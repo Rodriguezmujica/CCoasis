@@ -2,11 +2,11 @@
 
 > Traspaso para otra IA. Léelo junto con `CONTEXTO_PROYECTO.md` y `SPEC.md`. Este archivo solo cubre lo que **falta** y las comprobaciones pendientes. Si algo contradice a la realidad del repositorio o de la base de datos, **verifica y avisa**; no supongas.
 
-Última actualización: 8 de noviembre de 2026.
+Última actualización: 9 de noviembre de 2026.
 
 ## 0. Estado en una frase
 
-La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También están en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`), las **copias de seguridad (CSV/JSON)** en Auditoría, el **keep-alive automático (`018`)** mediante GitHub Actions y la **Pantalla de Inicio por Rol (`/inicio` con filtro de chips multi-rol y estados vacíos compactos)** (Fases 1 a 6 completadas, probadas por Luis y fusionadas en `main`). Queda solo la revisión visual final general antes de la entrega y, más adelante si los pastores la aprueban, la página pública de bienvenida.
+La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También están en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`), las **copias de seguridad (CSV/JSON)** en Auditoría, el **keep-alive automático (`018`)** mediante GitHub Actions, la **Pantalla de Inicio por Rol (`/inicio` con filtro de chips multi-rol y estados vacíos compactos)** (Fases 1 a 6) y la **Página Pública de Bienvenida (`/`, `/bienvenida`), "Vida en Oasis" y su panel de administración (`/pagina-publica`)** (Fases P1 a P7, migraciones `019` y `020`, probadas por Luis y fusionadas en `main`). Queda solo la revisión visual final general con un usuario por rol antes de la entrega.
 
 ## 1. Reglas que no se rompen
 
@@ -26,11 +26,11 @@ Todos los puntos fueron verificados satisfactoriamente en vivo en el SQL Editor 
 - **2.3 Archivado de avisos (`announcements`):** [VERIFICADO] La política SELECT en `announcements` empieza por `is_admin() OR ...` (`(is_admin() OR ((deleted_at IS NULL) AND (is_active = true) AND ((expires_at IS NULL) OR (expires_at > now()))))`), permitiendo al admin archivar registros sin error de RLS. Reflejado en migración `016_fix_announcements_policy.sql`.
 - **2.4 Permisos de la vista:** [VERIFICADO] Solo `authenticated` y `service_role` tienen `SELECT` sobre `v_event_servers`; el rol `anon` tiene revocado todo acceso.
 - **2.5 Prueba decisiva como alumno:** [VERIFICADO] Ejecutada en SQL Editor con JWT de alumno: ve exactamente su propia ficha (1 ficha) en `persons`, 0 RSVPs ajenos y en `v_event_servers` únicamente los nombres y apellidos.
-- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `018` (con la salvedad documentada de que no existe la `012`; la `017` es `017_assignment_file_cleanup.sql` y la `018` es `018_keepalive_ping.sql`). Guardado `016_fix_announcements_policy.sql`.
+- **2.6 Numeración de migraciones:** [VERIFICADO Y SIN COLISIONES] Secuencia limpia de la `001` a la `020` (con la salvedad documentada de que no existe la `012`; la `017` es `017_assignment_file_cleanup.sql`, la `018` es `018_keepalive_ping.sql`, la `019` es `019_public_welcome_page.sql` y la `020` es `020_public_news_gallery.sql`).
 - **2.7 Edge Functions (`create-user`, `update-user-password`):** [VERIFICADO] Inspeccionadas en código: ambas validan el JWT de la cabecera `Authorization` vía `getUser()` y comprueban explícitamente en BD el rol de admin (`callerClient.rpc('is_admin')`) antes de invocar cualquier método administrativo con `service_role`. Sin huecos de seguridad.
 - **2.8 RSVP (`church_event_rsvps`):** [VERIFICADO] Un alumno solo consulta su propia confirmación individual y el conteo consolidado (`get_event_rsvp_summary`), sin acceso a listas ni identidades ajenas.
 
-## 3. Rediseño visual (rama `rediseno-visual`)
+## 3. Rediseño visual, Inicio por Rol y Página Pública (en `main`)
 
 ### Identidad aprobada por los pastores
 Cabecera **cian** `#23d5da` con el logo y texto **oscuro** `#1a1a1a`. Barra de menú **magenta** `#ae4a84` con texto blanco. Banners y títulos grandes con degradado **`#0f9aa2` → `#ae4a84`** (solo títulos grandes en negrita blanca de 24 px o más; el texto pequeño va sobre tarjetas blancas). Tarjetas blancas con esquinas muy redondeadas. Fondo `#f5f5f5`. Login ya aprobado por Luis.
@@ -47,7 +47,7 @@ Cabecera **cian** `#23d5da` con el logo y texto **oscuro** `#1a1a1a`. Barra de m
 
 Script de verificación en el repo: `scripts/design/contrast.py`.
 
-### Hecho (Fase 3 · 100% COMPLETADA en rama `rediseno-visual`)
+### Hecho (Fase 3 · 100% COMPLETADA en `main`)
 - Commit del skill `ui-ux-pro-max` (`.agents/`), snapshot previo (`0c58f5f`) y sistema de diseño en `ccoasis-app/design-system/oasis/MASTER.md` + `contrast-table.md`.
 - **Fase 3a (`978c24f`) + Cierre de auditoría de contraste (`f1ad3e4`)**: escalas `brand`/`blue` remapeadas a cian, `magenta`/`indigo` a magenta, `slate` a neutros accesibles; tokens semánticos; foco visible global; `prefers-reduced-motion`; viewport sin `user-scalable=no` ni `maximum-scale`; `theme-color` `#23d5da`; iconos PWA generados (192, 512, maskable, apple-touch, favicon).
 - **Fase 3b (`f1ad3e4`, `4fde475`, `8ebd04e`)**: layout (`AppLayout.tsx`), navegación (sidebar con cabecera cian `#23d5da`, franja magenta `#ae4a84` y cuerpo blanco; cabecera móvil cian + barra magenta + barra inferior táctil) y login (`LoginView.tsx` con `.oasis-text-gradient`, `autocomplete`, `aria-label` y campos ≥ 16 px / 44 px).
@@ -66,18 +66,24 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
 
 ### Pantalla de Inicio por Rol (`/inicio`) · 100% COMPLETADA y en `main`
 - **Fases 1 a 6 completadas y probadas por Luis:** dashboard personalizado en `/inicio` como ruta inicial tras iniciar sesión (`getDefaultPathForRoles` y `start_url` de la PWA).
-- Incluye saludo con nombre de ficha vinculada, avisos clasificados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (`InicioNextEventCard` + RSVP), mis turnos asignados y tarjetas específicas por rol (Alumno, Maestro, Tesorería y Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos.
+- Incluye saludo con nombre de ficha vinculada, avisos clasificados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (`InicioNextEventCard` + RSVP), mis turnos asignados, tarjetas específicas por rol (Alumno, Maestro, Tesorería y Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos, y la sección "Vida en Oasis".
 - No requirió SQL nuevo ni cambios en `AuthContext`, `HomeRedirect`, `ProtectedRoute` ni `CalendarioView.tsx`.
 
-### Pendiente (rediseño y animación ya están en `main`)
-1. **Revisión visual final en navegador (`localhost:5173` o preview de Vercel):** validar con un usuario **admin** y otro **alumno** que todas las vistas se ven y funcionan según lo esperado.
+### Página Pública de Bienvenida y "Vida en Oasis" (`/`, `/bienvenida`, `/pagina-publica`) · 100% COMPLETADA y en `main`
+- **Fases P1 a P7 completadas, probadas por Luis y fusionadas en `main`** (migraciones `019_public_welcome_page.sql` y `020_public_news_gallery.sql`).
+- `/` muestra al instante la página pública a visitantes sin sesión (sin esperar `user_roles`) y redirige a `/inicio` si hay sesión; `/bienvenida` permite ver la página pública en cualquier momento.
+- Incluye portada institucional, próximo culto, calendario público de solo lectura (`v_public_events`), sección **"Vida en Oasis"** (en portada y en `/inicio`, con categorías `Bautizos`, `Comunidad` y `Discipulado`, y carrusel accesible de hasta 5 fotos por recuerdo), horarios, ubicación, WhatsApp, redes sociales y guía de instalación PWA.
+- Panel de administración `/pagina-publica` (exclusivo `admin`) con compresión automática en cliente (HTML5 Canvas a WebP ≤ 1600 px), verificación obligatoria de privacidad (RGPD/menores) y limpieza automática de archivos en `public-media` al archivar, editar o cancelar.
+
+### Pendiente (todo el desarrollo principal ya está en `main`)
+1. **Revisión visual final en navegador (`localhost:5173` o producción en Vercel):** validar con un usuario **admin** y otro **alumno** que todas las vistas se ven y funcionan según lo esperado.
 2. Ya no aplica la restricción de no fusionar: todo está en `main`. Si algo no convence, se corrige con un commit nuevo.
 
 ## 4. Antes de entregar la app a la iglesia
 
 1. **Copias de seguridad:** [COMPLETADO] Implementado módulo completo de exportación y respaldo en la vista de Auditoría (`BackupExportCard.tsx`, `useDataExport.ts`, exclusivo para el rol `admin`). Permite:
    - Exportación de planillas CSV compatibles con Excel (UTF-8 con BOM): Personas, Finanzas (ofrendas y gastos con categoría y método de pago), y Clases/Notas (alumnos, ciclos, porcentaje de asistencia y calificaciones).
-   - Respaldo integral del sistema en formato JSON estructurado con metadatos y todas las tablas clave (`persons`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `announcements`, `notifications`, `audit_logs`, `church_event_rsvps`).
+   - Respaldo integral del sistema en formato JSON estructurado con metadatos y todas las tablas clave (`persons`, `user_roles`, `courses`, `cycles`, `enrollments`, `sessions`, `attendance`, `evaluations`, `grades`, `assignments`, `assignment_submissions`, `class_materials`, `transaction_categories`, `offerings`, `expenses`, `church_events`, `church_event_assignments`, `church_event_attendance`, `church_event_rsvps`, `announcements`, `public_site_settings`, `public_news`).
    - Registro automático en `audit_logs` con la acción `BACKUP_DOWNLOAD` cada vez que se genera un respaldo.
 2. **Pausa por inactividad:** [COMPLETADO Y AUTOMATIZADO] Implementado sistema de latido automático ("keep-alive"):
    - Función SQL ligera `public.keepalive_ping()` (migración `018_keepalive_ping.sql`) con permisos para `anon` y `authenticated`.
@@ -90,19 +96,19 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
 6. **Authentication, URL Configuration** en Supabase: `Site URL` = la URL de producción de Vercel (`https://c-coasis.vercel.app`). El correo integrado de Supabase es muy limitado: si se usan invitaciones por correo, configurar un servicio propio.
 7. **Prueba final con un usuario por rol** (admin, tesorero, maestro, alumno): cada uno ve solo lo suyo, y escribiendo a mano una URL ajena (`/finanzas`) sale "permiso denegado".
 
-## 5. Documentación a corregir en `CONTEXTO_PROYECTO.md` (100% COMPLETADA · 8 de noviembre de 2026)
+## 5. Documentación a corregir en `CONTEXTO_PROYECTO.md` (100% COMPLETADA · 9 de noviembre de 2026)
 
-- **Esquema real de columnas principales:** `[HECHO]` Documentados en la sección 7 de `CONTEXTO_PROYECTO.md` los nombres exactos verificados contra las migraciones `001`–`018` (`courses.passing_grade`, `courses.min_attendance_pct`, `cycles.teacher_id`, `grades.enrollment_id` y `evaluation_id`, `attendance.mark`, `church_event_attendance.adults_count`/`children_count`/`visitors_count`/`total_count`).
+- **Esquema real de columnas principales:** `[HECHO]` Documentados en la sección 7 de `CONTEXTO_PROYECTO.md` los nombres exactos verificados contra las migraciones `001`–`020` (`courses.passing_grade`, `courses.min_attendance_pct`, `cycles.teacher_id`, `grades.enrollment_id` y `evaluation_id`, `attendance.mark`, `church_event_attendance.adults_count`/`children_count`/`visitors_count`/`total_count`, `church_events.is_public`, `public_site_settings` y `public_news`).
 - **Regla de soft-delete en políticas SELECT:** `[HECHO]` Reflejada en la sección 8 de `CONTEXTO_PROYECTO.md` (no usar `deleted_at IS NULL` sin anteponer `is_admin() OR ...` en la política SELECT de tablas con archivado).
-- **Excepción deliberada de `v_event_servers`:** `[HECHO]` Documentada en las secciones 7 y 8 de `CONTEXTO_PROYECTO.md` (`security_invoker = false` para permitir leer nombre y apellido de servidores asignados sin exponer datos privados de `persons`).
-- **Listado de migraciones (`001` a `018`) y notas de mantenimiento:** `[HECHO]` Reflejados en `CONTEXTO_PROYECTO.md` (secciones 7, 9 y 12) y `README.md`.
+- **Excepciones deliberadas de vistas (`v_event_servers`, `v_public_events`, `v_public_site_settings`, `v_public_news`):** `[HECHO]` Documentadas en las secciones 7 y 8 de `CONTEXTO_PROYECTO.md` (`security_invoker = false`).
+- **Listado de migraciones (`001` a `020`) y notas de mantenimiento:** `[HECHO]` Reflejados en `CONTEXTO_PROYECTO.md` (secciones 7, 9 y 12) y `README.md`.
 
 ## 5b. Ideas futuras
 
 Ver `IDEAS_FUTURAS.md` y `PLAN_INICIO_Y_PUBLICA.md`:
-- **Ya implementados y en `main`:** `Exportar datos y copias de seguridad (CSV/JSON)`, `Keep-alive automático (018)` y `Pantalla de inicio por rol (/inicio)`.
+- **Ya implementados y en `main`:** `Exportar datos y copias de seguridad (CSV/JSON)`, `Keep-alive automático (018)`, `Pantalla de inicio por rol (/inicio)` (Fases 1 a 6) y `Página pública de bienvenida (/ y /bienvenida), calendario público, "Vida en Oasis" y panel de administración (/pagina-publica)` (Fases P1 a P7, migraciones `019` y `020`).
 - **Descartados por decisión de Luis (no proponer):** `Peticiones de oración`, `Seguimiento de visitas` y `Cumpleaños`.
-- **En evaluación / futuro:** el único bloque grande en evaluación es la **Página pública de bienvenida (`/`)** (documentada en la sección 8 de `PLAN_INICIO_Y_PUBLICA.md`, sujeta a confirmación y datos de los pastores), junto con futuras **notificaciones Web Push** e **informes en PDF**.
+- **En evaluación / futuro:** futuras **notificaciones Web Push** e **informes en PDF**.
 
 ## 6. Datos útiles
 

@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from './supabase';
 import { useAuth } from '../context/AuthContext';
 import { ChurchEventRoleType } from '../types/assignments';
+import { ChurchEventType } from '../types/events';
+import { AnnouncementPriority } from '../types/announcements';
+import { EventRSVPSummary } from '../types/rsvps';
 
 // ============================================================================
 // Tipos de datos para el Dashboard de Inicio
@@ -84,6 +87,37 @@ export interface TeacherPendingSubmissionItem {
   cycleId: string;
   cycleName: string;
   courseTitle: string;
+}
+
+export interface AdminUnassignedEventItem {
+  id: string;
+  title: string;
+  eventType: ChurchEventType;
+  startTime: string;
+  endTime: string | null;
+  location: string | null;
+}
+
+export interface AdminExpiringAnnouncementItem {
+  id: string;
+  title: string;
+  message: string;
+  priority: AnnouncementPriority;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface AdminNextEventRSVPsItem {
+  event: {
+    id: string;
+    title: string;
+    eventType: ChurchEventType;
+    startTime: string;
+    endTime: string | null;
+    location: string | null;
+  };
+  summary: EventRSVPSummary;
+  notAttendingCount: number;
 }
 
 // ============================================================================
@@ -1145,12 +1179,325 @@ export function useTeacherPendingSubmissions(
 }
 
 // ============================================================================
+// Hook: Eventos futuros sin turnos asignados (Solo Admin)
+// ============================================================================
+
+export function useAdminUnassignedEvents(isAdmin: boolean) {
+  const [events, setEvents] = useState<AdminUnassignedEventItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchUnassignedEvents = useCallback(async () => {
+    if (!isAdmin) {
+      setEvents([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const nowIso = new Date().toISOString();
+
+      // Consultar eventos futuros no archivados con sus turnos asignados
+      const { data, error: queryErr } = await supabase
+        .from('church_events')
+        .select(`
+          id,
+          title,
+          event_type,
+          start_time,
+          end_time,
+          location,
+          assignments:church_event_assignments (
+            id
+          )
+        `)
+        .is('deleted_at', null)
+        .gte('start_time', nowIso)
+        .order('start_time', { ascending: true })
+        .limit(20);
+
+      if (!mountedRef.current) return;
+
+      if (queryErr) throw queryErr;
+
+      // Filtrar eventos con 0 turnos asignados y limitar a máximo 3
+      const unassigned: AdminUnassignedEventItem[] = (data || [])
+        .filter((row: any) => {
+          const asg = Array.isArray(row.assignments) ? row.assignments : [];
+          return asg.length === 0;
+        })
+        .slice(0, 3)
+        .map((row: any) => ({
+          id: row.id,
+          title: row.title,
+          eventType: row.event_type as ChurchEventType,
+          startTime: row.start_time,
+          endTime: row.end_time,
+          location: row.location,
+        }));
+
+      setEvents(unassigned);
+    } catch (err: any) {
+      console.error('Error al cargar eventos sin turnos asignados:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudieron cargar los eventos sin turnos asignados. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchUnassignedEvents();
+  }, [fetchUnassignedEvents]);
+
+  return {
+    events,
+    isLoading,
+    error,
+    refetch: fetchUnassignedEvents,
+  };
+}
+
+// ============================================================================
+// Hook: Avisos que caducan en los próximos 7 días (Solo Admin)
+// ============================================================================
+
+export function useAdminExpiringAnnouncements(isAdmin: boolean) {
+  const [announcements, setAnnouncements] = useState<AdminExpiringAnnouncementItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchExpiringAnnouncements = useCallback(async () => {
+    if (!isAdmin) {
+      setAnnouncements([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const now = new Date();
+      const nowIso = now.toISOString();
+      const in7DaysIso = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { data, error: queryErr } = await supabase
+        .from('announcements')
+        .select('id, title, message, priority, expires_at, created_at')
+        .is('deleted_at', null)
+        .eq('is_active', true)
+        .gt('expires_at', nowIso)
+        .lte('expires_at', in7DaysIso)
+        .order('expires_at', { ascending: true })
+        .limit(3);
+
+      if (!mountedRef.current) return;
+
+      if (queryErr) throw queryErr;
+
+      const formatted: AdminExpiringAnnouncementItem[] = (data || []).map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        message: row.message,
+        priority: row.priority as AnnouncementPriority,
+        expiresAt: row.expires_at,
+        createdAt: row.created_at,
+      }));
+
+      setAnnouncements(formatted);
+    } catch (err: any) {
+      console.error('Error al cargar avisos próximos a caducar:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudieron cargar los avisos próximos a caducar. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchExpiringAnnouncements();
+  }, [fetchExpiringAnnouncements]);
+
+  return {
+    announcements,
+    isLoading,
+    error,
+    refetch: fetchExpiringAnnouncements,
+  };
+}
+
+// ============================================================================
+// Hook: Confirmaciones (RSVPs) del próximo culto/evento (Solo Admin)
+// ============================================================================
+
+export function useAdminNextEventRSVPs(isAdmin: boolean) {
+  const [data, setData] = useState<AdminNextEventRSVPsItem | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const fetchNextEventRSVPs = useCallback(async () => {
+    if (!isAdmin) {
+      setData(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const nowIso = new Date().toISOString();
+
+      // 1. Obtener el próximo evento futuro no archivado
+      const { data: evData, error: evErr } = await supabase
+        .from('church_events')
+        .select('id, title, event_type, start_time, end_time, location')
+        .is('deleted_at', null)
+        .gte('start_time', nowIso)
+        .order('start_time', { ascending: true })
+        .limit(1);
+
+      if (!mountedRef.current) return;
+
+      if (evErr) throw evErr;
+
+      if (!evData || evData.length === 0) {
+        setData(null);
+        return;
+      }
+
+      const nextEv = evData[0] as any;
+
+      // 2. Obtener el resumen consolidado de confirmaciones mediante get_event_rsvp_summary
+      const { data: rpcData, error: rpcErr } = await supabase.rpc('get_event_rsvp_summary', {
+        p_event_id: nextEv.id,
+      });
+
+      if (!mountedRef.current) return;
+
+      if (rpcErr) throw rpcErr;
+
+      const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+      const summary: EventRSVPSummary = {
+        confirmed: Number(row?.confirmed ?? 0),
+        maybe: Number(row?.maybe ?? 0),
+        guests: Number(row?.guests ?? 0),
+      };
+
+      // 3. Consultar conteo de "no_asistire" (permitido para admin por política rsvps_select_own_or_admin)
+      let notAttendingCount = 0;
+      const { count } = await supabase
+        .from('church_event_rsvps')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_id', nextEv.id)
+        .eq('status', 'no_asistire');
+
+      if (typeof count === 'number') {
+        notAttendingCount = count;
+      }
+
+      if (!mountedRef.current) return;
+
+      setData({
+        event: {
+          id: nextEv.id,
+          title: nextEv.title,
+          eventType: nextEv.event_type as ChurchEventType,
+          startTime: nextEv.start_time,
+          endTime: nextEv.end_time,
+          location: nextEv.location,
+        },
+        summary,
+        notAttendingCount,
+      });
+    } catch (err: any) {
+      console.error('Error al cargar confirmaciones del próximo evento:', err);
+      if (mountedRef.current) {
+        setError(
+          parseDashboardError(
+            err,
+            'No se pudieron cargar las confirmaciones del próximo evento. Por favor, reintenta.'
+          )
+        );
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchNextEventRSVPs();
+  }, [fetchNextEventRSVPs]);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchNextEventRSVPs,
+  };
+}
+
+// ============================================================================
 // Hook unificado para uso en InicioView
 // ============================================================================
 
-export function useInicioDashboard(options?: { isAlumno?: boolean; isMaestro?: boolean }) {
+export function useInicioDashboard(options?: {
+  isAlumno?: boolean;
+  isMaestro?: boolean;
+  isAdmin?: boolean;
+}) {
   const isAlumno = Boolean(options?.isAlumno);
   const isMaestro = Boolean(options?.isMaestro);
+  const isAdmin = Boolean(options?.isAdmin);
   const { personId, personName, isPersonLinked, isLoadingPerson, refetchPerson } =
     useLinkedPerson();
 
@@ -1178,6 +1525,11 @@ export function useInicioDashboard(options?: { isAlumno?: boolean; isMaestro?: b
     isMaestro
   );
 
+  // Administración
+  const adminUnassignedEventsState = useAdminUnassignedEvents(isAdmin);
+  const adminExpiringAnnouncementsState = useAdminExpiringAnnouncements(isAdmin);
+  const adminNextEventRSVPsState = useAdminNextEventRSVPs(isAdmin);
+
   return {
     personId,
     personName,
@@ -1191,5 +1543,8 @@ export function useInicioDashboard(options?: { isAlumno?: boolean; isMaestro?: b
     teacherNextClass: teacherNextClassState,
     teacherPendingAttendance: teacherPendingAttendanceState,
     teacherPendingSubmissions: teacherPendingSubmissionsState,
+    adminUnassignedEvents: adminUnassignedEventsState,
+    adminExpiringAnnouncements: adminExpiringAnnouncementsState,
+    adminNextEventRSVPs: adminNextEventRSVPsState,
   };
 }

@@ -6,16 +6,21 @@ import {
   InicioUrgentAnnouncements,
   InicioNextEventCard,
   InicioMyShiftsCard,
+  InicioAdminSection,
   InicioTeacherSection,
   InicioStudentSection,
+  InicioTreasurySection,
   InicioNormalAnnouncements,
 } from '../components/inicio';
 import { useInicioDashboard } from '../lib/useInicioDashboard';
 
 export const InicioView: React.FC = () => {
   const { user, roles } = useAuth();
+  const isAdmin = roles.includes('admin');
+  const isTesorero = roles.includes('tesorero');
   const isMaestro = roles.includes('maestro');
   const isAlumno = roles.includes('alumno');
+  const canViewTreasury = isAdmin || isTesorero;
 
   // Fecha de hoy en formato amigable en español (ej: "Domingo, 8 de noviembre de 2026")
   const rawDate = new Intl.DateTimeFormat('es-ES', {
@@ -38,7 +43,10 @@ export const InicioView: React.FC = () => {
     teacherNextClass: teacherNextClassState,
     teacherPendingAttendance: teacherPendingAttendanceState,
     teacherPendingSubmissions: teacherPendingSubmissionsState,
-  } = useInicioDashboard({ isAlumno, isMaestro });
+    adminUnassignedEvents: adminUnassignedEventsState,
+    adminExpiringAnnouncements: adminExpiringAnnouncementsState,
+    adminNextEventRSVPs: adminNextEventRSVPsState,
+  } = useInicioDashboard({ isAlumno, isMaestro, isAdmin });
 
   const displayName = personName || user?.email || 'Bienvenido';
   const isLinked = isPersonLinked === true;
@@ -94,6 +102,14 @@ export const InicioView: React.FC = () => {
       />
 
       {/* 5. Tarjetas de su rol (apiladas con su título de sección por rol, sin pestañas y sin duplicados) */}
+      {isAdmin && (
+        <InicioAdminSection
+          unassignedEventsState={adminUnassignedEventsState}
+          expiringAnnouncementsState={adminExpiringAnnouncementsState}
+          nextEventRSVPsState={adminNextEventRSVPsState}
+        />
+      )}
+
       {isMaestro && (
         <InicioTeacherSection
           isPersonLinked={isPersonLinked}
@@ -111,6 +127,8 @@ export const InicioView: React.FC = () => {
           recentGradesState={recentGradesState}
         />
       )}
+
+      {canViewTreasury && <InicioTreasurySection />}
 
       {/* 6. Avisos normales de la congregación (orden móvil: más abajo, máx 3) */}
       <InicioNormalAnnouncements />

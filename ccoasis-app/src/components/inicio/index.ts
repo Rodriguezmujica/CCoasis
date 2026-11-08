@@ -8,3 +8,5 @@ export * from './InicioNextEventCard';
 export * from './InicioMyShiftsCard';
 export * from './InicioStudentSection';
 export * from './InicioTeacherSection';
+export * from './InicioTreasurySection';
+export * from './InicioAdminSection';

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { X, Calendar, Camera } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { X, Calendar, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PublicNewsCategory, PublicNewsItem } from '../../types/publicPage';
 import { getPublicMediaUrl, isSafePublicUrl } from '../../lib/publicPageSecurity';
 import { formatPublicNewsDate } from './publicDateFormatters';
@@ -31,10 +31,37 @@ export const VidaEnOasisModal: React.FC<VidaEnOasisModalProps> = ({
   onClose,
 }) => {
   const [imgFailed, setImgFailed] = useState<boolean>(false);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+
+  // Galería segura: image_urls (o [image_url] / [image_path]) filtrada con isSafePublicUrl
+  const galleryUrls: string[] = useMemo(() => {
+    if (!item) return [];
+    const raw =
+      item.image_urls && item.image_urls.length > 0
+        ? item.image_urls
+        : [item.image_url || getPublicMediaUrl(item.image_path)];
+    return raw
+      .map((u) => (u || '').trim())
+      .filter((u) => Boolean(u) && isSafePublicUrl(u));
+  }, [item]);
+  const galleryCount = galleryUrls.length;
+  const hasCarousel = galleryCount > 1;
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [item?.id, isOpen]);
 
   useEffect(() => {
     setImgFailed(false);
-  }, [item?.id, item?.image_url, item?.image_path, isOpen]);
+  }, [item?.id, activeIndex, isOpen]);
+
+  const goPrev = useCallback(() => {
+    if (galleryCount > 1) setActiveIndex((i) => (i - 1 + galleryCount) % galleryCount);
+  }, [galleryCount]);
+
+  const goNext = useCallback(() => {
+    if (galleryCount > 1) setActiveIndex((i) => (i + 1) % galleryCount);
+  }, [galleryCount]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,6 +70,12 @@ export const VidaEnOasisModal: React.FC<VidaEnOasisModalProps> = ({
       if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
+      } else if (event.key === 'ArrowLeft' && galleryCount > 1) {
+        event.preventDefault();
+        goPrev();
+      } else if (event.key === 'ArrowRight' && galleryCount > 1) {
+        event.preventDefault();
+        goNext();
       }
     };
 
@@ -54,21 +87,20 @@ export const VidaEnOasisModal: React.FC<VidaEnOasisModalProps> = ({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, galleryCount, goPrev, goNext]);
 
   if (!isOpen || !item) {
     return null;
   }
 
-  const rawImageUrl = item.image_url || getPublicMediaUrl(item.image_path);
-  const safeImageUrl =
-    Boolean(rawImageUrl?.trim()) && isSafePublicUrl(rawImageUrl)
-      ? rawImageUrl.trim()
-      : '';
+  const safeImageUrl = galleryUrls[Math.min(activeIndex, Math.max(galleryCount - 1, 0))] || '';
   const showImage = Boolean(safeImageUrl) && !imgFailed;
 
   const badgeClasses = getVidaEnOasisCategoryBadgeClasses(item.category);
   const formattedDate = formatPublicNewsDate(item.event_date);
+
+  const carouselButtonClass =
+    'absolute top-1/2 -translate-y-1/2 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[#1a1a1a]/85 hover:bg-[#1a1a1a] text-white inline-flex items-center justify-center cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white';
 
   return (
     <div
@@ -111,32 +143,100 @@ export const VidaEnOasisModal: React.FC<VidaEnOasisModalProps> = ({
           </button>
         </div>
 
-        {/* Cuerpo desplazable: foto ampliada + título + crónica completa */}
+        {/* Cuerpo desplazable: foto ampliada (o carrusel) + título + crónica completa */}
         <div className="overflow-y-auto flex-1">
-          {/* Imagen panorámica ampliada o fallback elegante */}
-          <div className="w-full bg-[#ebedef] border-b border-[#d4d7dc]">
-            {showImage ? (
-              <img
-                src={safeImageUrl}
-                alt={item.title}
-                onError={() => setImgFailed(true)}
-                className="w-full max-h-[420px] aspect-video object-cover block"
-              />
-            ) : (
-              <div
-                aria-hidden="true"
-                className="aspect-video w-full bg-gradient-to-br from-[#d9f7f8] via-[#f5f5f5] to-[#f6e6ef] flex flex-col items-center justify-center p-6 text-center"
+          {/* Imagen panorámica ampliada, carrusel accesible o fallback elegante */}
+          <div
+            className="w-full bg-[#ebedef] border-b border-[#d4d7dc]"
+            role={hasCarousel ? 'group' : undefined}
+            aria-roledescription={hasCarousel ? 'carrusel' : undefined}
+            aria-label={hasCarousel ? `Álbum de fotos: ${item.title}` : undefined}
+          >
+            <div className="relative">
+              {showImage ? (
+                <img
+                  src={safeImageUrl}
+                  alt={
+                    hasCarousel
+                      ? `${item.title} (foto ${activeIndex + 1} de ${galleryCount})`
+                      : item.title
+                  }
+                  onError={() => setImgFailed(true)}
+                  className="w-full max-h-[420px] aspect-video object-cover block"
+                />
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="aspect-video w-full bg-gradient-to-br from-[#d9f7f8] via-[#f5f5f5] to-[#f6e6ef] flex flex-col items-center justify-center p-6 text-center"
+                >
+                  <span className="w-12 h-12 rounded-full bg-white border border-[#d4d7dc] text-[#0a5961] inline-flex items-center justify-center shadow-2xs mb-2">
+                    <Camera className="w-6 h-6" aria-hidden="true" />
+                  </span>
+                  <span className="text-sm font-bold text-[#1a1a1a]">
+                    Centro Cristiano Oasis
+                  </span>
+                  <span className="text-xs font-medium text-[#4a4f57] mt-0.5">
+                    Recuerdo de nuestra comunidad
+                  </span>
+                </div>
+              )}
+
+              {hasCarousel && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    aria-label="Anterior"
+                    className={`${carouselButtonClass} left-2`}
+                  >
+                    <ChevronLeft className="w-6 h-6" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    aria-label="Siguiente"
+                    className={`${carouselButtonClass} right-2`}
+                  >
+                    <ChevronRight className="w-6 h-6" aria-hidden="true" />
+                  </button>
+                  <span
+                    className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-[#1a1a1a]/85 text-white text-xs font-bold"
+                    aria-live="polite"
+                  >
+                    {activeIndex + 1} / {galleryCount}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {hasCarousel && (
+              <ul
+                className="flex gap-2 overflow-x-auto p-2.5 bg-white"
+                aria-label="Miniaturas del álbum"
               >
-                <span className="w-12 h-12 rounded-full bg-white border border-[#d4d7dc] text-[#0a5961] inline-flex items-center justify-center shadow-2xs mb-2">
-                  <Camera className="w-6 h-6" aria-hidden="true" />
-                </span>
-                <span className="text-sm font-bold text-[#1a1a1a]">
-                  Centro Cristiano Oasis
-                </span>
-                <span className="text-xs font-medium text-[#4a4f57] mt-0.5">
-                  Recuerdo de nuestra comunidad
-                </span>
-              </div>
+                {galleryUrls.map((url, idx) => (
+                  <li key={`${url}-${idx}`} className="flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setActiveIndex(idx)}
+                      aria-label={`Ver foto ${idx + 1} de ${galleryCount}`}
+                      aria-current={idx === activeIndex ? 'true' : undefined}
+                      className={`block w-14 h-14 min-w-[44px] min-h-[44px] rounded-[10px] overflow-hidden border-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0e7c86] ${
+                        idx === activeIndex
+                          ? 'border-[#0e7c86]'
+                          : 'border-[#d4d7dc] opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt=""
+                        loading="lazy"
+                        className="w-full h-full object-cover block"
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
 

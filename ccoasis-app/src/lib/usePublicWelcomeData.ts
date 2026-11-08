@@ -14,6 +14,25 @@ import {
 /**
  * Valores seguros por defecto para la configuración de la página pública (`id = 1`)
  */
+/**
+ * Resuelve las rutas de la galería de un recuerdo. Si image_paths viene vacío usa [image_path].
+ * Devuelve también image_url (portada) por compatibilidad.
+ */
+export function resolveNewsImages(row: {
+  image_path?: string | null;
+  image_paths?: string[] | null;
+}): { image_paths: string[]; image_urls: string[]; image_url: string } {
+  const fromArray = Array.isArray(row.image_paths)
+    ? row.image_paths.filter((p) => typeof p === 'string' && p.trim() !== '')
+    : [];
+  const paths = fromArray.length > 0 ? fromArray : row.image_path ? [row.image_path] : [];
+  const urls = paths.map((p) => getPublicMediaUrl(p)).filter((u) => Boolean(u));
+  return {
+    image_paths: paths,
+    image_urls: urls,
+    image_url: urls[0] || '',
+  };
+}
 export const DEFAULT_PUBLIC_SITE_SETTINGS: PublicSiteSettings = {
   id: 1,
   slogan: 'Oasis: un hogar de refugio',
@@ -197,7 +216,7 @@ export function usePublicWelcomeData() {
     try {
       const { data, error } = await supabase
         .from('v_public_news')
-        .select('id, title, category, event_date, summary, image_path, created_at')
+        .select('id, title, category, event_date, summary, image_path, image_paths, created_at')
         .order('event_date', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(6);
@@ -210,7 +229,7 @@ export function usePublicWelcomeData() {
             ...item,
             title: sanitizePlainText(item.title),
             summary: sanitizePlainText(item.summary),
-            image_url: getPublicMediaUrl(item.image_path),
+            ...resolveNewsImages(item),
           })
         );
         setNews(enrichedNews);
@@ -318,7 +337,7 @@ export function usePublicNewsSectionData() {
       const [newsResult, settingsResult] = await Promise.all([
         supabase
           .from('v_public_news')
-          .select('id, title, category, event_date, summary, image_path, created_at')
+          .select('id, title, category, event_date, summary, image_path, image_paths, created_at')
           .order('event_date', { ascending: false })
           .order('created_at', { ascending: false })
           .limit(6),
@@ -338,7 +357,7 @@ export function usePublicNewsSectionData() {
           ...item,
           title: sanitizePlainText(item.title),
           summary: sanitizePlainText(item.summary),
-          image_url: getPublicMediaUrl(item.image_path),
+          ...resolveNewsImages(item),
         }));
         setNews(enrichedNews);
 

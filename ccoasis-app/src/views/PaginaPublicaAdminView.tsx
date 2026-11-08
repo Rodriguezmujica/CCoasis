@@ -161,7 +161,7 @@ export const PaginaPublicaAdminView: React.FC = () => {
           item={editing}
           saving={admin.actionLoading}
           uploading={admin.uploadingImage}
-          onUpload={admin.uploadPublicMediaImage}
+          onUploadMany={admin.uploadPublicMediaImages}
           onSubmit={handleSubmit}
           onClose={closeModal}
         />

@@ -221,6 +221,12 @@ export const VidaEnOasisSection: React.FC<VidaEnOasisSectionProps> = ({
                           </span>
                         </div>
                       )}
+                      {(item.image_urls?.length ?? 0) > 1 && (
+                        <span className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-[#1a1a1a]/85 text-white text-xs font-bold shadow-xs">
+                          <span aria-hidden="true">📷 {item.image_urls!.length} fotos</span>
+                          <span className="sr-only">{`Álbum de ${item.image_urls!.length} fotos`}</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* Cuerpo de la tarjeta (fondo blanco, contraste AA) */}

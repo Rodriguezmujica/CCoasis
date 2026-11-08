@@ -5,6 +5,8 @@ import { ChurchEventType } from './events';
  */
 export type PublicNewsCategory = 'Bautizos' | 'Comunidad' | 'Discipulado';
 
+export const MAX_PUBLIC_NEWS_IMAGES = 5;
+
 export const PUBLIC_NEWS_CATEGORIES: PublicNewsCategory[] = [
   'Bautizos',
   'Comunidad',
@@ -113,6 +115,8 @@ export interface PublicNewsItem {
   image_path: string;
   created_at: string;
   image_url?: string;
+  image_paths?: string[];
+  image_urls?: string[];
 }
 
 /**
@@ -132,6 +136,8 @@ export interface AdminPublicNewsItem {
   updated_at: string;
   deleted_at: string | null;
   image_url?: string;
+  image_paths?: string[];
+  image_urls?: string[];
 }
 
 /**
@@ -143,6 +149,8 @@ export interface CreatePublicNewsInput {
   event_date: string; // 'YYYY-MM-DD'
   summary: string;
   image_path: string;
+  /** Galería (máximo 5). image_path se sincroniza con image_paths[0]. */
+  image_paths: string[];
   is_published?: boolean;
   privacy_verified: boolean;
 }
@@ -156,6 +164,8 @@ export interface UpdatePublicNewsInput {
   event_date?: string; // 'YYYY-MM-DD'
   summary?: string;
   image_path?: string;
+  /** Galería (máximo 5). image_path se sincroniza con image_paths[0]. */
+  image_paths?: string[];
   is_published?: boolean;
   privacy_verified: boolean;
 }

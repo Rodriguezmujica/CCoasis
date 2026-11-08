@@ -5,6 +5,7 @@ import {
   AdminPublicNewsItem,
   AdminPublicSiteSettings,
   CreatePublicNewsInput,
+  MAX_PUBLIC_NEWS_IMAGES,
   PUBLIC_NEWS_CATEGORIES,
   PublicSiteSettingsUpdate,
   UpdatePublicNewsInput,
@@ -14,7 +15,8 @@ import {
   isSafePublicUrl,
   sanitizePlainText,
 } from './publicPageSecurity';
-import { DEFAULT_PUBLIC_SITE_SETTINGS } from './usePublicWelcomeData';
+import { DEFAULT_PUBLIC_SITE_SETTINGS, resolveNewsImages } from './usePublicWelcomeData';
+import { compressImage } from './imageCompression';
 
 const MAX_PUBLIC_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_PUBLIC_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -81,10 +83,29 @@ export function validatePublicMediaFile(file: File): { valid: boolean; error?: s
 }
 
 /**
+ * Normaliza la galería: recorta espacios, elimina vacíos/duplicados.
+ * Si no hay `image_paths`, usa `[image_path]`. La primera ruta es la portada.
+ */
+function normalizeGalleryPaths(paths?: string[], fallbackPath?: string): string[] {
+  const source = paths && paths.length > 0 ? paths : fallbackPath ? [fallbackPath] : [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const p of source) {
+    const t = (p || '').trim();
+    if (t && !seen.has(t)) {
+      seen.add(t);
+      out.push(t);
+    }
+  }
+  return out;
+}
+
+/**
  * Construye un nombre de archivo seguro `<timestamp>-<nombre-seguro>` para `public-media`.
  */
-function buildSafePublicMediaPath(originalName: string): string {
-  const cleaned = (originalName || 'imagen.jpg')
+function buildSafePublicMediaPath(originalName: string, extension?: string): string {
+  const baseName = (originalName || 'imagen.jpg').replace(/\.[^.]*$/, '') || 'recuerdo';
+  const cleaned = (extension ? `${baseName}.${extension}` : originalName || 'imagen.jpg')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // quitar acentos
     .replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -93,7 +114,8 @@ function buildSafePublicMediaPath(originalName: string): string {
     .toLowerCase();
 
   const safeBase = cleaned || 'recuerdo.jpg';
-  return `${Date.now()}-${safeBase}`;
+  const uniq = Math.random().toString(36).slice(2, 8);
+  return `${Date.now()}-${uniq}-${safeBase}`;
 }
 
 /**
@@ -293,7 +315,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
         const items: AdminPublicNewsItem[] = ((data as AdminPublicNewsItem[]) || []).map(
           (row) => ({
             ...row,
-            image_url: getPublicMediaUrl(row.image_path),
+            ...resolveNewsImages(row),
           })
         );
         setNewsItems(items);
@@ -334,13 +356,15 @@ export function usePublicPageAdmin(enabled: boolean = true) {
       setUploadingImage(true);
       setError(null);
       try {
-        const filePath = buildSafePublicMediaPath(file.name);
+        // Compresión automática (máx. 1600 px, WebP 0.82 / JPEG 0.85) antes de subir
+        const compressed = await compressImage(file);
+        const filePath = buildSafePublicMediaPath(file.name, compressed.extension);
 
         const { error: uploadErr } = await supabase.storage
           .from('public-media')
-          .upload(filePath, file, {
+          .upload(filePath, compressed.blob, {
             cacheControl: '3600',
-            contentType: file.type,
+            contentType: compressed.mimeType,
             upsert: false,
           });
 
@@ -373,6 +397,51 @@ export function usePublicPageAdmin(enabled: boolean = true) {
     []
   );
 
+  // 4b. Subir varias imágenes (máx. 5 por recuerdo en total), cada una comprimida antes de subir
+  const uploadPublicMediaImages = useCallback(
+    async (
+      files: File[],
+      currentCount: number = 0
+    ): Promise<{
+      ok: boolean;
+      uploaded: { imagePath: string; publicUrl: string }[];
+      error?: string;
+    }> => {
+      const remaining = MAX_PUBLIC_NEWS_IMAGES - currentCount;
+      if (files.length === 0) {
+        return { ok: false, uploaded: [], error: 'No se seleccionó ninguna imagen.' };
+      }
+      if (remaining <= 0) {
+        const msg = `Ya tienes ${MAX_PUBLIC_NEWS_IMAGES} fotos en este recuerdo. Quita alguna para añadir otra.`;
+        setError(msg);
+        return { ok: false, uploaded: [], error: msg };
+      }
+
+      const selected = files.slice(0, remaining);
+      const notices: string[] = [];
+      if (files.length > remaining) {
+        notices.push(
+          `Solo se pueden tener ${MAX_PUBLIC_NEWS_IMAGES} fotos por recuerdo; se ignoraron ${files.length - remaining}.`
+        );
+      }
+
+      const uploaded: { imagePath: string; publicUrl: string }[] = [];
+      for (const file of selected) {
+        const res = await uploadPublicMediaImage(file);
+        if (res.ok && res.imagePath) {
+          uploaded.push({ imagePath: res.imagePath, publicUrl: res.publicUrl || '' });
+        } else {
+          notices.push(`${file.name}: ${res.error || 'no se pudo subir.'}`);
+        }
+      }
+
+      const message = notices.length > 0 ? notices.join(' ') : undefined;
+      if (message && mountedRef.current) setError(message);
+      return { ok: uploaded.length > 0, uploaded, error: message };
+    },
+    [uploadPublicMediaImage]
+  );
+
   // 5. Crear recuerdo en public_news (exige privacy_verified === true)
   const createPublicNews = useCallback(
     async (
@@ -387,8 +456,14 @@ export function usePublicPageAdmin(enabled: boolean = true) {
 
       const cleanTitle = sanitizePlainText(input.title, 160);
       const cleanSummary = sanitizePlainText(input.summary, 2000);
-      const cleanImagePath = (input.image_path || '').trim();
+      const cleanImagePaths = normalizeGalleryPaths(input.image_paths, input.image_path);
+      const cleanImagePath = cleanImagePaths[0] || '';
 
+      if (cleanImagePaths.length > MAX_PUBLIC_NEWS_IMAGES) {
+        const msg = `Un recuerdo admite como máximo ${MAX_PUBLIC_NEWS_IMAGES} fotos.`;
+        setError(msg);
+        return { ok: false, error: msg };
+      }
       if (!cleanTitle) {
         const msg = 'El título del recuerdo es obligatorio.';
         setError(msg);
@@ -432,6 +507,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
           event_date: input.event_date,
           summary: cleanSummary,
           image_path: cleanImagePath,
+          image_paths: cleanImagePaths,
           is_published: input.is_published ?? true,
           privacy_verified: true,
           created_by: user?.id || null,
@@ -457,7 +533,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
 
         const enrichedItem: AdminPublicNewsItem = {
           ...(created as AdminPublicNewsItem),
-          image_url: getPublicMediaUrl((created as AdminPublicNewsItem).image_path),
+          ...resolveNewsImages(created as AdminPublicNewsItem),
         };
 
         return { ok: true, item: enrichedItem };
@@ -535,14 +611,20 @@ export function usePublicPageAdmin(enabled: boolean = true) {
         updatePayload.summary = cleanSummary;
       }
 
-      if (input.image_path !== undefined) {
-        const cleanImagePath = input.image_path.trim();
-        if (!cleanImagePath) {
+      if (input.image_paths !== undefined || input.image_path !== undefined) {
+        const cleanImagePaths = normalizeGalleryPaths(input.image_paths, input.image_path);
+        if (cleanImagePaths.length === 0) {
           const msg = 'La imagen del recuerdo es obligatoria.';
           setError(msg);
           return { ok: false, error: msg };
         }
-        updatePayload.image_path = cleanImagePath;
+        if (cleanImagePaths.length > MAX_PUBLIC_NEWS_IMAGES) {
+          const msg = `Un recuerdo admite como máximo ${MAX_PUBLIC_NEWS_IMAGES} fotos.`;
+          setError(msg);
+          return { ok: false, error: msg };
+        }
+        updatePayload.image_paths = cleanImagePaths;
+        updatePayload.image_path = cleanImagePaths[0];
       }
 
       if (input.is_published !== undefined) {
@@ -683,6 +765,7 @@ export function usePublicPageAdmin(enabled: boolean = true) {
     refetchNews: fetchAdminNews,
     updateSiteSettings,
     uploadPublicMediaImage,
+    uploadPublicMediaImages,
     createPublicNews,
     updatePublicNews,
     togglePublishPublicNews,

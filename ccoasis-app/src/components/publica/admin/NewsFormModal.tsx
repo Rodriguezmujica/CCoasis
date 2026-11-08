@@ -1,19 +1,27 @@
 import React, { useRef, useState } from 'react';
-import { X, ImagePlus, Loader2, AlertCircle } from 'lucide-react';
+import { X, ImagePlus, Loader2, AlertCircle, Trash2, Star } from 'lucide-react';
 import {
   AdminPublicNewsItem,
   CreatePublicNewsInput,
+  MAX_PUBLIC_NEWS_IMAGES,
   PUBLIC_NEWS_CATEGORIES,
   PublicNewsCategory,
 } from '../../../types/publicPage';
 import { getPublicMediaUrl } from '../../../lib/publicPageSecurity';
-import { validatePublicMediaFile } from '../../../lib/usePublicPageAdmin';
+import { resolveNewsImages } from '../../../lib/usePublicWelcomeData';
 
 interface NewsFormModalProps {
   item: AdminPublicNewsItem | null; // null = nuevo recuerdo
   saving: boolean;
   uploading: boolean;
-  onUpload: (file: File) => Promise<{ ok: boolean; imagePath?: string; publicUrl?: string; error?: string }>;
+  onUploadMany: (
+    files: File[],
+    currentCount: number
+  ) => Promise<{
+    ok: boolean;
+    uploaded: { imagePath: string; publicUrl: string }[];
+    error?: string;
+  }>;
   onSubmit: (input: CreatePublicNewsInput) => Promise<{ ok: boolean; error?: string }>;
   onClose: () => void;
 }
@@ -29,7 +37,7 @@ export const NewsFormModal: React.FC<NewsFormModalProps> = ({
   item,
   saving,
   uploading,
-  onUpload,
+  onUploadMany,
   onSubmit,
   onClose,
 }) => {
@@ -38,47 +46,63 @@ export const NewsFormModal: React.FC<NewsFormModalProps> = ({
   const [category, setCategory] = useState<PublicNewsCategory>(item?.category || 'Comunidad');
   const [eventDate, setEventDate] = useState(item?.event_date || new Date().toISOString().slice(0, 10));
   const [summary, setSummary] = useState(item?.summary || '');
-  const [imagePath, setImagePath] = useState(item?.image_path || '');
-  const [previewUrl, setPreviewUrl] = useState(item ? getPublicMediaUrl(item.image_path) : '');
+  const [photos, setPhotos] = useState<{ path: string; url: string }[]>(() => {
+    if (!item) return [];
+    const r = resolveNewsImages(item);
+    return r.image_paths.map((path) => ({ path, url: getPublicMediaUrl(path) }));
+  });
   const [isPublished, setIsPublished] = useState(item ? item.is_published : true);
   const [privacyVerified, setPrivacyVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
-    if (!file) return;
+    if (files.length === 0) return;
     setError(null);
-    const check = validatePublicMediaFile(file);
-    if (!check.valid) {
-      setError(check.error || 'Archivo no válido.');
-      return;
+    const res = await onUploadMany(files, photos.length);
+    if (res.uploaded.length > 0) {
+      setPhotos((prev) =>
+        [
+          ...prev,
+          ...res.uploaded.map((u) => ({ path: u.imagePath, url: u.publicUrl || getPublicMediaUrl(u.imagePath) })),
+        ].slice(0, MAX_PUBLIC_NEWS_IMAGES)
+      );
     }
-    const res = await onUpload(file);
-    if (res.ok && res.imagePath) {
-      setImagePath(res.imagePath);
-      setPreviewUrl(res.publicUrl || '');
-    } else {
-      setError(res.error || 'No se pudo subir la imagen.');
-    }
+    if (res.error) setError(res.error);
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const makeCover = (index: number) => {
+    setPhotos((prev) => {
+      if (index <= 0 || index >= prev.length) return prev;
+      const next = [...prev];
+      const [picked] = next.splice(index, 1);
+      return [picked, ...next];
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!imagePath) return setError('Debes subir una fotografía (JPG, PNG o WebP de hasta 5 MB).');
+    if (photos.length === 0) return setError('Debes subir al menos una fotografía (JPG, PNG o WebP de hasta 5 MB).');
     if (!title.trim()) return setError('El título es obligatorio.');
     if (!eventDate) return setError('La fecha del evento es obligatoria.');
     if (!summary.trim()) return setError('La crónica o historia es obligatoria.');
     if (privacyVerified !== true) {
       return setError('Debes marcar la casilla de consentimiento y privacidad para guardar.');
     }
+    const paths = photos.map((p) => p.path);
     const res = await onSubmit({
       title,
       category,
       event_date: eventDate,
       summary,
-      image_path: imagePath,
+      image_path: paths[0],
+      image_paths: paths,
       is_published: isPublished,
       privacy_verified: privacyVerified,
     });
@@ -109,32 +133,81 @@ export const NewsFormModal: React.FC<NewsFormModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4" noValidate>
           <div>
-            <span className={labelClass}>Fotografía</span>
-            <div className="aspect-video w-full rounded-xl border border-[#d4d7dc] bg-[#f5f5f5] overflow-hidden flex items-center justify-center">
-              {previewUrl ? (
-                <img src={previewUrl} alt="Vista previa del recuerdo" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm text-[#4a4f57] px-4 text-center">Aún no hay imagen</span>
-              )}
-            </div>
+            <span className={labelClass}>
+              Fotografías ({photos.length}/{MAX_PUBLIC_NEWS_IMAGES})
+            </span>
+            {photos.length === 0 ? (
+              <div className="aspect-video w-full rounded-xl border border-[#d4d7dc] bg-[#f5f5f5] flex items-center justify-center">
+                <span className="text-sm text-[#4a4f57] px-4 text-center">Aún no hay imágenes</span>
+              </div>
+            ) : (
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {photos.map((photo, index) => (
+                  <li
+                    key={photo.path}
+                    className="rounded-xl border border-[#d4d7dc] bg-white overflow-hidden flex flex-col"
+                  >
+                    <div className="relative aspect-video bg-[#f5f5f5]">
+                      {photo.url && (
+                        <img
+                          src={photo.url}
+                          alt={`Foto ${index + 1} del recuerdo`}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {index === 0 && (
+                        <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-[#1a1a1a]/85 text-white text-xs font-bold">
+                          Portada
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex">
+                      {index !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() => makeCover(index)}
+                          aria-label={`Usar la foto ${index + 1} como portada`}
+                          className="flex-1 min-h-[44px] px-1 text-xs font-bold text-[#0a5961] hover:bg-[#d9f7f8] inline-flex items-center justify-center gap-1"
+                        >
+                          <Star className="w-4 h-4" aria-hidden="true" />
+                          <span>Portada</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        aria-label={`Quitar la foto ${index + 1}`}
+                        className="flex-1 min-h-[44px] px-1 text-xs font-bold text-rose-950 hover:bg-rose-50 inline-flex items-center justify-center gap-1"
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                        <span>Quitar</span>
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
             <input
               ref={fileRef}
               type="file"
+              multiple
               accept="image/jpeg,image/png,image/webp"
-              onChange={handleFile}
+              onChange={handleFiles}
               className="sr-only"
-              aria-label="Seleccionar imagen"
+              aria-label="Seleccionar imágenes"
             />
             <button
               type="button"
-              disabled={uploading}
+              disabled={uploading || photos.length >= MAX_PUBLIC_NEWS_IMAGES}
               onClick={() => fileRef.current?.click()}
               className="mt-2 w-full min-h-[44px] px-4 py-2 rounded-xl border border-[#0e7c86] bg-white hover:bg-[#d9f7f8] text-[#0a5961] font-bold inline-flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {uploading ? <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> : <ImagePlus className="w-5 h-5" aria-hidden="true" />}
-              <span>{uploading ? 'Subiendo...' : previewUrl ? 'Cambiar imagen' : 'Elegir imagen'}</span>
+              <span>{uploading ? 'Optimizando y subiendo...' : photos.length > 0 ? 'Añadir más fotos' : 'Elegir fotos'}</span>
             </button>
-            <p className="text-xs text-[#4a4f57] mt-1">JPG, PNG o WebP, hasta 5 MB.</p>
+            <p className="text-xs text-[#4a4f57] mt-1">
+              Puedes subir hasta 5 fotos por recuerdo. Se optimizan automáticamente para ahorrar espacio.
+            </p>
           </div>
 
           <div>

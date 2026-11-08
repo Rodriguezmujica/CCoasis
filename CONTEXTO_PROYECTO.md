@@ -2,7 +2,7 @@
 
 > Lee este archivo completo antes de tocar nada. Es la fuente de verdad sobre qué se ha hecho, qué se decidió y qué falta. Si algo de aquí contradice una suposición tuya, manda este archivo. Si algo te parece mal, dilo antes de cambiarlo.
 
-Última actualización: 2 de noviembre de 2026.
+Última actualización: 8 de noviembre de 2026.
 
 ## 1. Qué es y para quién
 
@@ -16,11 +16,12 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 
 ## 2. Qué incluye la app
 
-1. **Personas:** fichas de miembros y visitas.
-2. **Clases / discipulado:** cursos, ciclos, inscripciones, sesiones, asistencia, evaluaciones y notas, tareas con entregas, materiales. Funciona como un pequeño instituto.
-3. **Finanzas:** ofrendas (con o sin persona), gastos con comprobante.
-4. **Administración:** usuarios, roles y auditoría.
-5. **Calendario y vida de la iglesia:** eventos, turnos de servidores, conteo de asistencia, confirmaciones (RSVP), anuncios y notificaciones.
+1. **Inicio (`/inicio`):** dashboard personalizado por rol (avisos clasificados por prioridad, confirmación de próximo evento, mis turnos asignados y tarjetas específicas por rol con filtro de chips multi-rol y estados vacíos compactos).
+2. **Personas:** fichas de miembros y visitas.
+3. **Clases / discipulado:** cursos, ciclos, inscripciones, sesiones, asistencia, evaluaciones y notas, tareas con entregas, materiales. Funciona como un pequeño instituto.
+4. **Finanzas:** ofrendas (con o sin persona), gastos con comprobante.
+5. **Administración:** usuarios, roles y auditoría.
+6. **Calendario y vida de la iglesia:** eventos, turnos de servidores, conteo de asistencia, confirmaciones (RSVP), anuncios y notificaciones.
 
 ## 3. Stack
 
@@ -57,6 +58,7 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 - Seguridad en Supabase revisada y verificada el 31 de octubre de 2026 (ver `CONTEXTO_PENDIENTE.md`).
 - **Exportación y copias de seguridad (Auditoría):** módulo de exportación CSV (Personas, Finanzas, Clases y Calificaciones) y respaldo integral en JSON en la vista de Auditoría (`BackupExportCard`), exclusivo para rol `admin`, con registro automático en `audit_logs` (`BACKUP_DOWNLOAD`).
 - **Keep-alive automático (Supabase):** función SQL `public.keepalive_ping()` (`018_keepalive_ping.sql`) y GitHub Action programado (`.github/workflows/supabase-keepalive.yml`) que ejecuta un ping RPC dos veces por semana (lunes y jueves 08:00 UTC) para evitar que el proyecto gratuito de Supabase se pause por inactividad tras 7 días. Si el ping falla, el workflow falla y GitHub envía un email de alerta a Luis. En caso de pausa manual o fallo extremo, se restaura desde supabase.com/dashboard pulsando "Restore project".
+- **Pantalla de Inicio por Rol (`/inicio`):** 100% completada y en producción (`main`). Dashboard personalizado por rol con avisos separados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (RSVP), mis turnos de servicio y tarjetas por rol (Alumno, Maestro, Tesorería, Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos. Es el destino predeterminado al iniciar sesión y en el manifiesto de la PWA (`start_url: "/inicio"`).
 
 ### Pendiente (lo que sigue abierto)
 
@@ -78,10 +80,10 @@ App web instalable (PWA) para administrar el **Centro Cristiano Oasis**, una igl
 
 | Rol | Ve |
 |---|---|
-| `admin` | Calendario, Personas, Clases, Finanzas, Usuarios, Auditoría |
-| `tesorero` | Calendario, Finanzas |
-| `maestro` | Calendario, Mis clases |
-| `alumno` | Calendario, Mis clases |
+| `admin` | Inicio, Calendario, Personas, Clases, Finanzas, Usuarios, Auditoría |
+| `tesorero` | Inicio, Calendario, Finanzas |
+| `maestro` | Inicio, Calendario, Mis clases |
+| `alumno` | Inicio, Calendario, Mis clases |
 
 Un usuario con varios roles ve la unión de menús.
 

@@ -1,6 +1,6 @@
 # Ideas futuras – Centro Cristiano Oasis
 
-> Solo ideas, nada implementado. Fecha: 2 de noviembre de 2026.
+> Ideas de evolución y mejoras futuras. Fecha: 8 de noviembre de 2026.
 > Antes de construir cualquier cosa conviene planificarla con `/plan`.
 
 ## 1. Primero: que no se pierda nada
@@ -11,13 +11,13 @@
 ## 2. Que la gente la use cada semana
 - **Notificaciones push en el móvil** (la app ya es PWA): eventos, anuncios y tareas.
 - **Recordatorios automáticos:** el día antes de un culto o evento, para quien confirmó asistencia y para quien tiene turno.
-- **Pantalla de inicio por rol** (ver sección 3).
+- **Pantalla de inicio por rol (`/inicio`).** [HECHO] Fases 1 a 6 completadas y en producción (ver sección 3).
 - **Peticiones de oración:** se envían y las ven los pastores o un equipo designado.
 - **Devocional o versículo del día.**
 
 ## 3. Pantalla de inicio
 
-### Visitante (sin login)
+### Visitante (sin login) [PENDIENTE — sujeta a aprobación y datos de los pastores]
 Página pública corta, pensada para móvil:
 1. Cabecera con logo y botón "Iniciar sesión".
 2. Próximo culto o evento: fecha, hora, lugar y botón "Cómo llegar".
@@ -26,14 +26,15 @@ Página pública corta, pensada para móvil:
 5. Redes sociales (Instagram y las que usen).
 6. Contacto: WhatsApp, dirección, horarios.
 
-### Usuario conectado (según rol)
-- **Todos:** anuncios vigentes y próximo evento con confirmación de asistencia.
-- **Alumno:** clases, tareas pendientes, notas.
-- **Maestro:** asistencia por pasar, entregas por revisar.
-- **Tesorero:** resumen del mes.
-- **Admin:** pendientes de la semana (eventos sin turnos, avisos por caducar).
+### Usuario conectado (según rol) [HECHO — Fases 1 a 6 completadas en `/inicio`]
+- **Todos:** [HECHO] Anuncios vigentes (urgentes/importantes arriba, normales abajo), próximo evento con confirmación de asistencia (RSVP) y mis turnos asignados.
+- **Alumno:** [HECHO] Próxima clase, tareas pendientes con fecha límite y últimas notas.
+- **Maestro:** [HECHO] Próxima clase que imparte, asistencia por pasar y entregas por revisar.
+- **Tesorero:** [HECHO] Resumen financiero del mes actual.
+- **Admin:** [HECHO] Resumen financiero del mes y pendientes de la semana (eventos futuros sin turnos, avisos por caducar en 7 días y confirmaciones del próximo culto).
+- **Multi-rol y UX:** [HECHO] Filtro interactivo de chips por rol y estados vacíos compactos.
 
-### Calendario público (solo lectura)
+### Calendario público (solo lectura) [PENDIENTE — sujeto a aprobación de los pastores]
 - Cada evento se marca como **público** o **interno**; por defecto, interno.
 - Se muestra solo título, fecha, hora y lugar. Nunca turnos, conteos, confirmaciones ni nombres.
 - Acceso mediante una vista o función aparte, sin leer `church_events` directamente (mismo patrón que `v_event_servers`).
@@ -64,11 +65,11 @@ Cuidados: aviso de cookies si se incrusta contenido, no copiar fotos de menores 
 - **Cumpleaños y aniversarios.**
 
 ## 6. Orden sugerido
-1. Exportar y copias de seguridad.
+1. Exportar y copias de seguridad. [HECHO]
 2. Notificaciones y recordatorios.
-3. Pantalla de inicio por rol.
+3. Pantalla de inicio por rol (`/inicio`). [HECHO]
 4. Peticiones de oración.
-5. Página pública con calendario de solo lectura, noticias y enlace a Instagram.
+5. Página pública con calendario de solo lectura, noticias y enlace a Instagram (pendiente de aprobación y datos de los pastores).
 
 ## 7. Advertencia sobre lo público
 Hoy todo está detrás de login y contiene datos sensibles (listas de miembros, ofrendas). Cualquier sección pública debe ir separada de esos datos y exponer solo lo mínimo.

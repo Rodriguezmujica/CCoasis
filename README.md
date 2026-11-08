@@ -30,6 +30,7 @@ Las organizaciones comunitarias y eclesiales de tamano mediano y pequeno suelen 
 
 CCoasis resuelve esta problematica unificando todas las areas operativas en una unica aplicacion web responsiva e instalable (PWA):
 
+- Panel de inicio personalizado por rol (`/inicio`) con avisos por prioridad, confirmacion de proximo evento, turnos de servicio y resumenes adaptativos.
 - Directorio central de miembros y visitantes con historiales individualizados.
 - Modulo academico completo para institutos biblicos y discipulado (aulas virtuales, tareas, calificaciones y asistencia).
 - Libro contable eclesial con registro de ofrendas, control estricto de egresos y almacenamiento de comprobantes.
@@ -78,6 +79,18 @@ La aplicacion sigue un patron arquitectonico desacoplado compuesto por un client
 ---
 
 ## Modulos Funcionales
+
+### 0. Dashboard de Inicio por Rol (`/inicio`)
+- Punto de entrada predeterminado tras la autenticacion y `start_url` del manifiesto PWA.
+- **Avisos clasificados por prioridad:** Comunicados urgentes e importantes destacados en la parte superior; avisos normales ubicados mas abajo.
+- **Proximo evento y confirmacion (RSVP):** Tarjeta compacta (`InicioNextEventCard`) con confirmacion directa de asistencia al proximo culto o actividad.
+- **Mis turnos de servicio:** Listado de proximas asignaciones personales vinculadas al expediente del miembro.
+- **Tarjetas especificas por rol:**
+  - **Alumno:** Proxima sesion de clase, tareas pendientes con fecha limite y ultimas calificaciones.
+  - **Maestro:** Proxima clase que imparte, sesiones pendientes de pasar asistencia y entregas por revisar.
+  - **Tesoreria:** Balance financiero consolidado del mes en curso.
+  - **Administracion:** Pendientes operativos de la semana (eventos futuros sin turnos asignados, anuncios proximos a expirar y conteo de confirmaciones del proximo culto).
+- **Filtro interactivo multi-rol:** Selector por chips para usuarios con multiples perfiles asignados y estados vacios compactos con manejo aislado de errores por tarjeta.
 
 ### 1. Directorio de Personas y Perfiles
 - Ficha unificada para miembros, alumnos, maestros y visitantes.
@@ -144,6 +157,7 @@ El sistema admite la asignacion de multiples roles a una misma cuenta de usuario
 
 | Modulo / Accion | admin | tesorero | maestro | alumno |
 |---|:---:|:---:|:---:|:---:|
+| Inicio (`/inicio` — Dashboard por rol) | Total | Total | Total | Total |
 | Personas (Gestion global y alta) | Total | Solo lectura | Solo sus alumnos | Solo perfil propio |
 | Clases (Crear cursos y ciclos) | Total | Denegado | Denegado | Denegado |
 | Clases (Asistencia, notas, tareas) | Total | Denegado | Sus ciclos | Solo consulta propia |
@@ -252,6 +266,7 @@ centro_cristiano-osasis/
 │   │   │   ├── calendario/          # Asignacion de turnos, conteo y metricas
 │   │   │   ├── clases/              # Formularios de ciclos, asistencia, notas y tareas
 │   │   │   ├── finanzas/            # Formularios de ingresos, egresos y categorias
+│   │   │   ├── inicio/              # Tarjetas, esqueletos y componentes del dashboard por rol
 │   │   │   ├── mis-clases/          # Vista interactiva del alumno y entregas
 │   │   │   ├── notifications/       # Campana y panel de notificaciones
 │   │   │   ├── personas/            # Directorio y vinculacion de expedientes
@@ -416,6 +431,7 @@ Al compilar y desplegar:
 - [x] Rubrica tactil y calificacion de entregas de tareas en el modulo de clases.
 - [x] Animacion 3D de inicio y cierre de sesion con libro interactivo (solo CSS).
 - [x] Rediseno visual completo bajo la identidad Oasis (paleta cian `#23d5da` y magenta `#ae4a84`, tokens semanticos y cumplimiento WCAG AA).
+- [x] Dashboard de Inicio por Rol (`/inicio`): avisos por prioridad, confirmacion de proximo evento, mis turnos y tarjetas por rol (Alumno, Maestro, Tesoreria y Administracion) con filtro de chips multi-rol y estados vacios compactos.
 
 ### Proximas Mejoras Planificadas
 - [-] Notificaciones Web Push en segundo plano para avisos de servicio dominical.

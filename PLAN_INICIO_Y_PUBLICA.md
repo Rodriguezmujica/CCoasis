@@ -32,22 +32,22 @@ Si Antigravity dice "listo", verifícalo tú: lo que escribe sobre sí mismo es 
 
 - Producción: `https://c-coasis.vercel.app` (Vercel, rama `main`). Supabase `ccoasis-app`, región West EU, plan gratuito.
 - Rediseño visual, animación del libro, respaldos y keep-alive: hechos y en `main` (ver `CONTEXTO_PENDIENTE.md`).
-- **Rama `inicio-por-rol` (sin fusionar con `main`).** **Fase 1 hecha y probada por Luis** (commit `8f2e6d0`):
-  - `src/views/InicioView.tsx`: saludo con el nombre de la ficha vinculada (si no hay ficha, el correo), fecha en español, insignias de roles y la tarjeta "Estamos preparando tu inicio".
-  - Ruta protegida `/inicio` en `App.tsx`, accesible a `admin`, `tesorero`, `maestro` y `alumno`.
-  - **No se tocó** `AuthContext`, `HomeRedirect`, `navigation.ts`, `CalendarioView.tsx` ni migraciones. El login sigue llevando a `/calendario`.
-- Fases 2 a 6 pendientes. Después, la página pública (sección 8).
+- **Pantalla de Inicio por Rol (`/inicio`) 100% COMPLETADA y FUSIONADA en `main`:**
+  - **Fases 1 a 6 `[HECHO]` y probadas por Luis** (`8f2e6d0`, `52403bc`, `3b3d950`, `9952ffc`, `2243f29`, `a24fefd`).
+  - `/inicio` es ahora el primer ítem de navegación y el destino predeterminado al iniciar sesión para los cuatro roles (`admin`, `tesorero`, `maestro`, `alumno`), con `start_url: "/inicio"` en el manifiesto PWA.
+  - Incluye saludo personalizado, avisos separados por prioridad, próximo evento con confirmación de asistencia (`InicioNextEventCard` + RSVP), mis turnos y tarjetas por rol con filtro de chips multi-rol y estados vacíos compactos.
+- **Queda pendiente únicamente la sección 8** (Página pública de bienvenida para visitantes, sujeta a la aprobación y datos de los pastores).
 
-### Cómo funciona la app hoy (informe de solo lectura, verificado por Luis solo en lo funcional)
+### Cómo funciona la app hoy (informe de solo lectura, verificado por Luis)
 - `HomeRedirect` (`/`): mientras `isLoading` muestra "Cargando..." y no navega; sin sesión va a `/login`; con sesión va a `getDefaultPathForRoles(roles)`.
-- `getDefaultPathForRoles` devuelve la ruta del primer ítem de `NAV_ITEMS` accesible. Hoy el primero es `calendario`, por eso todos van ahí. Sin roles: `/sin-permisos`.
+- `getDefaultPathForRoles` devuelve la ruta del primer ítem de `NAV_ITEMS` accesible: ahora es `/inicio` para todos los roles con permisos. Sin roles: `/sin-permisos`.
 - `ProtectedRoute`: cargando, spinner; sin sesión, `/login` guardando `state.from`; sin roles o sin el rol exigido, `/sin-permisos`.
 - `/sin-permisos` **nunca redirige a `/`**. No se debe cambiar.
 - `LoginView`: si ya hay sesión, vuelve a `location.state.from` o a `/`; tras un login correcto no navega de forma imperativa, deja que el estado reactivo lo haga.
 - Ruta comodín `*` redirige a `/`.
-- Menú definido en `src/config/navigation.ts` (`NAV_ITEMS`, `MOBILE_NAV_PRIORITY`, `getAvailableNavItems`, `getMobileNavItems`, `canAccessPath`, `getDefaultPathForRoles`) y consumido en `AppLayout.tsx`. Los logos de `AppLayout.tsx` (escritorio y móvil, cerca de las líneas 100 y 207) enlazan a `/calendario`.
-- Hooks y componentes que existen: `useAnnouncements` (con `activeAnnouncements`), `useEvents` (con `upcomingEvent`), `useEventRSVPs` (`myRsvpsByEvent`, `upsertRSVP`), `useEventAssignments`, `useStudentClasses`, `useStudentClassroom`, `useFinances` (con `summary`); `AnnouncementsBanner`, `FinancialSummaryCards`, `EventRSVPModal`, `EventAssignmentsModal`, `AnnouncementModal`.
-- **No hace falta SQL nuevo ni migraciones para `/inicio`:** las políticas RLS y funciones auxiliares ya cubren los datos. Solo consultas del cliente de Supabase.
+- Menú definido en `src/config/navigation.ts` (`NAV_ITEMS`, `MOBILE_NAV_PRIORITY`, `getAvailableNavItems`, `getMobileNavItems`, `canAccessPath`, `getDefaultPathForRoles`) y consumido en `AppLayout.tsx`. Los logos de `AppLayout.tsx` (escritorio y móvil) enlazan a `/inicio`.
+- Hooks y componentes que existen: `useAnnouncements` (con `activeAnnouncements`), `useEvents` (con `upcomingEvent`), `useEventRSVPs` (`myRsvpsByEvent`, `upsertRSVP`), `useEventAssignments`, `useStudentClasses`, `useStudentClassroom`, `useFinances` (con `summary`), `useInicioDashboard`; `AnnouncementsBanner`, `FinancialSummaryCards`, `EventRSVPModal`, `EventAssignmentsModal`, `AnnouncementModal`, `InicioNextEventCard`, `DashboardCard`, `DashboardSkeleton`, `DashboardEmptyState`.
+- **No hizo falta SQL nuevo ni migraciones para `/inicio`:** las políticas RLS y funciones auxiliares ya cubren los datos. Solo consultas del cliente de Supabase.
 
 ---
 
@@ -99,41 +99,44 @@ REGLAS
 
 ---
 
-## 5. Fases
+## 5. Fases (Fases 1 a 6 `[HECHO]` y fusionadas en `main`)
 
-Cada fase: una rama de trabajo común (`inicio-por-rol`), un commit y pruebas antes de pasar a la siguiente.
+Cada fase se desarrolló en la rama `inicio-por-rol`, fue probada por Luis y se fusionó en `main`.
 
-### Fase 1 (HECHA)
+### Fase 1 `[HECHO]`
 Ruta `/inicio` y `InicioView` esqueleto. Commit `8f2e6d0`.
 
-### Fase 2: componentes base, anuncios y próximo evento
-- Crear `DashboardCard`, `DashboardSkeleton`, `DashboardEmptyState` y un estado de error con "Reintentar" (en `src/components/inicio/`).
-- Anuncios vigentes: reutilizar `useAnnouncements().activeAnnouncements`. Arriba solo urgentes e importantes; los normales, más abajo (máximo 3 por bloque).
-- **Próximo evento** con confirmación de asistencia: crear un componente NUEVO y compacto (`InicioNextEventCard`) que reutilice `useEvents().upcomingEvent`, `useEventRSVPs` y `EventRSVPModal`. **No extraer ni cambiar nada de `CalendarioView.tsx`.**
-- Integrar todo en `InicioView.tsx`, quitando el texto "Estamos preparando tu inicio".
-- Pruebas: sección 6, incluyendo anuncio normal/importante/urgente y evento futuro.
+### Fase 2: componentes base, anuncios y próximo evento `[HECHO]`
+- Commit `52403bc`.
+- Creados `DashboardCard`, `DashboardSkeleton`, `DashboardEmptyState` y estado de error con "Reintentar" (en `src/components/inicio/`).
+- Anuncios vigentes: reutilizando `useAnnouncements().activeAnnouncements`. Arriba solo urgentes e importantes; los normales, más abajo (máximo 3 por bloque).
+- **Próximo evento** con confirmación de asistencia: componente nuevo y compacto (`InicioNextEventCard`) que reutiliza `useEvents().upcomingEvent`, `useEventRSVPs` y `EventRSVPModal`. **Sin extraer ni cambiar nada de `CalendarioView.tsx`.**
+- Integrado todo en `InicioView.tsx`, quitando el texto "Estamos preparando tu inicio".
 
-### Fase 3: Mis turnos y tarjetas del alumno
+### Fase 3: Mis turnos y tarjetas del alumno `[HECHO]`
+- Commit `3b3d950`.
 - Hook ligero `src/lib/useInicioDashboard.ts` (solo consultas de lectura).
-- **Mis turnos** (cualquier rol con ficha vinculada): `church_event_assignments` de mi persona con evento futuro, orden ascendente, máximo 3. Reutilizar cómo `useEventRSVPs` resuelve la persona vinculada (`get_my_person_id`).
+- **Mis turnos** (cualquier rol con ficha vinculada): `church_event_assignments` de mi persona con evento futuro, orden ascendente, máximo 3. Reutiliza cómo `useEventRSVPs` resuelve la persona vinculada (`get_my_person_id`).
 - **Alumno:** próxima clase (`sessions` con fecha desde hoy, limit 1), tareas pendientes con fecha límite (tareas de ciclos activos sin entrega mía), últimas notas (`grades` con `evaluations`, últimas 3).
-- Si la persona no tiene ficha vinculada: mostrar el aviso amigable que ya usa el RSVP, no un error.
+- Si la persona no tiene ficha vinculada: muestra el aviso amigable que ya usa el RSVP, no un error.
 
-### Fase 4: tarjetas del maestro
+### Fase 4: tarjetas del maestro `[HECHO]`
+- Commit `9952ffc`.
 - **Próxima clase** de ciclos que imparte; **asistencia por pasar** (sesiones pasadas de sus ciclos sin ningún registro de asistencia); **entregas por revisar** (`assignment_submissions` de sus ciclos con `grade` nulo y archivo presente).
 - Enlaces "Ver todo" al módulo Clases.
 
-### Fase 5: tarjetas de Tesorería y Administración
-- Tesorero y admin: resumen financiero del mes (reutilizar `useFinances().summary` o `FinancialSummaryCards`, fijado al mes actual).
+### Fase 5: tarjetas de Tesorería y Administración `[HECHO]`
+- Commit `2243f29`.
+- Tesorero y admin: resumen financiero del mes (reutilizando `useFinances().summary`, fijado al mes actual).
 - Admin: pendientes de la semana (eventos futuros sin turnos asignados, avisos que caducan en 7 días, confirmaciones del próximo culto).
 
-### Fase 6: activar `/inicio` como destino (la última, la que toca la navegación)
-- `navigation.ts`: añadir `inicio` como **primer** ítem de `NAV_ITEMS` (icono `Home`, los 4 roles) y como primero de `MOBILE_NAV_PRIORITY`. Esto hace que `getDefaultPathForRoles` devuelva `/inicio`.
-- `AppLayout.tsx`: los dos enlaces del logo pasan de `/calendario` a `/inicio`.
+### Fase 6: activar `/inicio` como destino, filtro de chips multi-rol y estados vacíos compactos `[HECHO]`
+- Commit `a24fefd`.
+- Filtro interactivo de chips por rol para usuarios con varios roles y estados vacíos compactos.
+- `navigation.ts`: añadido `inicio` como **primer** ítem de `NAV_ITEMS` (icono `Home`, los 4 roles) y como primero de `MOBILE_NAV_PRIORITY`. Esto hace que `getDefaultPathForRoles` devuelva `/inicio`.
+- `AppLayout.tsx`: los dos enlaces del logo pasaron de `/calendario` a `/inicio`.
 - Manifiesto de la PWA: `start_url: "/inicio"`.
-- Verificar la barra inferior móvil de 4 espacios con cada rol (el admin tiene muchos módulos: el resto va en "Más").
-- Verificar que volver a una ruta abierta antes del login (`state.from`) sigue funcionando y que no hay bucles.
-- Pruebas completas de la sección 6 con los cuatro roles. Solo entonces pedir fusión a `main`.
+- Probadas las 6 fases por Luis y fusionadas a `main`.
 
 ---
 

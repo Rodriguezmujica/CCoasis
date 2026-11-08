@@ -2,11 +2,11 @@
 
 > Traspaso para otra IA. Léelo junto con `CONTEXTO_PROYECTO.md` y `SPEC.md`. Este archivo solo cubre lo que **falta** y las comprobaciones pendientes. Si algo contradice a la realidad del repositorio o de la base de datos, **verifica y avisa**; no supongas.
 
-Última actualización: 2 de noviembre de 2026.
+Última actualización: 8 de noviembre de 2026.
 
 ## 0. Estado en una frase
 
-La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También está en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`). Queda solo la revisión visual final con un usuario admin y otro alumno.
+La app (React + Vite + Supabase, PWA) está funcionando y publicada en Vercel. Las fases 1 y 2 del producto están hechas. Las **comprobaciones de seguridad en Supabase están 100% COMPLETADAS Y VERIFICADAS** (31 de octubre de 2026). El **rediseño visual (Fase 3 completa: 3a, 3b, 3c y 3d)** está **COMPLETADO y FUSIONADO en `main`**. También están en `main` la **animación del libro 3D** (se abre al iniciar sesión y se cierra al cerrarla; solo CSS, componente `LoginIntro`) y la **Pantalla de Inicio por Rol (`/inicio`)** (Fases 1 a 6 completadas, probadas por Luis y fusionadas en `main`). Queda solo la revisión visual final general antes de la entrega y, más adelante si los pastores la aprueban, la página pública de bienvenida.
 
 ## 1. Reglas que no se rompen
 
@@ -64,6 +64,11 @@ Script de verificación en el repo: `scripts/design/contrast.py`.
 - Solo observa la sesión (`useAuth`): no cambia la autenticación, las rutas ni la carga de roles, y no se activa si el login falla.
 - Commits: `34e2312`, `465e97f`, fusión `dbad6d3`.
 
+### Pantalla de Inicio por Rol (`/inicio`) · 100% COMPLETADA y en `main`
+- **Fases 1 a 6 completadas y probadas por Luis:** dashboard personalizado en `/inicio` como ruta inicial tras iniciar sesión (`getDefaultPathForRoles` y `start_url` de la PWA).
+- Incluye saludo con nombre de ficha vinculada, avisos clasificados por prioridad (urgentes/importantes arriba, normales abajo), tarjeta compacta de próximo evento con confirmación de asistencia (`InicioNextEventCard` + RSVP), mis turnos asignados y tarjetas específicas por rol (Alumno, Maestro, Tesorería y Administración) con filtro interactivo de chips multi-rol y estados vacíos compactos.
+- No requirió SQL nuevo ni cambios en `AuthContext`, `HomeRedirect`, `ProtectedRoute` ni `CalendarioView.tsx`.
+
 ### Pendiente (rediseño y animación ya están en `main`)
 1. **Revisión visual final en navegador (`localhost:5173` o preview de Vercel):** validar con un usuario **admin** y otro **alumno** que todas las vistas se ven y funcionan según lo esperado.
 2. Ya no aplica la restricción de no fusionar: todo está en `main`. Si algo no convence, se corrige con un commit nuevo.
@@ -102,7 +107,7 @@ GROUP BY table_name ORDER BY 1;
 
 ## 5b. Ideas futuras
 
-Ver `IDEAS_FUTURAS.md` (solo ideas, nada implementado): push y recordatorios, pantalla de inicio por rol, página pública con calendario de solo lectura, noticias, Instagram, exportar datos.
+Ver `IDEAS_FUTURAS.md` y `PLAN_INICIO_Y_PUBLICA.md`: la pantalla de inicio por rol (`/inicio`) ya está implementada y en producción; quedan como ideas futuras la página pública de bienvenida con calendario de solo lectura (sujeta a la aprobación y datos de los pastores), notificaciones push y recordatorios, noticias e Instagram.
 
 ## 6. Datos útiles
 

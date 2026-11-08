@@ -150,10 +150,19 @@ export const AppLayout: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsSelfPasswordModalOpen(true)}
-              className="w-full min-h-[44px] px-2.5 rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-[13px] font-semibold inline-flex items-center justify-center gap-2 transition-colors min-w-0"
+              className="w-full min-h-[44px] px-2.5 rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-[13px] font-semibold inline-flex items-center justify-center gap-2 transition-colors min-w-0 cursor-pointer"
             >
               <KeyRound className="w-4 h-4 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
               <span className="truncate">Cambiar mi contraseña</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="w-full min-h-[44px] px-2.5 rounded-[10px] bg-white border border-[#767b83] hover:bg-[#ebedef] text-[#1a1a1a] text-[13px] font-semibold inline-flex items-center justify-center gap-2 transition-colors min-w-0 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 text-[#1a1a1a] flex-shrink-0" aria-hidden="true" />
+              <span className="truncate">Cerrar sesión</span>
             </button>
           </div>
 
@@ -163,7 +172,7 @@ export const AppLayout: React.FC = () => {
           </div>
           <nav
             aria-label="Módulos"
-            className="px-3 py-1 flex flex-col gap-1 flex-1 bg-white min-w-0"
+            className="px-3 py-1 pb-4 flex flex-col gap-1 flex-1 bg-white min-w-0"
           >
             {navItems.map((item) => {
               const IconComponent = item.icon;
@@ -185,18 +194,6 @@ export const AppLayout: React.FC = () => {
               );
             })}
           </nav>
-
-          {/* Pie del sidebar con botón Cerrar sesión sobre fondo blanco */}
-          <div className="p-3 border-t border-[#d4d7dc] bg-white">
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="w-full min-h-[44px] px-3 rounded-[10px] text-sm font-medium text-[#4a4f57] hover:bg-[#ebedef] hover:text-[#1a1a1a] flex items-center gap-3 border-l-4 border-l-transparent transition-colors cursor-pointer"
-            >
-              <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-              <span>Cerrar sesión</span>
-            </button>
-          </div>
         </aside>
 
         {/* Cabecera superior móvil: cian (#23d5da) seguida de franja delgada magenta (#ae4a84) */}
